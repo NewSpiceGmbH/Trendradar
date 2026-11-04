@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Archivo, DM_Sans } from "next/font/google";
+import { themeScript } from "@/lib/theme";
 import "./globals.css";
 
 // next/font lädt die Schriften beim Build und liefert sie selbst aus – keine Anfragen an Google zur Laufzeit.
@@ -14,7 +15,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="de" className={`${archivo.variable} ${dmSans.variable} h-full antialiased`}>
+    <html lang="de" className={`${archivo.variable} ${dmSans.variable} h-full antialiased`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

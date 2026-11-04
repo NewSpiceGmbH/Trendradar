@@ -245,7 +245,9 @@ select t.eq((select count(*)::int from trends), 45, 'Editor: sieht auch Entwürf
 select t.eq((select count(*)::int from trend_premium), 1, 'Editor: sieht Premium-Inhalte');
 select t.eq((select count(*)::int from proposals), 1, 'Editor: sieht Proposals');
 select t.ok((select count(*) from usage_events) >= 1, 'Editor: sieht Nutzungsprotokoll');
-select t.eq((select count(*)::int from organizations), 5, 'Editor: sieht alle Organisationen');
+select t.eq((select count(*)::int from organizations where id in ('aaaaaaaa-0000-0000-0000-000000000000', 'bbbbbbbb-0000-0000-0000-000000000000',
+  'cccccccc-0000-0000-0000-000000000000', 'dddddddd-0000-0000-0000-000000000000', 'eeeeeeee-0000-0000-0000-000000000000')), 5,
+  'Editor: sieht alle Organisationen');
 select t.eq((select count(*)::int from org_trend_notes), 0, 'Editor: sieht KEINE Kundennotizen (Vertraulichkeit)');
 select t.rows($$update trends set name = name where number = 1$$, 1, 'Editor: kann Trends bearbeiten');
 select t.rows($$insert into organizations (name) values ('Neukunde')$$, 1, 'Editor: kann Organisationen anlegen');

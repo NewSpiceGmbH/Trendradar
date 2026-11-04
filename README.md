@@ -23,5 +23,16 @@ npx supabase db reset          # Schema + Seed
 npm run dev
 ```
 
-Prüfen: `npm run lint`, `npm run typecheck`, `npm test` (Bewertungslogik), `npm run test:db` (Zugriffsregeln).
+Prüfen: `npm run lint`, `npm run typecheck`, `npm test` (Bewertungslogik), `npm run test:db` (Zugriffsregeln),
+`npm run test:e2e` (Klickpfade im Testmodus).
+
+Ohne Datenbank ausprobieren: `RADAR_FIXTURES=1 npm run dev` – Login über die Demo-Zugänge, Daten aus `seed/*.json`.
+
+## Vorschau (Vercel + Supabase-Branching)
+
+- Vercel-Umgebungsvariablen: `NEXT_PUBLIC_SUPABASE_URL` und `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (bzw. `…_ANON_KEY`)
+  setzt die Supabase-Vercel-Integration. Zusätzlich **nur für „Preview“**: `DEMO_LOGIN=1`.
+- Supabase-Preview-Branches spielen `seed.sql` und `seed-demo.sql` ein (siehe `supabase/config.toml`). Damit gibt es
+  fünf Demo-Zugänge (Redaktion, Owner, Member, Premium, abgelaufen; Passwort `trendradar-demo`).
+- In Produktion: kein `DEMO_LOGIN`, keine Demo-Konten. Login nur per Magic-Link für eingeladene Adressen.
 Nach Änderungen an `seed/*.json`: `npm run seed:build && npx supabase db reset`.

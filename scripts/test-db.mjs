@@ -25,8 +25,10 @@ if (fresh) {
   file(target, "tests/db/supabase-stub.sql");
   const migrations = fs.readdirSync("supabase/migrations").filter((f) => f.endsWith(".sql")).sort();
   for (const m of migrations) file(target, path.join("supabase/migrations", m));
+  // wie supabase/config.toml [db.seed] sql_paths
   file(target, "supabase/seed.sql");
-  console.log(`✓ ${migrations.length} Migrationen und Seed eingespielt`);
+  file(target, "supabase/seed-demo.sql");
+  console.log(`✓ ${migrations.length} Migrationen, Seed und Demo-Zugänge eingespielt`);
 }
 
 const tests = fs.readdirSync("tests/db").filter((f) => f.endsWith(".test.sql")).sort();

@@ -165,7 +165,12 @@ Details in `docs/agents.md`. Unverhandelbare Regeln:
   Angriffe deshalb auch ohne `WHERE` testen.
 - Nach Änderungen an `seed/*.json`: `node scripts/build-seed.mjs && supabase db reset`.
 - Typen aus der DB erzeugen: `supabase gen types typescript --local > lib/supabase/types.ts`.
-- Tests: Vitest für `lib/scoring.ts` und Agenten-Parser; Playwright für Login und Radar.
+- Tests: Vitest für `lib/scoring.ts`, das Daten-Mapping und Agenten-Parser; Playwright (`e2e/`) für Login und Radar im
+  Testmodus `RADAR_FIXTURES=1` (Seed-Daten ohne Datenbank, Demo-Personas per Cookie). Supabase-Antwort und Testdaten
+  laufen durch dasselbe Mapping (`lib/radar/raw.ts`), damit der Testmodus nicht vom echten Pfad abweicht.
+- Demo-Zugänge: `supabase/seed-demo.sql` (nur lokal/Preview) und `DEMO_LOGIN=1`. Nie in Produktion aktivieren.
+- Next 16 mit Cache Components: Zugriffe auf Sitzung/Cookies/`params` nur innerhalb von `<Suspense>`;
+  `getViewer()` ruft `connection()` auf, weil Zugang vom heutigen Datum abhängt.
 - Keine Secrets im Repo. `.env.local` (Vorlage: `.env.example`) enthält `NEXT_PUBLIC_SUPABASE_URL`,
   `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (alternativ der alte `…_ANON_KEY`), `SUPABASE_SECRET_KEY`
   (alternativ `SUPABASE_SERVICE_ROLE_KEY`), `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`.
