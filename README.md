@@ -15,8 +15,13 @@ Startpaket für den Aufbau mit Claude Code. Projektkontext und Regeln stehen in 
 
 ## Loslegen
 
-1. Ordner als neues Git-Repo anlegen und auf GitHub pushen.
-2. Supabase CLI installieren, dann `supabase init` (vorhandene Dateien behalten) und `supabase start`.
-3. `supabase db reset` spielt Schema und Seed-Daten ein.
-4. Im Repo `claude` starten, z. B. mit:
-   „Lies CLAUDE.md und docs/agents.md. Plane Phase 1 der Roadmap und leg mir den Plan vor, bevor du baust.“
+```bash
+npm install
+cp .env.example .env.local     # Werte aus `npx supabase status -o env` eintragen
+npx supabase start             # braucht Docker
+npx supabase db reset          # Schema + Seed
+npm run dev
+```
+
+Prüfen: `npm run lint`, `npm run typecheck`, `npm test` (Bewertungslogik), `npm run test:db` (Zugriffsregeln).
+Nach Änderungen an `seed/*.json`: `npm run seed:build && npx supabase db reset`.

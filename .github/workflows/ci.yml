@@ -23,3 +23,25 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
+
+  db:
+    # Migrationen, Seed und RLS-Tests gegen ein frisches Postgres (Version wie in supabase/config.toml)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Seed aktuell?
+        run: node scripts/build-seed.mjs && git diff --exit-code supabase/seed.sql
+      - run: node scripts/test-db.mjs --fresh

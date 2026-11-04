@@ -145,12 +145,23 @@ Details in `docs/agents.md`. Unverhandelbare Regeln:
 
 ## Arbeitsweise
 
+- Next.js 16 weicht in vielen Punkten vom Trainingsstand ab (`proxy.ts` statt Middleware, Cache Components,
+  `LayoutProps`/`PageProps`). Vor neuem Code die passende Doku in `node_modules/next/dist/docs/` lesen (siehe `AGENTS.md`).
+- Supabase ist per GitHub-Integration angebunden: Migrationen in `supabase/migrations/` werden beim Merge in den
+  Produktionsbranch auf das Supabase-Projekt angewendet. `supabase/config.toml` gilt für lokale Instanzen und Preview-Branches.
 - Schema nur über neue Dateien in `supabase/migrations/` ändern, nie bestehende Migrationen editieren.
+- Jede Änderung an Zugriffsregeln braucht einen Test in `tests/db/rls.test.sql`, der ohne die Änderung fehlschlägt.
+  Ausführen: `npm run test:db -- --fresh` gegen ein beliebiges Postgres (`DATABASE_URL`) oder nach
+  `supabase db reset` direkt gegen die lokale Supabase-Datenbank (`npm run test:db`).
+  Achtung bei UPDATE-Tests: Mit `WHERE` prüft Postgres die neue Zeile zusätzlich gegen die SELECT-Regel –
+  Angriffe deshalb auch ohne `WHERE` testen.
 - Nach Änderungen an `seed/*.json`: `node scripts/build-seed.mjs && supabase db reset`.
 - Typen aus der DB erzeugen: `supabase gen types typescript --local > lib/supabase/types.ts`.
 - Tests: Vitest für `lib/scoring.ts` und Agenten-Parser; Playwright für Login und Radar.
-- Keine Secrets im Repo. `.env.local` enthält `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
-  `SUPABASE_SERVICE_ROLE_KEY`, `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`.
+- Keine Secrets im Repo. `.env.local` (Vorlage: `.env.example`) enthält `NEXT_PUBLIC_SUPABASE_URL`,
+  `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (alternativ der alte `…_ANON_KEY`), `SUPABASE_SECRET_KEY`
+  (alternativ `SUPABASE_SERVICE_ROLE_KEY`), `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`.
+- Der Secret-/Service-Role-Key nur über `lib/supabase/admin.ts` (ist `server-only`).
 - Erst planen, dann bauen: Bei größeren Aufgaben zuerst einen kurzen Plan vorlegen.
 
 ## Roadmap
