@@ -33,7 +33,7 @@ async function Trend({ params }: { params: PageProps<"/trends/[number]">["params
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 py-10 sm:px-8">
       <nav className="flex items-center justify-between gap-4 text-sm">
-        <Link href="/radar#arena">← Zur Arena</Link>
+        <Link href={`/radar?v=radar&t=${n}&d=1`}>← Im Stadion ansehen</Link>
         <span className="flex gap-4">
           {n > 1 && data.trends.some((t) => t.number === n - 1) && <Link href={`/trends/${n - 1}`}>← #{n - 1}</Link>}
           {data.trends.some((t) => t.number === n + 1) && <Link href={`/trends/${n + 1}`}>#{n + 1} →</Link>}

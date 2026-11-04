@@ -15,6 +15,7 @@ import { buildTour, firstSentence } from "@/lib/stadium/tour";
 import { AUDIENCE_LABEL, FILTER_LABEL, audienceOf, matchesAudience, type AudienceFilter } from "@/lib/stadium/audience";
 import { USE_CASE, hotspotShot, type UseCaseKey } from "@/lib/stadium/usecases";
 import type { Palette, View } from "./scene";
+import { TrendDetail } from "./trend-detail";
 
 const Scene = dynamic(() => import("./scene"), {
   ssr: false,
@@ -85,6 +86,7 @@ export default function StadiumView({ data }: { data: RadarData }) {
       place: view === "journey" ? (trend ? stageOf(trend) : o && STAGE[o] ? o : null) : null,
       selected: trend,
       useCase: sc && USE_CASE[sc] ? sc : null,
+      detail: !!trend && q.get("d") === "1",
       audience: (z === "vip" || z === "public" ? z : "all") as AudienceFilter,
       station: !deep && !store.get(TOUR_SEEN) ? 0 : null,
       found,
@@ -96,6 +98,10 @@ export default function StadiumView({ data }: { data: RadarData }) {
   const [place, setPlace] = useState<StageKey | null>(initial.place);
   const [selected, setSelected] = useState<number | null>(initial.selected);
   const [useCase, setUseCase] = useState<UseCaseKey | null>(initial.useCase);
+  // Detailansicht gehört zu genau einem Trend; wechselt die Auswahl, schließt sie sich von selbst
+  const [detailFor, setDetailFor] = useState<number | null>(initial.detail ? initial.selected : null);
+  const detail = detailFor !== null && detailFor === selected;
+  const setDetail = (open: boolean) => setDetailFor(open ? selected : null);
   const [audience, setAudience] = useState<AudienceFilter>(initial.audience);
   const [hovered, setHovered] = useState<number | null>(null);
   const [station, setStation] = useState<number | null>(initial.station);
@@ -114,11 +120,12 @@ export default function StadiumView({ data }: { data: RadarData }) {
     if (place) q.set("o", place);
     if (useCase) q.set("s", useCase);
     if (selected) q.set("t", String(selected));
+    if (selected && detail) q.set("d", "1");
     if (persp === "GLOBAL") q.set("p", "global");
     if (audience !== "all") q.set("z", audience);
     const s = q.toString();
     window.history.replaceState(null, "", s ? `?${s}` : window.location.pathname);
-  }, [view, cluster, place, selected, persp, touring, useCase, audience]);
+  }, [view, cluster, place, selected, persp, touring, useCase, audience, detail]);
 
   // In der Perspektiv-Station erst Europa zeigen, dann umschalten – damit man die Bewegung sieht
   useEffect(() => {
@@ -221,12 +228,13 @@ export default function StadiumView({ data }: { data: RadarData }) {
   );
 
   const up = useCallback(() => {
-    if (selected) setSelected(null);
+    if (detail) setDetailFor(null);
+    else if (selected) setSelected(null);
     else if (useCase) setUseCase(null);
     else if (cluster) setCluster(null);
     else if (place) setPlace(null);
     else if (view === "radar") setView("journey");
-  }, [selected, cluster, place, view, useCase]);
+  }, [selected, cluster, place, view, useCase, detail]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -269,13 +277,18 @@ export default function StadiumView({ data }: { data: RadarData }) {
       const h = selected ? USE_CASE[useCase].hotspots.find((x) => x.trend === selected) : null;
       return h ? hotspotShot(h) : USE_CASE[useCase].shot;
     }
+    if (selected && detail) {
+      // Detail-Panel deckt die rechte Hälfte ab: ganze Tribüne bzw. ganzen Ort zeigen statt Nahaufnahme
+      if (view === "radar") return clusterShot(byNumber.get(selected)!.cluster);
+      return forPlace(stageOf(selected));
+    }
     if (selected) {
       const d = spotOf(selected, view, persp);
       return view === "journey" && stageOf(selected) !== "stadion" ? spotShot(d) : groupShot([d]);
     }
     if (view === "radar") return cluster ? clusterShot(cluster) : OVERVIEW;
     return place ? forPlace(place) : JOURNEY_OVERVIEW;
-  }, [st, selected, view, cluster, place, persp, spotOf, useCase]);
+  }, [st, selected, view, cluster, place, persp, spotOf, useCase, detail, byNumber]);
 
   const highlight = useMemo(() => (st && st.highlight.length ? new Set(st.highlight) : null), [st]);
   const pulse = useMemo(() => {
@@ -433,7 +446,7 @@ export default function StadiumView({ data }: { data: RadarData }) {
       )}
 
       {/* Seitenpanel: Ort, Tribüne oder Trend */}
-      {!touring && (cluster || place || sel || useCase) && (
+      {!touring && !(detail && sel) && (cluster || place || sel || useCase) && (
         <aside
           className="absolute inset-x-3 bottom-3 max-h-[55%] glass-strong overflow-y-auto rounded-[var(--radius-card)] p-5 sm:inset-x-auto sm:bottom-auto sm:right-8 sm:top-[200px] sm:max-h-[calc(100%-16rem)] sm:w-[360px]"
           aria-live="polite"
@@ -468,9 +481,9 @@ export default function StadiumView({ data }: { data: RadarData }) {
                   Global {data.zones[pos.GLOBAL[sel.number].zone].name}, in Europa {data.zones[pos.EU[sel.number].zone].name}.
                 </p>
               )}
-              <Link href={`/trends/${sel.number}`} className="self-start rounded-[var(--radius-pill)] bg-ink px-5 py-2 text-sm font-bold text-bg no-underline hover:opacity-90">
+              <button type="button" onClick={() => setDetail(true)} className="self-start rounded-[var(--radius-pill)] bg-ink px-5 py-2 text-sm font-bold text-bg hover:opacity-90">
                 Mehr erfahren
-              </Link>
+              </button>
             </article>
           ) : useCase ? (
             <UseCasePanel data={data} useCaseKey={useCase} onSelect={selectTrend} onClose={closeUseCase} hovered={hovered} onHover={setHovered} />
@@ -489,6 +502,19 @@ export default function StadiumView({ data }: { data: RadarData }) {
             />
           ) : null}
         </aside>
+      )}
+
+      {/* Ebene 3: Detailansicht */}
+      {!touring && detail && sel && (
+        <TrendDetail
+          data={data}
+          trend={sel}
+          pos={pos}
+          persp={persp}
+          onClose={() => setDetail(false)}
+          onOpen={(n) => { selectTrend(n); setDetailFor(n); }}
+          onOpenScene={(k, n) => { setDetail(false); openUseCase(k, n); }}
+        />
       )}
 
       {/* Tour */}
