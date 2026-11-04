@@ -101,3 +101,19 @@ export function fitShot(shot: CameraShot, aspect: number): CameraShot {
   const [px, py, pz] = shot.position, [tx, ty, tz] = shot.target;
   return { target: shot.target, position: [tx + (px - tx) * k, ty + (py - ty) * k, tz + (pz - tz) * k] };
 }
+
+// ───────────── Region (Journey-Ansicht) ─────────────
+
+export const JOURNEY_OVERVIEW: CameraShot = { position: [4, 62, 78], target: [0, 0, 1] };
+/** Stadion von außen, leicht erhöht */
+export const STADIUM_OUTSIDE: CameraShot = { position: [0, 30, 44], target: [0, 2, 0] };
+
+/** Kamera auf einen Ort der Journey: von Süden, erhöht */
+export function placeShot(at: [number, number], height: number): CameraShot {
+  return { target: [at[0], height * 0.6, at[1]], position: [at[0] + at[0] * 0.12, height + 26, at[1] + 34] };
+}
+
+/** Kamera auf einen einzelnen Punkt in der Region */
+export function spotShot(p: [number, number, number]): CameraShot {
+  return { target: p, position: [p[0], p[1] + 9, p[2] + 15] };
+}
