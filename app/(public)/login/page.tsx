@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { demoLogin } from "@/lib/auth/actions";
 import { PERSONAS, isDemoLogin } from "@/lib/auth/personas";
@@ -27,7 +28,29 @@ export default function LoginPage({ searchParams }: PageProps<"/login">) {
           <MagicLinkForm />
         </section>
 
-        {isDemoLogin() && (
+        <Suspense>
+          <DemoLogins />
+        </Suspense>
+      </div>
+    </main>
+  );
+}
+
+async function LoginError({ searchParams }: { searchParams: PageProps<"/login">["searchParams"] }) {
+  const fehler = (await searchParams).fehler;
+  if (!fehler) return null;
+  return (
+    <p role="alert" className="rounded-lg border border-line bg-sunk px-3 py-2 text-sm text-ink">
+      {String(fehler)}
+    </p>
+  );
+}
+
+/** Zur Anfragezeit prüfen, nicht beim Build: so wirkt DEMO_LOGIN ohne neuen Build. */
+async function DemoLogins() {
+  await connection();
+  if (!isDemoLogin()) return null;
+  return (
           <section className="flex flex-col gap-3 rounded-[var(--radius-card)] border border-dashed border-line p-6 sm:p-8" aria-labelledby="demo-h">
             <h2 id="demo-h" className="!text-xl">Demo-Zugänge</h2>
             <p className="text-sm text-muted">Nur in der Vorschau. Zeigt, wer was sieht – mit echten Zugriffsregeln.</p>
@@ -45,18 +68,5 @@ export default function LoginPage({ searchParams }: PageProps<"/login">) {
               ))}
             </form>
           </section>
-        )}
-      </div>
-    </main>
-  );
-}
-
-async function LoginError({ searchParams }: { searchParams: PageProps<"/login">["searchParams"] }) {
-  const fehler = (await searchParams).fehler;
-  if (!fehler) return null;
-  return (
-    <p role="alert" className="rounded-lg border border-line bg-sunk px-3 py-2 text-sm text-ink">
-      {String(fehler)}
-    </p>
   );
 }
