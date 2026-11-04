@@ -1,6 +1,6 @@
 "use client";
 
-import { Line } from "@react-three/drei";
+import { Edges, Line } from "@react-three/drei";
 import type { ThreeEvent } from "@react-three/fiber";
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
@@ -98,6 +98,31 @@ function Ground({ palette }: { palette: Palette }) {
   );
 }
 
+/**
+ * Mattiertes Glas für die Orte: durchscheinend, mit Klarlack-Reflex. Lebt von der Umgebung (Lightformer in scene.tsx).
+ */
+export function Glass({ tint, strength = 1 }: { tint: string; strength?: number }) {
+  return (
+    <meshPhysicalMaterial
+      color={tint}
+      transmission={0.72 * strength}
+      roughness={0.36}
+      thickness={2.2}
+      ior={1.35}
+      clearcoat={1}
+      clearcoatRoughness={0.06}
+      attenuationColor={tint}
+      attenuationDistance={14}
+      envMapIntensity={2.6}
+    />
+  );
+}
+
+/** feine Lichtkante an Glaskörpern */
+export function GlassEdge({ color }: { color: string }) {
+  return <Edges threshold={20} color={color} transparent opacity={0.55} />;
+}
+
 /** Helle Bauteile der Orte */
 function Clay({ position, size, color, onClick }: { position: [number, number, number]; size: [number, number, number]; color: string; onClick?: () => void }) {
   return (
@@ -108,7 +133,8 @@ function Clay({ position, size, color, onClick }: { position: [number, number, n
       onPointerOut={onClick ? () => { document.body.style.cursor = ""; } : undefined}
     >
       <boxGeometry args={size} />
-      <meshStandardMaterial color={color} roughness={0.85} />
+      <Glass tint={color} />
+      <GlassEdge color={color} />
     </mesh>
   );
 }
@@ -159,11 +185,12 @@ export function Places({ palette, active, onSelect }: { palette: Palette; active
         <group key={i} position={[h.x, 0, h.z]} onClick={(ev) => { ev.stopPropagation(); onSelect("zuhause"); }}>
           <mesh position={[0, h.h / 2, 0]}>
             <boxGeometry args={[3, h.h, 2.6]} />
-            <meshStandardMaterial color={i % 2 ? ink : sand} roughness={0.85} />
+            <Glass tint={i % 2 ? ink : sand} />
+            <GlassEdge color={ink} />
           </mesh>
           <mesh position={[0, h.h + 0.55, 0]} rotation={[0, Math.PI / 4, 0]} scale={[1.55, 1, 1.35]}>
             <coneGeometry args={[1.5, 1.1, 4]} />
-            <meshStandardMaterial color={sand} roughness={0.85} />
+            <Glass tint={sand} />
           </mesh>
         </group>
       ))}
@@ -173,7 +200,7 @@ export function Places({ palette, active, onSelect }: { palette: Palette; active
         <Clay position={[a[0] - 2, 0, a[1]]} size={[12, 2.2, 4]} color={ink} />
         <mesh position={[a[0] - 2, 2.2, a[1]]} rotation={[0, 0, Math.PI / 2]}>
           <cylinderGeometry args={[2, 2, 12, 24, 1, false, 0, Math.PI]} />
-          <meshStandardMaterial color={sand} roughness={0.8} side={THREE.DoubleSide} />
+          <Glass tint={sand} />
         </mesh>
         {/* Parkhaus: vier Ebenen */}
         {[0, 1, 2, 3].map((l) => (
@@ -201,7 +228,7 @@ export function Places({ palette, active, onSelect }: { palette: Palette; active
         <Clay position={[r[0] + 4.5, 0, r[1] + 5]} size={[5, 2.6, 3.4]} color={sand} />
         <mesh position={[r[0] - 6, 0.1, r[1] + 5]} rotation-x={-Math.PI / 2}>
           <circleGeometry args={[2.6, 32]} />
-          <meshStandardMaterial color={sand} roughness={0.9} />
+          <Glass tint={sand} />
         </mesh>
       </group>
 
@@ -235,7 +262,7 @@ export function Places({ palette, active, onSelect }: { palette: Palette; active
         {[0, 1, 2].map((i) => (
           <mesh key={i} position={[k[0] - 9, 9, k[1] - 5.8]} rotation={[0, 0, (i * Math.PI * 2) / 3]}>
             <boxGeometry args={[0.25, 4.2, 0.08]} />
-            <meshStandardMaterial color={ink} roughness={0.7} />
+            <Glass tint={ink} />
           </mesh>
         ))}
       </group>

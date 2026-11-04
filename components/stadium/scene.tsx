@@ -1,6 +1,6 @@
 "use client";
 
-import { Billboard, CameraControls, Line } from "@react-three/drei";
+import { Billboard, CameraControls, Environment, Lightformer, Line } from "@react-three/drei";
 import { Canvas, useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
@@ -172,7 +172,23 @@ function Stands({ palette, cluster, view, onSelectCluster, onEnterStadium }: Pic
       {/* Fassade in Sand, außen hell wie ein Modell aus Ton */}
       {/* im Radar fast durchsichtig, damit die vorderen Ränge sichtbar bleiben */}
       <mesh geometry={facade.wall} onClick={(e) => { e.stopPropagation(); if (view === "journey") onEnterStadium(); }}>
-        <meshStandardMaterial color={sand} roughness={0.85} side={THREE.DoubleSide} transparent opacity={view === "radar" ? 0.14 : 1} depthWrite={view !== "radar"} />
+        {view === "radar" ? (
+          <meshStandardMaterial color={sand} side={THREE.DoubleSide} transparent opacity={0.12} depthWrite={false} />
+        ) : (
+          <meshPhysicalMaterial
+            color={sand}
+            side={THREE.DoubleSide}
+            transmission={0.7}
+            roughness={0.34}
+            thickness={2}
+            ior={1.35}
+            clearcoat={1}
+            clearcoatRoughness={0.06}
+            attenuationColor={sand}
+            attenuationDistance={14}
+            envMapIntensity={2.6}
+          />
+        )}
       </mesh>
       <Line points={facade.rim} color={palette.ink} lineWidth={1.4} />
       {/* Flutlichtmasten */}
@@ -408,6 +424,13 @@ function World(p: SceneProps & { registry: LabelRegistry; targets: Record<number
       <ambientLight intensity={0.7} />
       <directionalLight position={[-20, 40, 25]} intensity={1.15} color={palette.ink} />
       <hemisphereLight args={[palette.ink, palette.bg, 0.3]} />
+      {/* Umgebung für Glasreflexe: lokal erzeugte Lichtflächen, keine externen HDR-Dateien */}
+      <Environment resolution={256} frames={1} environmentIntensity={0.35}>
+        <Lightformer intensity={1.6} position={[0, 40, 0]} rotation-x={Math.PI / 2} scale={[80, 80, 1]} color={palette.ink} />
+        <Lightformer intensity={1.4} position={[-50, 14, 20]} rotation-y={Math.PI / 2} scale={[40, 10, 1]} color={palette.ink} />
+        <Lightformer intensity={1.1} position={[50, 14, -20]} rotation-y={-Math.PI / 2} scale={[40, 10, 1]} color={palette.ink} />
+        <Lightformer form="ring" intensity={0.9} position={[0, 10, 60]} scale={18} color={palette.ink} />
+      </Environment>
       <City palette={palette} />
       <Places palette={palette} active={p.place} onSelect={p.onSelectPlace} />
       <Pitch palette={palette} />
@@ -520,7 +543,7 @@ export default function StadiumScene(props: SceneProps) {
     <div className="relative h-full w-full">
       <Canvas
         dpr={[1, 2]}
-        camera={{ position: [4, 62, 78], fov: 38, near: 0.1, far: 400 }}
+        camera={{ position: [4, 74, 92], fov: 38, near: 0.1, far: 400 }}
         gl={{ antialias: true }}
         onPointerMissed={props.onBackground}
         fallback={<p className="p-8 text-muted">3D wird von diesem Browser nicht unterstützt. Bitte die 2D-Ansicht nutzen.</p>}

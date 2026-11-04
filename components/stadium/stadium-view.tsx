@@ -52,7 +52,7 @@ function usePalette() {
   return palette;
 }
 
-const pill = "rounded-[var(--radius-pill)] border border-line bg-bg/70 px-4 py-1.5 text-sm font-bold text-ink backdrop-blur hover:border-muted";
+const pill = "glass rounded-[var(--radius-pill)] px-4 py-1.5 text-sm font-bold text-ink hover:brightness-110";
 
 export default function StadiumView({ data }: { data: RadarData }) {
   const pos = useMemo(() => positions(data), [data]);
@@ -277,7 +277,7 @@ export default function StadiumView({ data }: { data: RadarData }) {
   if (sel) crumbs.push({ label: `#${sel.number} ${sel.name}` });
 
   return (
-    <div className="relative h-[calc(100dvh-57px)] min-h-[560px] w-full overflow-hidden bg-bg">
+    <div className="relative -mt-[57px] h-[100dvh] min-h-[600px] w-full overflow-hidden bg-bg">
       <div className="absolute inset-0">
         <Scene
           data={data}
@@ -305,7 +305,7 @@ export default function StadiumView({ data }: { data: RadarData }) {
       </div>
 
       {/* Kopf: Titel und Pfad */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 flex flex-wrap items-start justify-between gap-4 p-4 sm:p-8">
+      <div className="pointer-events-none absolute inset-x-0 top-[57px] flex flex-wrap items-start justify-between gap-4 p-4 sm:p-8">
         <div className="pointer-events-auto flex max-w-xl flex-col gap-2">
           <p className="eyebrow">Trendradar 2027–2035</p>
           <h1 className="!text-[clamp(28px,3.4vw,44px)]">Future of Experiences</h1>
@@ -326,7 +326,7 @@ export default function StadiumView({ data }: { data: RadarData }) {
         </div>
         {!touring && (
           <div className="pointer-events-auto flex flex-wrap items-center gap-2">
-            <span className="inline-flex rounded-[var(--radius-pill)] border border-line bg-bg/70 p-0.5 backdrop-blur" role="group" aria-label="Ansicht">
+            <span className="glass inline-flex rounded-[var(--radius-pill)] p-0.5" role="group" aria-label="Ansicht">
               {([["journey", "Journey"], ["radar", "Radar"]] as const).map(([v, label]) => (
                 <button
                   key={v}
@@ -339,7 +339,7 @@ export default function StadiumView({ data }: { data: RadarData }) {
                 </button>
               ))}
             </span>
-            <span className="inline-flex rounded-[var(--radius-pill)] border border-line bg-bg/70 p-0.5 backdrop-blur" role="group" aria-label="Perspektive">
+            <span className="glass inline-flex rounded-[var(--radius-pill)] p-0.5" role="group" aria-label="Perspektive">
               {(["EU", "GLOBAL"] as const).map((p) => (
                 <button
                   key={p}
@@ -361,7 +361,7 @@ export default function StadiumView({ data }: { data: RadarData }) {
       {/* Fuß: Spielphasen und Fortschritt */}
       {!touring && (
         <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-wrap items-end justify-between gap-4 p-4 sm:p-8">
-          <dl className="pointer-events-auto flex overflow-hidden rounded-[var(--radius-card)] border border-line bg-bg/70 backdrop-blur">
+          <dl className="glass pointer-events-auto flex overflow-hidden rounded-[var(--radius-card)]">
             {ZONE_KEYS.map((z) => (
               <div key={z} className={`flex flex-col px-4 py-3 ${z === "KICKOFF" ? "bg-accent text-on-accent" : ""}`}>
                 <dt className={`eyebrow !text-[10px] ${z === "KICKOFF" ? "!text-on-accent" : "!text-muted"}`}>{data.zones[z].name} · {ZONE_PLACE[z]}</dt>
@@ -369,7 +369,7 @@ export default function StadiumView({ data }: { data: RadarData }) {
               </div>
             ))}
           </dl>
-          <p className="pointer-events-auto rounded-[var(--radius-pill)] border border-line bg-bg/70 px-4 py-1.5 text-sm text-muted backdrop-blur">
+          <p className="glass pointer-events-auto rounded-[var(--radius-pill)] px-4 py-1.5 text-sm text-muted">
             <span className="num text-ink">{found.size}</span> von {data.trends.length} entdeckt
             {!cluster && !place && (
               <span className="hidden sm:inline"> · {view === "journey" ? "Ort anklicken oder ins Stadion gehen" : "Tribüne anklicken zum Hineinzoomen"}</span>
@@ -381,7 +381,7 @@ export default function StadiumView({ data }: { data: RadarData }) {
       {/* Seitenpanel: Ort, Tribüne oder Trend */}
       {!touring && (cluster || place || sel) && (
         <aside
-          className="absolute inset-x-3 bottom-3 max-h-[55%] overflow-y-auto rounded-[var(--radius-card)] border border-line bg-surface/95 p-5 shadow-2xl backdrop-blur sm:inset-x-auto sm:bottom-auto sm:right-8 sm:top-36 sm:max-h-[calc(100%-12rem)] sm:w-[360px]"
+          className="absolute inset-x-3 bottom-3 max-h-[55%] glass-strong overflow-y-auto rounded-[var(--radius-card)] p-5 sm:inset-x-auto sm:bottom-auto sm:right-8 sm:top-[200px] sm:max-h-[calc(100%-16rem)] sm:w-[360px]"
           aria-live="polite"
         >
           {sel && selView ? (
@@ -438,7 +438,7 @@ export default function StadiumView({ data }: { data: RadarData }) {
       {st && station !== null && (
         <section
           aria-label="Tour"
-          className="absolute inset-x-3 bottom-3 flex flex-col gap-4 rounded-[var(--radius-card)] border border-line bg-surface/90 p-6 shadow-2xl backdrop-blur sm:inset-x-auto sm:bottom-8 sm:left-8 sm:w-[460px]"
+          className="absolute inset-x-3 bottom-3 glass-strong flex flex-col gap-4 rounded-[var(--radius-card)] p-6 sm:inset-x-auto sm:bottom-8 sm:left-8 sm:w-[460px]"
         >
           <div className="flex items-center justify-between gap-4">
             <p className="eyebrow">{st.eyebrow}</p>
@@ -459,7 +459,7 @@ export default function StadiumView({ data }: { data: RadarData }) {
             </button>
             <div className="flex gap-2">
               {station > 0 && (
-                <button type="button" onClick={() => step(-1)} className="rounded-[var(--radius-pill)] border border-line px-4 py-2 text-sm font-bold text-ink hover:border-muted">
+                <button type="button" onClick={() => step(-1)} className="glass rounded-[var(--radius-pill)] px-4 py-2 text-sm font-bold text-ink hover:brightness-110">
                   Zurück
                 </button>
               )}

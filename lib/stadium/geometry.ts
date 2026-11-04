@@ -104,7 +104,7 @@ export function fitShot(shot: CameraShot, aspect: number): CameraShot {
 
 // ───────────── Region (Journey-Ansicht) ─────────────
 
-export const JOURNEY_OVERVIEW: CameraShot = { position: [4, 62, 78], target: [0, 0, 1] };
+export const JOURNEY_OVERVIEW: CameraShot = { position: [4, 74, 92], target: [0, 0, -3] };
 /** Stadion von außen, leicht erhöht */
 export const STADIUM_OUTSIDE: CameraShot = { position: [0, 30, 44], target: [0, 2, 0] };
 

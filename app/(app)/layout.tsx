@@ -6,7 +6,7 @@ import { UserMenu } from "@/components/app/user-menu";
 export default function AppLayout({ children }: LayoutProps<"/">) {
   return (
     <>
-      <header className="sticky top-0 z-20 border-b border-line bg-bg/90 backdrop-blur">
+      <header className="glass sticky top-0 z-20 !border-x-0 !border-t-0 !shadow-none">
         <div className="mx-auto flex max-w-[1320px] items-center gap-6 px-4 py-3 sm:px-8">
           <Link href="/radar" className="flex items-baseline gap-2 text-ink no-underline">
             <span className="font-display text-lg font-extrabold tracking-tight">New Spice</span>
