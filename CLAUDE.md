@@ -38,7 +38,7 @@ lib/scoring.ts          Bewertungslogik (muss identisch zur View trend_positions
 lib/agents/             Scout, Analyst, Scorer, Editor (siehe docs/agents.md)
 lib/supabase/           Clients (Browser, Server, Service-Role nur serverseitig)
 supabase/migrations/    SQL-Migrationen
-supabase/seed.sql       Erzeugt aus seed/*.json – nicht von Hand bearbeiten
+supabase/migrations/0004_initial_content.sql  Startinhalte, erzeugt aus seed/*.json (scripts/build-seed.mjs)
 scripts/                extract-prototype.mjs, build-seed.mjs
 seed/                   Aus dem Prototyp extrahierte Daten (JSON)
 reference/              prototype.html
@@ -163,12 +163,16 @@ Details in `docs/agents.md`. Unverhandelbare Regeln:
   `supabase db reset` direkt gegen die lokale Supabase-Datenbank (`npm run test:db`).
   Achtung bei UPDATE-Tests: Mit `WHERE` prüft Postgres die neue Zeile zusätzlich gegen die SELECT-Regel –
   Angriffe deshalb auch ohne `WHERE` testen.
-- Nach Änderungen an `seed/*.json`: `node scripts/build-seed.mjs && supabase db reset`.
+- `seed/*.json` ist der Startbestand und steckt in Migration 0004 (bereits angewendet, nicht neu erzeugen). Inhaltliche
+  Änderungen laufen über die Redaktion bzw. neue Migrationen, nicht über die JSON-Dateien.
 - Typen aus der DB erzeugen: `supabase gen types typescript --local > lib/supabase/types.ts`.
 - Tests: Vitest für `lib/scoring.ts`, das Daten-Mapping und Agenten-Parser; Playwright (`e2e/`) für Login und Radar im
   Testmodus `RADAR_FIXTURES=1` (Seed-Daten ohne Datenbank, Demo-Personas per Cookie). Supabase-Antwort und Testdaten
   laufen durch dasselbe Mapping (`lib/radar/raw.ts`), damit der Testmodus nicht vom echten Pfad abweicht.
-- Demo-Zugänge: `supabase/seed-demo.sql` (nur lokal/Preview) und `DEMO_LOGIN=1`. Nie in Produktion aktivieren.
+- Demo-Zugänge: Migration `0005_demo_accounts.sql` und `DEMO_LOGIN=1` (nur Vercel-Preview; in Vercel-Produktion
+  ist der Demo-Login im Code gesperrt). **Prototyp-Phase:** Supabase läuft im Free-Tarif ohne Branching, Vorschau und
+  Produktion teilen sich eine Datenbank („supabase-violet-house“). Vor dem ersten echten Kunden die Demo-Konten per
+  neuer Migration entfernen oder ein frisches Produktionsprojekt in Frankfurt aufsetzen.
 - Next 16 mit Cache Components: Zugriffe auf Sitzung/Cookies/`params` nur innerhalb von `<Suspense>`;
   `getViewer()` ruft `connection()` auf, weil Zugang vom heutigen Datum abhängt.
 - Keine Secrets im Repo. `.env.local` (Vorlage: `.env.example`) enthält `NEXT_PUBLIC_SUPABASE_URL`,

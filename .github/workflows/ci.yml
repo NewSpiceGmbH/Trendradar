@@ -42,8 +42,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Seed aktuell?
-        run: node scripts/build-seed.mjs && git diff --exit-code supabase/seed.sql
+      - name: Startinhalte passen zu seed/*.json?
+        run: node scripts/build-seed.mjs && git diff --exit-code supabase/migrations/0004_initial_content.sql
       - run: node scripts/test-db.mjs --fresh
 
   e2e:

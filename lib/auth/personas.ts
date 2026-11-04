@@ -1,5 +1,5 @@
-// Demo-Zugänge für Vorschau-Umgebungen. Die Konten legt supabase/seed-demo.sql an – nur in lokalen
-// Instanzen und Supabase-Preview-Branches, nie in Produktion. Aktiv nur mit DEMO_LOGIN=1.
+// Demo-Zugänge für Vorschau-Umgebungen. Die Konten legt Migration 0005_demo_accounts.sql an – vor dem Livegang
+// entfernen. Aktiv nur mit DEMO_LOGIN=1 und nie in Vercel-Produktion.
 
 export type PersonaKey = "redaktion" | "owner" | "member" | "premium" | "abgelaufen";
 

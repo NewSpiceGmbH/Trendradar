@@ -1,5 +1,5 @@
--- Demo-Zugänge (supabase/seed-demo.sql) sehen genau das, was die Demo-Buttons versprechen.
--- Nur sinnvoll, wenn seed-demo.sql eingespielt ist; sonst wird der Test übersprungen.
+-- Demo-Zugänge (Migration 0005) sehen genau das, was die Demo-Buttons versprechen.
+-- Fehlen die Konten (z. B. nach ihrer Entfernung vor dem Livegang), wird der Test übersprungen.
 begin;
 
 create function pg_temp.as_user(uid uuid) returns void language plpgsql as $$

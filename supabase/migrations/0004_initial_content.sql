@@ -1,5 +1,4 @@
--- Automatisch erzeugt von scripts/build-seed.mjs – nicht von Hand bearbeiten.
-begin;
+-- Startinhalte aus dem Prototyp. Automatisch erzeugt von scripts/build-seed.mjs – nicht von Hand bearbeiten.
 
 insert into clusters (code, name, position) values
   ('A', 'Fan & Guest Experience', 0),
@@ -929,5 +928,3 @@ insert into trend_partners (trend_id, partner_key, position) values
   ((select id from trends where number = 43), 'fifasensory', 0),
   ((select id from trends where number = 43), 'wembley', 1),
   ((select id from trends where number = 43), 'mancity', 2);
-
-commit;

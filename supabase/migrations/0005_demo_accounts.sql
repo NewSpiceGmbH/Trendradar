@@ -1,6 +1,14 @@
--- Demo-Zugänge für lokale Instanzen und Supabase-Preview-Branches (nie Produktion).
--- Passwort für alle: trendradar-demo (überschreibbar per DEMO_PASSWORD nur in der App, hier fest).
--- Login in der App über /login → „Demo-Zugänge“, wenn DEMO_LOGIN=1 gesetzt ist.
+-- Demo-Zugänge für den klickbaren Prototyp (Option B: eine Supabase-Datenbank für Vorschau und Produktion).
+-- Passwort für alle: trendradar-demo. Login in der App über /login → „Demo-Zugänge“, nur in Vercel-Vorschauen
+-- mit DEMO_LOGIN=1 (in Vercel-Produktion bleibt der Demo-Login immer aus).
+--
+-- VOR DEM ERSTEN ECHTEN KUNDEN ENTFERNEN – per neuer Migration, z. B.:
+--   delete from organizations where id::text like 'da000000-%';
+--   delete from auth.users    where id::text like 'd0000000-%';
+-- oder ein frisches Produktionsprojekt (Frankfurt) ohne diese Migration aufsetzen.
+
+-- crypt()/gen_salt() kommen aus pgcrypto, das bei Supabase im Schema „extensions“ liegt
+set search_path = "$user", public, extensions;  -- wie Supabase-Standard
 
 -- Konten
 with demo(id, email, name) as (values
