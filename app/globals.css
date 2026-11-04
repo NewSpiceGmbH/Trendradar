@@ -1,0 +1,125 @@
+@import "tailwindcss";
+
+/*
+ * New-Spice-CI (docs/ci.md). Dunkel ist die Markenansicht und Standard; Hell (Creme/Sand der
+ * Casualfood-Website) per <html data-theme="light">.
+ * Clusterfarben: aus den Farbtönen des Prototyps für beide Grundflächen neu abgestuft und mit dem
+ * Paletten-Validator geprüft (Helligkeitsband, Farbfehlsichtigkeit benachbarter Segmente inkl. G↔A,
+ * Kontrast). --cX-fg ist die Schriftfarbe der Trendnummer im Dot (≥ 4,5:1).
+ */
+:root {
+  --bg: #1d1d1d;          /* Anthrazit */
+  --surface: #2b2a27;     /* Karten-Grau */
+  --sunk: #242321;        /* Eingabefelder, vertiefte Flächen */
+  --line: #3d3b37;        /* Linien-Grau */
+  --ink: #fcf4e6;         /* Creme: Überschriften, Haupttext */
+  --text: #d9cfbd;        /* Sand: Fließtext, Beschreibungen */
+  --muted: #a8a195;       /* Warmgrau: Labels, Quellen, Footer */
+  --accent: #c2e689;      /* Limette: Fläche – sparsam, ein Blickfang je Ansicht */
+  --on-accent: #253912;   /* Dunkelgrün: Text auf Limette */
+  --accent-ink: #c2e689;  /* Limette als Schrift (Eyebrows, Links, große Zahlen) */
+  --image-bg: #faf8f4;    /* Hinterlegung für Pläne/Screenshots */
+  --logo: #f3efe6;        /* Logos, einfarbig */
+  --pitch: #232220;       /* Spielfeld der Arena */
+  --pitch-line: #4f4c46;
+  --tier1: rgba(252, 244, 230, 0.07); --tier2: rgba(252, 244, 230, 0.04); --tier3: rgba(252, 244, 230, 0.015);
+  --lock: #a8a195;
+
+  --cA: #c2402a; --cB: #4d9cd0; --cC: #9d6500; --cD: #2ca8a0; --cE: #7b57b9; --cF: #66a758; --cG: #ca6db8;
+  --cA-fg: #fcf4e6; --cB-fg: #1d1d1d; --cC-fg: #fcf4e6; --cD-fg: #1d1d1d; --cE-fg: #fcf4e6; --cF-fg: #1d1d1d; --cG-fg: #1d1d1d;
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  --bg: #fcf4e6;          /* Creme */
+  --surface: #faf8f4;
+  --sunk: #f2e5cf;        /* Sand (Website) */
+  --line: #e3d7c2;
+  --ink: #1d1d1d;
+  --text: #3d3b37;
+  --muted: #655f55;
+  --accent: #c2e689;
+  --on-accent: #253912;
+  --accent-ink: #4a6b1a;  /* Limette ist als Schrift auf Creme zu hell */
+  --image-bg: #faf8f4;
+  --logo: #1d1d1d;
+  --pitch: #f2e5cf;
+  --pitch-line: #cdbfa6;
+  --tier1: rgba(29, 29, 29, 0.06); --tier2: rgba(29, 29, 29, 0.035); --tier3: rgba(29, 29, 29, 0.015);
+  --lock: #655f55;
+
+  --cA: #b6341f; --cB: #3e8cc9; --cC: #8f5d04; --cD: #009b92; --cE: #6a45a6; --cF: #549a44; --cG: #c562b2;
+  --cA-fg: #fcf4e6; --cB-fg: #1d1d1d; --cC-fg: #fcf4e6; --cD-fg: #1d1d1d; --cE-fg: #fcf4e6; --cF-fg: #1d1d1d; --cG-fg: #1d1d1d;
+  color-scheme: light;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-sunk: var(--sunk);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-image-bg: var(--image-bg);
+  --color-logo: var(--logo);
+  --color-pitch: var(--pitch);
+  --color-pitch-line: var(--pitch-line);
+  --color-lock: var(--lock);
+  --color-cluster-a: var(--cA);
+  --color-cluster-b: var(--cB);
+  --color-cluster-c: var(--cC);
+  --color-cluster-d: var(--cD);
+  --color-cluster-e: var(--cE);
+  --color-cluster-f: var(--cF);
+  --color-cluster-g: var(--cG);
+
+  --font-display: var(--font-archivo), "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --font-sans: var(--font-dm-sans), "Segoe UI", system-ui, sans-serif;
+
+  --radius-card: 16px;
+  --radius-pill: 40px;
+}
+
+@layer base {
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.55;
+  }
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    color: var(--ink);
+    text-wrap: balance;
+    letter-spacing: -0.014em; /* CI: −1 px bei 72 px */
+    line-height: 1.1;
+  }
+  h1 { font-size: clamp(40px, 6.25vw, 72px); }
+  h2 { font-size: clamp(28px, 3.4vw, 44px); }
+  h3 { font-size: clamp(20px, 2vw, 32px); }
+  a { color: var(--accent-ink); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+}
+
+/* Eyebrows/Labels: DM Sans Bold, Versalien, Laufweite 3 px bei 24 px (≈ 0,125 em) */
+@utility eyebrow {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.125em;
+  text-transform: uppercase;
+  color: var(--accent-ink);
+}
+
+/* Zahlen und Scores: Archivo ExtraBold, gleich breite Ziffern für Tabellen */
+@utility num {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}

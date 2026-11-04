@@ -8,15 +8,38 @@ Startpaket für den Aufbau mit Claude Code. Projektkontext und Regeln stehen in 
 - `docs/agents.md` – Spezifikation der vier KI-Agenten und der Review-Queue
 - `supabase/migrations/0001_init.sql` – Datenbankschema inkl. RLS und Bewertungs-View
 - `supabase/migrations/0002_external_access.sql` – Kundenbetrieb: Einladungen, Sitzplätze, Laufzeiten, Merkliste, Notizen
-- `supabase/seed.sql` – die 44 Trends, 85 Quellen und 43 Partner aus dem Prototyp
+- `supabase/migrations/0004_initial_content.sql` – die 44 Trends, 85 Quellen und 43 Partner aus dem Prototyp
+- `supabase/migrations/0005_demo_accounts.sql` – Demo-Zugänge für den Prototyp (vor Livegang entfernen)
 - `seed/*.json` – dieselben Daten als JSON
-- `scripts/` – Extraktion aus dem Prototyp und Erzeugung der seed.sql
+- `scripts/` – Extraktion aus dem Prototyp und Erzeugung der Startinhalte-Migration
 - `reference/prototype.html` – der ursprüngliche Prototyp als Design-Referenz
 
 ## Loslegen
 
-1. Ordner als neues Git-Repo anlegen und auf GitHub pushen.
-2. Supabase CLI installieren, dann `supabase init` (vorhandene Dateien behalten) und `supabase start`.
-3. `supabase db reset` spielt Schema und Seed-Daten ein.
-4. Im Repo `claude` starten, z. B. mit:
-   „Lies CLAUDE.md und docs/agents.md. Plane Phase 1 der Roadmap und leg mir den Plan vor, bevor du baust.“
+```bash
+npm install
+cp .env.example .env.local     # Werte aus `npx supabase status -o env` eintragen
+npx supabase start             # braucht Docker
+npx supabase db reset          # Schema + Seed
+npm run dev
+```
+
+Prüfen: `npm run lint`, `npm run typecheck`, `npm test` (Bewertungslogik), `npm run test:db` (Zugriffsregeln),
+`npm run test:e2e` (Klickpfade im Testmodus).
+
+Ohne Datenbank ausprobieren: `RADAR_FIXTURES=1 npm run dev` – Login über die Demo-Zugänge, Daten aus `seed/*.json`.
+
+## Vorschau (Vercel + Supabase-Branching)
+
+Einrichtung im Vercel-Projekt `trendradar` (Team New Spice):
+- Settings → Environments → Production → Branch Tracking: `main`. Jeder andere Branch bzw. Pull Request baut eine Preview.
+- Supabase-Integration ohne Präfix verbunden, „Supabase Preview Branch“ nur für Preview.
+- Funktionen laufen in Frankfurt (`vercel.json`: `fra1`).
+
+- Vercel-Umgebungsvariablen: `NEXT_PUBLIC_SUPABASE_URL` und `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (bzw. `…_ANON_KEY`)
+  setzt die Supabase-Vercel-Integration. Zusätzlich **nur für „Preview“**: `DEMO_LOGIN=1` (Name exakt so, Großschreibung
+  zählt). Vercel übernimmt geänderte Variablen erst mit dem nächsten Deployment.
+- Inhalte und Demo-Zugänge kommen per Migration (0004/0005) in die Datenbank, auch ohne Supabase-Branching. Damit gibt es
+  fünf Demo-Zugänge (Redaktion, Owner, Member, Premium, abgelaufen; Passwort `trendradar-demo`).
+- In Produktion: kein `DEMO_LOGIN`, keine Demo-Konten. Login nur per Magic-Link für eingeladene Adressen.
+Nach Änderungen an `seed/*.json`: `npm run seed:build && npx supabase db reset`.

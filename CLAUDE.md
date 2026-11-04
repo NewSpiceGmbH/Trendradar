@@ -5,8 +5,9 @@ recherchieren, bewerten und pflegen. Eine Redaktion bei New Spice prüft und gib
 Ergebnis als interaktiven Radar („Die Arena“).
 
 Der Ausgangspunkt ist der HTML-Prototyp „Future of Experiences Radar“ in `reference/prototype.html`.
-Er ist die **verbindliche Referenz für Inhalt, Begriffe und Design**. Nicht kopieren, sondern in
-Komponenten nachbauen; die Daten kommen aus der Datenbank.
+Er ist die **verbindliche Referenz für Inhalt, Begriffe, Aufbau und Interaktion**. Farben, Schriften und Formen
+kommen aus der New-Spice-CI (`docs/ci.md`). Nicht kopieren, sondern in Komponenten nachbauen; die Daten kommen
+aus der Datenbank.
 
 ## Stack
 
@@ -37,7 +38,7 @@ lib/scoring.ts          Bewertungslogik (muss identisch zur View trend_positions
 lib/agents/             Scout, Analyst, Scorer, Editor (siehe docs/agents.md)
 lib/supabase/           Clients (Browser, Server, Service-Role nur serverseitig)
 supabase/migrations/    SQL-Migrationen
-supabase/seed.sql       Erzeugt aus seed/*.json – nicht von Hand bearbeiten
+supabase/migrations/0004_initial_content.sql  Startinhalte, erzeugt aus seed/*.json (scripts/build-seed.mjs)
 scripts/                extract-prototype.mjs, build-seed.mjs
 seed/                   Aus dem Prototyp extrahierte Daten (JSON)
 reference/              prototype.html
@@ -137,20 +138,47 @@ Details in `docs/agents.md`. Unverhandelbare Regeln:
 
 ## Design
 
-- Typografie wie im Prototyp: Archivo (Headlines), Source Sans 3 (Text), JetBrains Mono (Zahlen, Scores, IDs).
-- Farben und Abstände aus den CSS-Variablen des Prototyps als Tailwind-Theme übernehmen; Light- und Dark-Mode.
+- **CI in `docs/ci.md`** – Tokens in `app/globals.css`. Nur Tokens verwenden (`bg-surface`, `text-muted`,
+  `text-accent-ink` …), keine Hex-Werte in Komponenten.
+- Dunkel (Anthrazit) ist Standard, Hell (Creme) per `data-theme="light"`.
+- Typografie: Archivo ExtraBold (Überschriften, Zahlen, Scores – Utility `num`), DM Sans (Text, Eyebrows –
+  Utility `eyebrow`).
+- Genau ein Limetten-Block je Ansicht als Blickfang. Limette nie als Clusterfarbe.
+- Clusterfarben `--cA … --cG` mit Schriftfarbe `--cA-fg …`; geprüft für beide Modi. Bei Änderungen erneut
+  validieren (Farbfehlsichtigkeit benachbarter Segmente, Kontrast).
+- Ecken 16 px (Karten), 40 px (Pillen/Chips); Abstände 24–48 px.
 - Sprache der Oberfläche: Deutsch. Typografische Anführungszeichen („…“) und Dezimalkomma bei Scores (3,85).
 - Fachbegriffe des Prototyps beibehalten: Arena, Anstoß, Aufwärmen, Scouting, Cluster, Fokusfeld, Horizont.
 - Barrierefreiheit: Arena per Tastatur bedienbar, Tooltips auch per Fokus, Kontraste prüfen.
 
 ## Arbeitsweise
 
+- Next.js 16 weicht in vielen Punkten vom Trainingsstand ab (`proxy.ts` statt Middleware, Cache Components,
+  `LayoutProps`/`PageProps`). Vor neuem Code die passende Doku in `node_modules/next/dist/docs/` lesen (siehe `AGENTS.md`).
+- Supabase ist per GitHub-Integration angebunden: Migrationen in `supabase/migrations/` werden beim Merge in den
+  Produktionsbranch auf das Supabase-Projekt angewendet. `supabase/config.toml` gilt für lokale Instanzen und Preview-Branches.
 - Schema nur über neue Dateien in `supabase/migrations/` ändern, nie bestehende Migrationen editieren.
-- Nach Änderungen an `seed/*.json`: `node scripts/build-seed.mjs && supabase db reset`.
+- Jede Änderung an Zugriffsregeln braucht einen Test in `tests/db/rls.test.sql`, der ohne die Änderung fehlschlägt.
+  Ausführen: `npm run test:db -- --fresh` gegen ein beliebiges Postgres (`DATABASE_URL`) oder nach
+  `supabase db reset` direkt gegen die lokale Supabase-Datenbank (`npm run test:db`).
+  Achtung bei UPDATE-Tests: Mit `WHERE` prüft Postgres die neue Zeile zusätzlich gegen die SELECT-Regel –
+  Angriffe deshalb auch ohne `WHERE` testen.
+- `seed/*.json` ist der Startbestand und steckt in Migration 0004 (bereits angewendet, nicht neu erzeugen). Inhaltliche
+  Änderungen laufen über die Redaktion bzw. neue Migrationen, nicht über die JSON-Dateien.
 - Typen aus der DB erzeugen: `supabase gen types typescript --local > lib/supabase/types.ts`.
-- Tests: Vitest für `lib/scoring.ts` und Agenten-Parser; Playwright für Login und Radar.
-- Keine Secrets im Repo. `.env.local` enthält `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
-  `SUPABASE_SERVICE_ROLE_KEY`, `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`.
+- Tests: Vitest für `lib/scoring.ts`, das Daten-Mapping und Agenten-Parser; Playwright (`e2e/`) für Login und Radar im
+  Testmodus `RADAR_FIXTURES=1` (Seed-Daten ohne Datenbank, Demo-Personas per Cookie). Supabase-Antwort und Testdaten
+  laufen durch dasselbe Mapping (`lib/radar/raw.ts`), damit der Testmodus nicht vom echten Pfad abweicht.
+- Demo-Zugänge: Migration `0005_demo_accounts.sql` und `DEMO_LOGIN=1` (nur Vercel-Preview; in Vercel-Produktion
+  ist der Demo-Login im Code gesperrt). **Prototyp-Phase:** Supabase läuft im Free-Tarif ohne Branching, Vorschau und
+  Produktion teilen sich eine Datenbank („supabase-violet-house“). Vor dem ersten echten Kunden die Demo-Konten per
+  neuer Migration entfernen oder ein frisches Produktionsprojekt in Frankfurt aufsetzen.
+- Next 16 mit Cache Components: Zugriffe auf Sitzung/Cookies/`params` nur innerhalb von `<Suspense>`;
+  `getViewer()` ruft `connection()` auf, weil Zugang vom heutigen Datum abhängt.
+- Keine Secrets im Repo. `.env.local` (Vorlage: `.env.example`) enthält `NEXT_PUBLIC_SUPABASE_URL`,
+  `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (alternativ der alte `…_ANON_KEY`), `SUPABASE_SECRET_KEY`
+  (alternativ `SUPABASE_SERVICE_ROLE_KEY`), `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`.
+- Der Secret-/Service-Role-Key nur über `lib/supabase/admin.ts` (ist `server-only`).
 - Erst planen, dann bauen: Bei größeren Aufgaben zuerst einen kurzen Plan vorlegen.
 
 ## Roadmap

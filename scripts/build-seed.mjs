@@ -1,5 +1,9 @@
-// Erzeugt supabase/seed.sql aus seed/*.json (Ausgabe von extract-prototype.mjs).
-// Aufruf: node scripts/build-seed.mjs   →  danach: supabase db reset
+// Erzeugt die Migration mit den Startinhalten aus seed/*.json (Ausgabe von extract-prototype.mjs).
+// Aufruf: node scripts/build-seed.mjs
+// Die Inhalte (44 Trends, Quellen, Partner …) sind redaktioneller Startbestand und gehen deshalb als Migration
+// in jede Datenbank, auch in Produktion. Spätere Änderungen laufen über die Redaktion, nicht über seed/*.json.
+// Die Migration ist bereits angewendet: NICHT neu erzeugen, wenn sich seed/*.json ändert – CI prüft nur,
+// dass Datei und JSON zusammenpassen.
 import fs from "node:fs";
 
 const J = (f) => JSON.parse(fs.readFileSync(`seed/${f}.json`, "utf8"));
@@ -23,7 +27,7 @@ const isoDate = (d) => {
 
 const IND_CODES = { "Sport": "SPORT", "Hospitality": "HOSPITALITY", "Live Entertainment": "LIVE" };
 
-out.push("-- Automatisch erzeugt von scripts/build-seed.mjs – nicht von Hand bearbeiten.\nbegin;\n");
+out.push("-- Startinhalte aus dem Prototyp. Automatisch erzeugt von scripts/build-seed.mjs – nicht von Hand bearbeiten.\n");
 
 ins_("clusters", ["code", "name", "position"],
   Object.entries(clusters).map(([k, v], i) => [q(k), q(v.n), i]));
@@ -76,7 +80,6 @@ ins_("trend_sources", ["trend_id", "source_id", "perspective"], trends.flatMap((
 ins_("trend_partners", ["trend_id", "partner_key", "position"],
   Object.entries(tp).flatMap(([n, keys]) => keys.map((k, i) => [tid(n), q(k), i])));
 
-out.push("commit;\n");
-fs.mkdirSync("supabase", { recursive: true });
-fs.writeFileSync("supabase/seed.sql", out.join("\n"));
-console.log(`✓ supabase/seed.sql geschrieben (${trends.length} Trends, ${Object.keys(sources).length} Quellen, ${Object.keys(partners).length} Partner)`);
+const target = "supabase/migrations/0004_initial_content.sql";
+fs.writeFileSync(target, out.join("\n"));
+console.log(`✓ ${target} geschrieben (${trends.length} Trends, ${Object.keys(sources).length} Quellen, ${Object.keys(partners).length} Partner)`);
