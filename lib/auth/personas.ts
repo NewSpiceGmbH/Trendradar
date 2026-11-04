@@ -19,4 +19,13 @@ export const PERSONAS: Persona[] = [
 ];
 
 export const isFixtureMode = () => process.env.RADAR_FIXTURES === "1" && process.env.VERCEL !== "1";
-export const isDemoLogin = () => process.env.DEMO_LOGIN === "1" || isFixtureMode();
+const truthy = (v: string | undefined) => ["1", "true", "yes", "ja"].includes((v ?? "").trim().toLowerCase());
+export const isDemoLogin = () => (truthy(process.env.DEMO_LOGIN) && process.env.VERCEL_ENV !== "production") || isFixtureMode();
+
+/** Für den Hinweis in Vorschauen, wenn die Demo-Zugänge nicht aktiv sind */
+export const demoLoginDiagnosis = () =>
+  process.env.VERCEL_ENV === "preview"
+    ? `Demo-Zugänge sind in dieser Vorschau aus: DEMO_LOGIN ist ${
+        process.env.DEMO_LOGIN === undefined ? "nicht gesetzt" : `„${process.env.DEMO_LOGIN}“ statt „1“`
+      }. In Vercel unter Settings → Environment Variables für „Preview“ DEMO_LOGIN = 1 setzen und die Seite neu laden.`
+    : null;

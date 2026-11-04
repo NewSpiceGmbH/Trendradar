@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { demoLogin } from "@/lib/auth/actions";
-import { PERSONAS, isDemoLogin } from "@/lib/auth/personas";
+import { PERSONAS, demoLoginDiagnosis, isDemoLogin } from "@/lib/auth/personas";
 import { MagicLinkForm } from "./magic-link-form";
 
 export const metadata: Metadata = { title: "Anmelden" };
@@ -49,7 +49,10 @@ async function LoginError({ searchParams }: { searchParams: PageProps<"/login">[
 /** Zur Anfragezeit prüfen, nicht beim Build: so wirkt DEMO_LOGIN ohne neuen Build. */
 async function DemoLogins() {
   await connection();
-  if (!isDemoLogin()) return null;
+  if (!isDemoLogin()) {
+    const hint = demoLoginDiagnosis();
+    return hint ? <p className="rounded-xl border border-dashed border-line p-4 text-sm text-muted">{hint}</p> : null;
+  }
   return (
           <section className="flex flex-col gap-3 rounded-[var(--radius-card)] border border-dashed border-line p-6 sm:p-8" aria-labelledby="demo-h">
             <h2 id="demo-h" className="!text-xl">Demo-Zugänge</h2>
