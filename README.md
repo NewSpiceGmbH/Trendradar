@@ -36,7 +36,8 @@ Einrichtung im Vercel-Projekt `trendradar` (Team New Spice):
 - Funktionen laufen in Frankfurt (`vercel.json`: `fra1`).
 
 - Vercel-Umgebungsvariablen: `NEXT_PUBLIC_SUPABASE_URL` und `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (bzw. `…_ANON_KEY`)
-  setzt die Supabase-Vercel-Integration. Zusätzlich **nur für „Preview“**: `DEMO_LOGIN=1`.
+  setzt die Supabase-Vercel-Integration. Zusätzlich **nur für „Preview“**: `DEMO_LOGIN=1` (Name exakt so, Großschreibung
+  zählt). Vercel übernimmt geänderte Variablen erst mit dem nächsten Deployment.
 - Supabase-Preview-Branches spielen `seed.sql` und `seed-demo.sql` ein (siehe `supabase/config.toml`). Damit gibt es
   fünf Demo-Zugänge (Redaktion, Owner, Member, Premium, abgelaufen; Passwort `trendradar-demo`).
 - In Produktion: kein `DEMO_LOGIN`, keine Demo-Konten. Login nur per Magic-Link für eingeladene Adressen.
