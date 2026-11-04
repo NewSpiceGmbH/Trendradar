@@ -256,3 +256,8 @@ button.stadium-anchor { pointer-events: auto; }
   .stadium-place { padding: 3px; }
   .stadium-place > span:last-child { display: none; }
 }
+
+/* Übergang in und aus einer Use-Case-Szene */
+@keyframes stadium-fade { from { opacity: 1; } to { opacity: 0; } }
+.stadium-fade { opacity: 0; animation: stadium-fade 0.6s ease-out; }
+@media (prefers-reduced-motion: reduce) { .stadium-fade { animation: none; } }

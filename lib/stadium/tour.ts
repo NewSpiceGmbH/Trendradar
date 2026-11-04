@@ -2,6 +2,7 @@ import type { Perspective } from "@/lib/scoring";
 import type { RadarData } from "@/lib/radar/types";
 import { moved, type Positions } from "@/lib/radar/view";
 import { STAGE, stageOf, type StageKey } from "./journey";
+import { USE_CASE, type UseCaseKey } from "./usecases";
 
 /**
  * Geführte Tour „Ein Spieltag 2030“: entlang der Customer Journey von zuhause ins Stadion, dann in den Radar.
@@ -11,7 +12,8 @@ export type Shot =
   | { kind: "journey" }
   | { kind: "place"; place: StageKey }
   | { kind: "radar" }
-  | { kind: "pitch" };
+  | { kind: "pitch" }
+  | { kind: "scene"; useCase: UseCaseKey };
 
 export interface Station {
   key: string;
@@ -20,7 +22,7 @@ export interface Station {
   figure?: string;
   title: string;
   body: string;
-  view: "journey" | "radar";
+  view: "journey" | "radar" | "scene";
   shot: Shot;
   /** hervorgehobene Trends; leer = alle gleich */
   highlight: number[];
@@ -67,6 +69,13 @@ export function buildTour(data: RadarData, pos: Positions): Station[] {
     };
   };
 
+  const scene = (k: UseCaseKey, eyebrow: string, title: string): Station | null => {
+    const u = USE_CASE[k];
+    const list = u.hotspots.map((h) => h.trend).filter((n) => all.includes(n));
+    if (!list.length) return null;
+    return { key: k, eyebrow, figure: String(list.length), title, body: u.blurb, view: "scene", shot: { kind: "scene", useCase: k }, highlight: list, persp: "EU" };
+  };
+
   const stations: (Station | null)[] = [
     {
       key: "spieltag",
@@ -83,6 +92,8 @@ export function buildTour(data: RadarData, pos: Positions): Station[] {
     place("anreise"),
     place("region"),
     place("einlass"),
+    scene("kiosk", "Am Verkaufsstand", "Hier entscheiden Sekunden über Umsatz und Laune."),
+    scene("lounge", "In der Loge", "Hospitality macht aus einem Platz ein Erlebnis."),
     {
       key: "anpfiff",
       eyebrow: "Anpfiff",

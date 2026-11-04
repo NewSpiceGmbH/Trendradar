@@ -11,6 +11,9 @@ import {
   OUTER_R, PITCH_R, ROOF_H, SEGMENT, SX, TIERS, clusterAngle, dotPosition, fitShot, polar, type CameraShot,
 } from "@/lib/stadium/geometry";
 import { STAGES, journeySpot, stageOf, type StageKey } from "@/lib/stadium/journey";
+import { matchesAudience, type AudienceFilter } from "@/lib/stadium/audience";
+import { USE_CASE, USE_CASES, type UseCaseKey } from "@/lib/stadium/usecases";
+import { DIORAMA, PfandRing, StadiumMarkers } from "./dioramas";
 import { City, Places } from "./city";
 import { Projector, createRegistry, labelRef, type LabelRegistry } from "./labels";
 
@@ -20,7 +23,7 @@ export interface Palette {
   clusters: Record<string, string>;
 }
 
-export type View = "journey" | "radar";
+export type View = "journey" | "radar" | "scene";
 
 export interface SceneProps {
   data: RadarData;
@@ -31,6 +34,10 @@ export interface SceneProps {
   shot: CameraShot;
   cluster: ClusterCode | null;
   place: StageKey | null;
+  /** geöffnete Use-Case-Szene (nur bei view = "scene") */
+  useCase: UseCaseKey | null;
+  /** Zielgruppen-Filter: nicht passende Trends werden abgeblendet */
+  audience: AudienceFilter;
   selected: number | null;
   hovered: number | null;
   /** hervorgehobene Trends (Tour); null = keine Hervorhebung */
@@ -48,6 +55,8 @@ export interface SceneProps {
   onSelectPlace: (k: StageKey) => void;
   /** Klick auf das Stadion von außen (Journey → Radar) */
   onEnterStadium: () => void;
+  /** Szene öffnen, optional mit vorausgewähltem Trend */
+  onOpenUseCase: (k: UseCaseKey, trend?: number) => void;
   onBackground: () => void;
 }
 
@@ -370,7 +379,7 @@ function Rig({ shot, autoRotate, view }: { shot: CameraShot; autoRotate: boolean
     const c = ref.current;
     if (!c || !autoRotate) return;
     idle.current += dt;
-    if (idle.current > 0 && !c.active) void c.rotate(dt * (view === "journey" ? 0.02 : 0.035), 0, false);
+    if (idle.current > 0 && !c.active) void c.rotate(dt * (view === "journey" ? 0.02 : view === "scene" ? 0.05 : 0.035), 0, false);
   });
   return (
     <CameraControls
@@ -378,7 +387,7 @@ function Rig({ shot, autoRotate, view }: { shot: CameraShot; autoRotate: boolean
       makeDefault
       smoothTime={0.95}
       minDistance={5}
-      maxDistance={view === "journey" ? 160 : 90}
+      maxDistance={view === "journey" ? 160 : view === "scene" ? 24 : 90}
       minPolarAngle={0.12}
       maxPolarAngle={1.3}
       dollySpeed={0.4}
@@ -416,7 +425,8 @@ function useTargets(data: RadarData, pos: Positions, persp: Perspective, view: V
 
 function World(p: SceneProps & { registry: LabelRegistry; targets: Record<number, Target> }) {
   const { data, palette, cluster, selected, highlight, pulse, view, targets, registry } = p;
-  const fog: [number, number] = view === "journey" ? [95, 210] : [45, 110];
+  const fog: [number, number] = view === "journey" ? [95, 210] : view === "scene" ? [18, 60] : [45, 110];
+  const Diorama = p.useCase ? DIORAMA[p.useCase] : null;
   return (
     <>
       <color attach="background" args={[palette.bg]} />
@@ -431,13 +441,19 @@ function World(p: SceneProps & { registry: LabelRegistry; targets: Record<number
         <Lightformer intensity={1.1} position={[50, 14, -20]} rotation-y={-Math.PI / 2} scale={[40, 10, 1]} color={palette.ink} />
         <Lightformer form="ring" intensity={0.9} position={[0, 10, 60]} scale={18} color={palette.ink} />
       </Environment>
+      {/* Welt (Region und Stadion) – in einer Use-Case-Szene entfernt, damit sie keine Klicks abfängt */}
+      {view !== "scene" && (
+      <group>
       <City palette={palette} />
       <Places palette={palette} active={p.place} onSelect={p.onSelectPlace} />
+      {view === "journey" && <PfandRing palette={palette} onOpen={() => p.onOpenUseCase("kiosk", 31)} />}
       <Pitch palette={palette} />
       <Stands palette={palette} cluster={cluster} view={view} onSelectCluster={p.onSelectCluster} onEnterStadium={p.onEnterStadium} />
+      {view === "radar" && <StadiumMarkers palette={palette} onOpen={(k) => p.onOpenUseCase(k)} />}
       {data.trends.map((t) => {
         const inScope = view === "radar" ? !cluster || t.cluster === cluster : !p.place || stageOf(t.number) === p.place;
-        const state = highlight ? (highlight.has(t.number) ? "glow" : "dim") : inScope ? "normal" : "dim";
+        const fits = matchesAudience(t.number, p.audience);
+        const state = highlight ? (highlight.has(t.number) ? "glow" : "dim") : inScope && fits ? "normal" : "dim";
         return (
           <Dot
             key={t.number}
@@ -454,6 +470,16 @@ function World(p: SceneProps & { registry: LabelRegistry; targets: Record<number
           />
         );
       })}
+      </group>
+      )}
+      {Diorama && view === "scene" && (
+        <Diorama
+          palette={palette}
+          colorOf={(n) => palette.clusters[data.trends.find((t) => t.number === n)?.cluster ?? "A"]}
+          selected={selected}
+          onSelectTrend={p.onSelectTrend}
+        />
+      )}
       <Projector registry={registry} />
       <Rig shot={p.shot} autoRotate={p.autoRotate} view={view} />
     </>
@@ -462,7 +488,8 @@ function World(p: SceneProps & { registry: LabelRegistry; targets: Record<number
 
 /** Beschriftungen und Marken als HTML über der Szene */
 function Overlay(p: SceneProps & { registry: LabelRegistry }) {
-  const { data, pos, persp, palette, view, cluster, place, selected, hovered, labelled, registry, showMarkers } = p;
+  const { data, pos, persp, palette, view, cluster, place, selected, hovered, labelled, registry, showMarkers, useCase } = p;
+  const byNumber = new Map(data.trends.map((t) => [t.number, t]));
   const counts = useMemo(() => {
     const c = new Map<StageKey, number>();
     for (const t of data.trends) c.set(stageOf(t.number), (c.get(stageOf(t.number)) ?? 0) + 1);
@@ -502,7 +529,43 @@ function Overlay(p: SceneProps & { registry: LabelRegistry }) {
             </span>
           </button>
         ))}
-      {data.trends.map((t) => {
+      {showMarkers && view === "radar" &&
+        USE_CASES.map((u) => (
+          <button
+            key={u.key}
+            ref={labelRef(registry, `u${u.key}`)}
+            type="button"
+            className="stadium-place stadium-anchor"
+            onClick={() => p.onOpenUseCase(u.key)}
+            aria-label={`Szene ${u.name} öffnen`}
+          >
+            <span className="stadium-place-icon" aria-hidden>{u.audience === "vip" ? "★" : "◎"}</span>
+            <span className="flex flex-col items-start leading-tight">
+              <b>{u.name}</b>
+              <small>{u.audience === "vip" ? "Hospitality" : "Public"} · {u.hotspots.length} Use Cases</small>
+            </span>
+          </button>
+        ))}
+      {view === "scene" && useCase &&
+        USE_CASE[useCase].hotspots.map((h) => {
+          const t = byNumber.get(h.trend);
+          if (!t) return null;
+          return (
+            <button
+              key={h.key}
+              ref={labelRef(registry, `h${useCase}-${h.key}`)}
+              type="button"
+              className={`stadium-cluster stadium-anchor ${selected === h.trend ? "is-active" : ""}`}
+              style={{ "--tint": palette.clusters[t.cluster] } as React.CSSProperties}
+              onClick={() => p.onSelectTrend(h.trend)}
+              aria-label={`${h.label}: Trend ${t.number} ${t.name}`}
+            >
+              <span className="num">{t.number}</span>
+              <span className="stadium-cluster-name">{h.label}</span>
+            </button>
+          );
+        })}
+      {view !== "scene" && data.trends.map((t) => {
         const mode = hovered === t.number ? "teaser" : labelled.has(t.number) || selected === t.number ? "short" : "none";
         const v = pos[persp][t.number];
         return (
@@ -532,6 +595,14 @@ export default function StadiumScene(props: SceneProps) {
     for (const c of CLUSTER_KEYS) {
       const [x, y, z] = polar(OUTER_R + 0.9, clusterAngle(c), ROOF_H + 0.6);
       registry.anchors.set(`c${c}`, (out) => (out.set(x, y, z), true));
+    }
+    for (const u of USE_CASES) {
+      const [x, y, z] = u.marker;
+      registry.anchors.set(`u${u.key}`, (out) => (out.set(x, y + 1.4, z), true));
+      for (const h of u.hotspots) {
+        const [hx, hy, hz] = h.at;
+        registry.anchors.set(`h${u.key}-${h.key}`, (out) => (out.set(hx, hy + 0.5, hz), true));
+      }
     }
     for (const s of STAGES) {
       const y = s.key === "stadion" ? ROOF_H + 6 : s.height + 5.5;

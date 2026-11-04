@@ -12,6 +12,8 @@ import {
 } from "@/lib/stadium/geometry";
 import { STAGE, STAGES, journeySpot, stageOf, type StageKey } from "@/lib/stadium/journey";
 import { buildTour, firstSentence } from "@/lib/stadium/tour";
+import { AUDIENCE_LABEL, FILTER_LABEL, audienceOf, matchesAudience, type AudienceFilter } from "@/lib/stadium/audience";
+import { USE_CASE, hotspotShot, type UseCaseKey } from "@/lib/stadium/usecases";
 import type { Palette, View } from "./scene";
 
 const Scene = dynamic(() => import("./scene"), {
@@ -73,13 +75,17 @@ export default function StadiumView({ data }: { data: RadarData }) {
     try {
       found = new Set((JSON.parse(store.get(FOUND) ?? "[]") as number[]).filter((n) => byNumber.has(n)));
     } catch { /* ignorieren */ }
-    const deep = !!(c || o || trend || q.get("v"));
+    const sc = q.get("s") as UseCaseKey | null;
+    const z = q.get("z");
+    const deep = !!(c || o || trend || q.get("v") || sc);
     return {
       persp: (q.get("p") === "global" ? "GLOBAL" : "EU") as Perspective,
       view,
       cluster: view === "radar" ? (trend ? byNumber.get(trend)!.cluster : c && CLUSTER_KEYS.includes(c) ? c : null) : null,
       place: view === "journey" ? (trend ? stageOf(trend) : o && STAGE[o] ? o : null) : null,
       selected: trend,
+      useCase: sc && USE_CASE[sc] ? sc : null,
+      audience: (z === "vip" || z === "public" ? z : "all") as AudienceFilter,
       station: !deep && !store.get(TOUR_SEEN) ? 0 : null,
       found,
     };
@@ -89,6 +95,8 @@ export default function StadiumView({ data }: { data: RadarData }) {
   const [cluster, setCluster] = useState<ClusterCode | null>(initial.cluster);
   const [place, setPlace] = useState<StageKey | null>(initial.place);
   const [selected, setSelected] = useState<number | null>(initial.selected);
+  const [useCase, setUseCase] = useState<UseCaseKey | null>(initial.useCase);
+  const [audience, setAudience] = useState<AudienceFilter>(initial.audience);
   const [hovered, setHovered] = useState<number | null>(null);
   const [station, setStation] = useState<number | null>(initial.station);
   const [switched, setSwitched] = useState<string | null>(null);
@@ -104,11 +112,13 @@ export default function StadiumView({ data }: { data: RadarData }) {
     if (view === "radar") q.set("v", "radar");
     if (cluster) q.set("c", cluster);
     if (place) q.set("o", place);
+    if (useCase) q.set("s", useCase);
     if (selected) q.set("t", String(selected));
     if (persp === "GLOBAL") q.set("p", "global");
+    if (audience !== "all") q.set("z", audience);
     const s = q.toString();
     window.history.replaceState(null, "", s ? `?${s}` : window.location.pathname);
-  }, [view, cluster, place, selected, persp, touring]);
+  }, [view, cluster, place, selected, persp, touring, useCase, audience]);
 
   // In der Perspektiv-Station erst Europa zeigen, dann umschalten – damit man die Bewegung sieht
   useEffect(() => {
@@ -118,7 +128,9 @@ export default function StadiumView({ data }: { data: RadarData }) {
   }, [st]);
 
   const activePersp: Perspective = st ? (st.persp === "GLOBAL" && switched === st.key ? "GLOBAL" : "EU") : persp;
-  const activeView: View = st ? st.view : view;
+  const tourScene = st && st.shot.kind === "scene" ? st.shot.useCase : null;
+  const activeUseCase = st ? tourScene : useCase;
+  const activeView: View = activeUseCase ? "scene" : st ? (st.view === "scene" ? "radar" : st.view) : view;
 
   const discover = useCallback((n: number) => {
     setFound((f) => {
@@ -133,11 +145,12 @@ export default function StadiumView({ data }: { data: RadarData }) {
     (n: number) => {
       if (touring) return;
       setSelected(n);
+      if (useCase) { discover(n); return; }
       if (view === "radar") setCluster(byNumber.get(n)!.cluster);
       else setPlace(stageOf(n));
       discover(n);
     },
-    [touring, view, byNumber, discover],
+    [touring, view, byNumber, discover, useCase],
   );
   const selectCluster = useCallback((c: ClusterCode) => {
     if (touring) return;
@@ -167,7 +180,18 @@ export default function StadiumView({ data }: { data: RadarData }) {
     setCluster(null);
     setSelected(null);
   }, [touring]);
+  const openUseCase = useCallback((k: UseCaseKey, trend?: number) => {
+    if (touring) return;
+    setUseCase(k);
+    setSelected(trend ?? null);
+    if (trend) discover(trend);
+  }, [touring, discover]);
+  const closeUseCase = () => {
+    setUseCase(null);
+    setSelected(null);
+  };
   const switchView = (v: View) => {
+    setUseCase(null);
     setView(v);
     setCluster(null);
     setPlace(null);
@@ -183,6 +207,7 @@ export default function StadiumView({ data }: { data: RadarData }) {
     setCluster(null);
     setPlace(null);
     setSelected(null);
+    setUseCase(null);
     setStation(0);
   };
   const step = useCallback(
@@ -197,10 +222,11 @@ export default function StadiumView({ data }: { data: RadarData }) {
 
   const up = useCallback(() => {
     if (selected) setSelected(null);
+    else if (useCase) setUseCase(null);
     else if (cluster) setCluster(null);
     else if (place) setPlace(null);
     else if (view === "radar") setView("journey");
-  }, [selected, cluster, place, view]);
+  }, [selected, cluster, place, view, useCase]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -236,7 +262,12 @@ export default function StadiumView({ data }: { data: RadarData }) {
       if (s.kind === "pitch") return PITCH_SHOT;
       if (s.kind === "radar") return OVERVIEW;
       if (s.kind === "place") return forPlace(s.place);
+      if (s.kind === "scene") return USE_CASE[s.useCase].shot;
       return JOURNEY_OVERVIEW;
+    }
+    if (useCase) {
+      const h = selected ? USE_CASE[useCase].hotspots.find((x) => x.trend === selected) : null;
+      return h ? hotspotShot(h) : USE_CASE[useCase].shot;
     }
     if (selected) {
       const d = spotOf(selected, view, persp);
@@ -244,7 +275,7 @@ export default function StadiumView({ data }: { data: RadarData }) {
     }
     if (view === "radar") return cluster ? clusterShot(cluster) : OVERVIEW;
     return place ? forPlace(place) : JOURNEY_OVERVIEW;
-  }, [st, selected, view, cluster, place, persp, spotOf]);
+  }, [st, selected, view, cluster, place, persp, spotOf, useCase]);
 
   const highlight = useMemo(() => (st && st.highlight.length ? new Set(st.highlight) : null), [st]);
   const pulse = useMemo(() => {
@@ -274,6 +305,10 @@ export default function StadiumView({ data }: { data: RadarData }) {
   ];
   if (view === "radar" && cluster) crumbs.push({ label: `Tribüne ${cluster} · ${clusterName[cluster]}`, onClick: () => setSelected(null) });
   if (view === "journey" && place) crumbs.push({ label: STAGE[place].name, onClick: () => setSelected(null) });
+  if (useCase) {
+    crumbs.splice(1, crumbs.length - 1);
+    crumbs.push({ label: USE_CASE[useCase].name, onClick: () => setSelected(null) });
+  }
   if (sel) crumbs.push({ label: `#${sel.number} ${sel.name}` });
 
   return (
@@ -288,21 +323,27 @@ export default function StadiumView({ data }: { data: RadarData }) {
           shot={shot}
           cluster={touring ? null : cluster}
           place={touring ? (st?.shot.kind === "place" ? st.shot.place : null) : place}
+          useCase={activeUseCase}
+          audience={touring ? "all" : audience}
           selected={touring ? null : selected}
           hovered={hovered}
           highlight={highlight}
           pulse={pulse}
           labelled={labelled}
-          autoRotate={!touring && !cluster && !place && !selected}
+          autoRotate={!touring && !cluster && !place && !selected && !useCase}
           showMarkers={!touring || st?.shot.kind === "journey" || st?.shot.kind === "radar"}
           onHover={setHovered}
           onSelectTrend={selectTrend}
           onSelectCluster={selectCluster}
           onSelectPlace={selectPlace}
           onEnterStadium={enterStadium}
+          onOpenUseCase={openUseCase}
           onBackground={() => !touring && setSelected(null)}
         />
       </div>
+
+      {/* kurzer Übergang beim Betreten und Verlassen einer Szene */}
+      <div key={activeView === "scene" ? `scene-${activeUseCase}` : "world"} className="stadium-fade pointer-events-none absolute inset-0 bg-bg" aria-hidden />
 
       {/* Kopf: Titel und Pfad */}
       <div className="pointer-events-none absolute inset-x-0 top-[57px] flex flex-wrap items-start justify-between gap-4 p-4 sm:p-8">
@@ -339,6 +380,19 @@ export default function StadiumView({ data }: { data: RadarData }) {
                 </button>
               ))}
             </span>
+            <span className="glass inline-flex rounded-[var(--radius-pill)] p-0.5" role="group" aria-label="Zielgruppe">
+              {(["all", "vip", "public"] as const).map((a) => (
+                <button
+                  key={a}
+                  type="button"
+                  aria-pressed={audience === a}
+                  onClick={() => setAudience(a)}
+                  className={`rounded-[var(--radius-pill)] px-3 py-1 text-sm font-bold ${audience === a ? "bg-ink text-bg" : "text-ink"}`}
+                >
+                  {FILTER_LABEL[a]}
+                </button>
+              ))}
+            </span>
             <span className="glass inline-flex rounded-[var(--radius-pill)] p-0.5" role="group" aria-label="Perspektive">
               {(["EU", "GLOBAL"] as const).map((p) => (
                 <button
@@ -371,7 +425,7 @@ export default function StadiumView({ data }: { data: RadarData }) {
           </dl>
           <p className="glass pointer-events-auto rounded-[var(--radius-pill)] px-4 py-1.5 text-sm text-muted">
             <span className="num text-ink">{found.size}</span> von {data.trends.length} entdeckt
-            {!cluster && !place && (
+            {!cluster && !place && !useCase && (
               <span className="hidden sm:inline"> · {view === "journey" ? "Ort anklicken oder ins Stadion gehen" : "Tribüne anklicken zum Hineinzoomen"}</span>
             )}
           </p>
@@ -379,7 +433,7 @@ export default function StadiumView({ data }: { data: RadarData }) {
       )}
 
       {/* Seitenpanel: Ort, Tribüne oder Trend */}
-      {!touring && (cluster || place || sel) && (
+      {!touring && (cluster || place || sel || useCase) && (
         <aside
           className="absolute inset-x-3 bottom-3 max-h-[55%] glass-strong overflow-y-auto rounded-[var(--radius-card)] p-5 sm:inset-x-auto sm:bottom-auto sm:right-8 sm:top-[200px] sm:max-h-[calc(100%-16rem)] sm:w-[360px]"
           aria-live="polite"
@@ -403,10 +457,11 @@ export default function StadiumView({ data }: { data: RadarData }) {
                 </p>
               </div>
               <p className="text-ink">{firstSentence(sel.description)}</p>
-              <dl className="grid grid-cols-3 gap-3 border-t border-line pt-4 text-sm">
+              <dl className="grid grid-cols-2 gap-3 border-t border-line pt-4 text-sm">
                 <div><dt className="text-xs text-muted">Phase</dt><dd className="font-bold text-ink">{data.zones[selView.zone].name}</dd></div>
                 <div><dt className="text-xs text-muted">Horizont</dt><dd className="font-bold text-ink">{selView.horizon} J.</dd></div>
                 <div><dt className="text-xs text-muted">Ort</dt><dd className="font-bold text-ink">{STAGE[stageOf(sel.number)].name}</dd></div>
+                <div><dt className="text-xs text-muted">Zielgruppe</dt><dd className="font-bold text-ink">{AUDIENCE_LABEL[audienceOf(sel.number)]}</dd></div>
               </dl>
               {moved(pos, sel.number) && (
                 <p className="text-sm text-muted">
@@ -417,15 +472,17 @@ export default function StadiumView({ data }: { data: RadarData }) {
                 Mehr erfahren
               </Link>
             </article>
+          ) : useCase ? (
+            <UseCasePanel data={data} useCaseKey={useCase} onSelect={selectTrend} onClose={closeUseCase} hovered={hovered} onHover={setHovered} />
           ) : view === "radar" && cluster ? (
             <TrendList
-              data={data} pos={pos} persp={persp} hovered={hovered} onHover={setHovered} onSelect={selectTrend}
+              data={data} pos={pos} persp={persp} hovered={hovered} onHover={setHovered} onSelect={selectTrend} audience={audience}
               eyebrow={`Tribüne ${cluster}`} dot={`var(--c${cluster})`} title={clusterName[cluster]}
               trends={data.trends.filter((t) => t.cluster === cluster).map((t) => t.number)}
             />
           ) : place ? (
             <TrendList
-              data={data} pos={pos} persp={persp} hovered={hovered} onHover={setHovered} onSelect={selectTrend}
+              data={data} pos={pos} persp={persp} hovered={hovered} onHover={setHovered} onSelect={selectTrend} audience={audience}
               eyebrow={`Station ${STAGES.findIndex((s) => s.key === place) + 1} von ${STAGES.length}`} title={STAGE[place].name} blurb={STAGE[place].blurb}
               trends={data.trends.filter((t) => stageOf(t.number) === place).map((t) => t.number)}
               action={place === "stadion" ? { label: "Hinein in den Radar", onClick: enterStadium } : undefined}
@@ -493,9 +550,9 @@ export default function StadiumView({ data }: { data: RadarData }) {
 }
 
 function TrendList({
-  data, pos, persp, hovered, onHover, onSelect, eyebrow, dot, title, blurb, trends, action,
+  data, pos, persp, hovered, onHover, onSelect, eyebrow, dot, title, blurb, trends, action, audience,
 }: {
-  data: RadarData; pos: ReturnType<typeof positions>; persp: Perspective;
+  data: RadarData; pos: ReturnType<typeof positions>; persp: Perspective; audience: AudienceFilter;
   hovered: number | null; onHover: (n: number | null) => void; onSelect: (n: number) => void;
   eyebrow: string; dot?: string; title: string; blurb?: string; trends: number[];
   action?: { label: string; onClick: () => void };
@@ -531,11 +588,14 @@ function TrendList({
                 onMouseLeave={() => onHover(null)}
                 onFocus={() => onHover(n)}
                 onBlur={() => onHover(null)}
-                className={`grid w-full grid-cols-[12px_28px_minmax(0,1fr)_auto] items-baseline gap-2 rounded-lg px-2 py-1.5 text-left text-sm ${hovered === n ? "bg-sunk" : ""}`}
+                className={`grid w-full grid-cols-[12px_28px_minmax(0,1fr)_auto] items-baseline gap-2 rounded-lg px-2 py-1.5 text-left text-sm ${hovered === n ? "bg-sunk" : ""} ${matchesAudience(n, audience) ? "" : "opacity-40"}`}
               >
                 <span className="inline-block size-2 self-center rounded-full" style={{ background: `var(--c${t.cluster})` }} />
                 <span className="num text-muted">{n}</span>
-                <span className="truncate text-ink">{t.name}</span>
+                <span className="truncate text-ink">
+                  {t.name}
+                  {audienceOf(n) === "vip" && <span className="ml-1.5 text-[10px] font-bold uppercase tracking-wider text-muted">VIP</span>}
+                </span>
                 <span className="text-xs text-muted">{data.zones[v.zone].name}</span>
               </button>
             </li>
@@ -547,6 +607,50 @@ function TrendList({
           {action.label}
         </button>
       )}
+    </div>
+  );
+}
+
+function UseCasePanel({
+  data, useCaseKey, onSelect, onClose, hovered, onHover,
+}: {
+  data: RadarData; useCaseKey: UseCaseKey; onSelect: (n: number) => void; onClose: () => void;
+  hovered: number | null; onHover: (n: number | null) => void;
+}) {
+  const u = USE_CASE[useCaseKey];
+  const byNumber = new Map(data.trends.map((t) => [t.number, t]));
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex items-start justify-between gap-3">
+        <p className="eyebrow !text-muted">Szene · {u.audience === "vip" ? "Hospitality" : "Public"}</p>
+        <button type="button" onClick={onClose} aria-label="Szene schließen" className="-mr-1 -mt-1 rounded-full px-2 text-lg text-muted hover:text-ink">×</button>
+      </div>
+      <h2 className="!text-[26px]">{u.name}</h2>
+      <p className="text-ink">{u.blurb}</p>
+      <ul className="flex flex-col border-t border-line pt-3">
+        {u.hotspots.map((h) => {
+          const t = byNumber.get(h.trend);
+          if (!t) return null;
+          return (
+            <li key={h.key}>
+              <button
+                type="button"
+                onClick={() => onSelect(h.trend)}
+                onMouseEnter={() => onHover(h.trend)}
+                onMouseLeave={() => onHover(null)}
+                className={`grid w-full grid-cols-[12px_minmax(0,1fr)] items-start gap-x-2 rounded-lg px-2 py-2 text-left text-sm ${hovered === h.trend ? "bg-sunk" : ""}`}
+              >
+                <span className="mt-1.5 inline-block size-2 rounded-full" style={{ background: `var(--c${t.cluster})` }} />
+                <span className="flex flex-col">
+                  <span className="font-bold text-ink">{h.label}</span>
+                  <span className="text-xs text-muted">#{t.number} {t.name}</span>
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+      <p className="text-xs text-muted">Objekt in der Szene oder in der Liste anklicken. Esc führt zurück ins Stadion.</p>
     </div>
   );
 }
