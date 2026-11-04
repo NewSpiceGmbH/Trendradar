@@ -1,0 +1,25 @@
+# Abhängigkeiten & Builds
+node_modules/
+.next/
+out/
+dist/
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+
+# Secrets
+.env
+.env*.local
+
+# Supabase lokal
+supabase/.branches/
+supabase/.temp/
+
+# Tests
+playwright-report/
+test-results/
+
+# System
+.DS_Store
+*.log
+.vercel

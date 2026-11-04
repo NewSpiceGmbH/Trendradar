@@ -1,0 +1,36 @@
+{
+  "HOS": {
+    "n": "Hospitality",
+    "d": "Venue und Hotellerie",
+    "st": [
+      "VIP & Premium",
+      "Kiosk & Gastro",
+      "Schanktechnik",
+      "Robotik",
+      "Hotellerie"
+    ]
+  },
+  "INF": {
+    "n": "Infrastruktur",
+    "d": "Bau, Mobilität, Energie, Einlass, Sicherheit, Inklusion",
+    "st": [
+      "Stadionbau",
+      "Mobilität",
+      "Energie",
+      "Einlass",
+      "Sicherheit",
+      "Inklusion"
+    ]
+  },
+  "FAN": {
+    "n": "Fan Engagement",
+    "d": "Plattformen, Gamification, Loyalty, Content, Teilhabe",
+    "st": [
+      "Plattformen",
+      "Gamification",
+      "Loyalty",
+      "Content & Community",
+      "Teilhabe"
+    ]
+  }
+}

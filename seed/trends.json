@@ -1,0 +1,1543 @@
+[
+  {
+    "id": 1,
+    "n": "Hyper-Personalisierung",
+    "c": "A",
+    "d": "KI steuert Angebote, Inhalte und Services entlang der gesamten Gast- und Fan-Journey individuell – vom Ticketkauf bis zum Hotelzimmer.",
+    "rel": [
+      3,
+      3,
+      3
+    ],
+    "use": "Personalisierte Matchday-Journey in der Club-App; Upgrade-Angebote nach Präferenzprofil; individuelle Konzert-Pakete.",
+    "bp": "DFL/Bundesliga mit AWS als GenAI-Partner für personalisierte Inhalte [s13, s14].",
+    "sig": "Belegt: DFL baut KI-Partnerschaft mit AWS aus. Prognose: Personalisierung wird Standarderwartung.",
+    "src": [
+      "s13",
+      "s14"
+    ],
+    "opp": "Höhere Conversion, Warenkorb und Wiederkehr.",
+    "risk": "DSGVO, Datensilos, Filterblasen-Effekt.",
+    "tta": "0–2",
+    "sc": [
+      4,
+      5,
+      5,
+      4,
+      3,
+      3
+    ],
+    "ev": "A",
+    "fo": "FAN",
+    "st": "Plattformen",
+    "orig": "EU"
+  },
+  {
+    "id": 2,
+    "n": "Loyalty-Ökosysteme",
+    "c": "A",
+    "d": "Branchenübergreifende Treueprogramme verbinden Stadion, Hotel, Mobilität und Entertainment in einer Währung.",
+    "rel": [
+      3,
+      3,
+      2
+    ],
+    "use": "Punkte aus Hotelaufenthalten für Matchday-Erlebnisse einlösen; Status-Stufen über Partner hinweg.",
+    "bp": "Wissensbasis: Hotel-Loyalty-Programme mit Event-Erlebnissen als Prämie (z. B. Marriott Bonvoy Moments) – im Detail zu validieren.",
+    "sig": "Prognose: Loyalty wird zum Datenrückgrat für Personalisierung und Agentic Booking.",
+    "src": [],
+    "opp": "Höherer Customer Lifetime Value, Partner-Erlöse.",
+    "risk": "Komplexe Abrechnung, Programmmüdigkeit.",
+    "tta": "0–2",
+    "sc": [
+      4,
+      4,
+      5,
+      4,
+      3,
+      3
+    ],
+    "ev": "B",
+    "fo": "FAN",
+    "st": "Loyalty",
+    "orig": "GLOBAL"
+  },
+  {
+    "id": 3,
+    "n": "Gamifizierte Second Screens",
+    "c": "A",
+    "d": "Interaktive Live-Daten, Prognosespiele und Echtzeit-Statistiken binden Fans vor Ort und zu Hause.",
+    "rel": [
+      3,
+      1,
+      2
+    ],
+    "use": "Live-Predictions in der App, Match-Facts-Overlays, Belohnungen für Teilnahme.",
+    "bp": "Bundesliga Match Facts auf Basis der AWS-Partnerschaft [s13].",
+    "sig": "Belegt: datengetriebene Fan-Features im Ligabetrieb.",
+    "src": [
+      "s13"
+    ],
+    "opp": "Mehr Nutzungszeit und Sponsoring-Inventar.",
+    "risk": "Nähe zu Glücksspiel, Ablenkung vom Live-Erlebnis.",
+    "tta": "0–2",
+    "sc": [
+      3,
+      4,
+      3,
+      4,
+      3,
+      4
+    ],
+    "ev": "B",
+    "fo": "FAN",
+    "st": "Gamification",
+    "orig": "EU"
+  },
+  {
+    "id": 4,
+    "n": "Club-Superapps",
+    "c": "A",
+    "fo": "FAN",
+    "st": "Plattformen",
+    "d": "Eine App bündelt Ticket, Einlass, Bezahlen, Bestellen, Content und Loyalty – statt vieler Einzel-Apps.",
+    "rel": [
+      3,
+      2,
+      3
+    ],
+    "use": "Digitales Ticket mit Wallet, In-Seat-Bestellung, Mitgliederstatus und Live-Daten in einer Oberfläche.",
+    "bp": "FC Bayern stellt ab 2026/27 auf rein digitale Tickets in der App um, inkl. Wallet und Zweitmarkt [s74]; Vitória SC baut mit Blocksport eine Fan-Superapp [s92].",
+    "sig": "Belegt: Clubs bündeln Funktionen in eigenen Apps. Offen: Fans ohne Smartphone.",
+    "src": [
+      "s74",
+      "s92"
+    ],
+    "opp": "Datenhoheit, höhere Nutzungsfrequenz, Grundlage für Personalisierung.",
+    "risk": "Entwicklungskosten, Ausschluss von Fans ohne Smartphone, App-Müdigkeit.",
+    "tta": "0–2",
+    "sc": [
+      4,
+      4,
+      5,
+      4,
+      3,
+      3
+    ],
+    "ev": "A",
+    "orig": "EU"
+  },
+  {
+    "id": 5,
+    "n": "KI-Fan-Assistenten",
+    "c": "A",
+    "fo": "FAN",
+    "st": "Plattformen",
+    "d": "Sprach- und Chat-Assistenten beantworten Fragen zu Ticket, Anreise, Stadion und Club rund um die Uhr.",
+    "rel": [
+      3,
+      2,
+      3
+    ],
+    "use": "Matchday-Fragen (Einlass, Parken, Barrierefreiheit), Ticket-Support, personalisierte Club-Inhalte.",
+    "bp": "Infobip startet den KI-Fan-Companion PitchMate [s93]; die Premier League testet einen KI-Companion, der in Tests noch schwach abschneidet [s94].",
+    "sig": "Belegt: erste Produkte am Markt. Unsicher: Qualität und Mehrwert.",
+    "src": [
+      "s93",
+      "s94"
+    ],
+    "opp": "Entlastung des Service, Datengewinn, 24/7-Erreichbarkeit.",
+    "risk": "Falschauskünfte, Markenrisiko, Datenschutz.",
+    "tta": "0–2",
+    "sc": [
+      3,
+      4,
+      4,
+      4,
+      4,
+      4
+    ],
+    "ev": "A",
+    "orig": "GLOBAL"
+  },
+  {
+    "id": 6,
+    "n": "Agentic Booking",
+    "c": "B",
+    "d": "KI-Agenten recherchieren, kombinieren und buchen Tickets, Hotel und Anreise selbstständig im Auftrag des Gastes.",
+    "rel": [
+      2,
+      3,
+      3
+    ],
+    "use": "Agent bucht Matchday-Paket inkl. Hotel; automatische Umbuchung bei Spielverlegung.",
+    "bp": "Marriott: Google AI Mode soll Hotelbuchungen direkt abwickeln [s27]; Bericht: KI-Agenten beginnen Hotelzimmer zu buchen [s29].",
+    "sig": "Belegt: erste agentische Buchungen. Prognose: KI konsolidiert Hotelsuche und -buchung bis 2035 [s28].",
+    "src": [
+      "s27",
+      "s28",
+      "s29"
+    ],
+    "opp": "Neue Vertriebskanäle, Paketierung in Echtzeit.",
+    "risk": "Disintermediation, Verlust des Kundenkontakts, Plattformabhängigkeit.",
+    "tta": "3–5",
+    "sc": [
+      5,
+      4,
+      5,
+      3,
+      5,
+      3
+    ],
+    "ev": "A",
+    "fo": "HOS",
+    "st": "Hotellerie",
+    "orig": "GLOBAL"
+  },
+  {
+    "id": 7,
+    "n": "GenAI-Content-Automation",
+    "c": "B",
+    "d": "Generative KI erstellt Highlights, Zusammenfassungen und mehrsprachige Inhalte in Echtzeit.",
+    "rel": [
+      3,
+      2,
+      3
+    ],
+    "use": "Automatische Clips je Spieler; mehrsprachige Spielberichte; personalisierte Konzert-Recaps.",
+    "bp": "WSC Sports erstellt KI-Highlights für BVB, DFB-Pokal und Red Bull München [s62, s63, s64]; Bundesliga nutzt Amazon Nova [s14].",
+    "sig": "Belegt: Produktivbetrieb in der Bundesliga.",
+    "src": [
+      "s13",
+      "s14",
+      "s62",
+      "s63"
+    ],
+    "opp": "Mehr Reichweite bei geringeren Produktionskosten.",
+    "risk": "Rechtefragen, Qualitäts- und Markenrisiken.",
+    "tta": "0–2",
+    "sc": [
+      4,
+      4,
+      4,
+      5,
+      3,
+      4
+    ],
+    "ev": "A",
+    "fo": "FAN",
+    "st": "Content & Community",
+    "orig": "EU"
+  },
+  {
+    "id": 8,
+    "n": "Venue Digital Twins",
+    "c": "B",
+    "d": "Virtuelle Echtzeit-Abbilder von Venues für Planung, Betrieb, Energie und Vermarktung.",
+    "rel": [
+      3,
+      2,
+      3
+    ],
+    "use": "Event-Szenarien simulieren; Sponsoring-Sichtbarkeit planen; Energieverbrauch optimieren.",
+    "bp": "Anbieter-Lösungen für Stadion-Digital-Twins [s35].",
+    "sig": "Belegt: Anbieterangebote. Prognose: Standard bei Neubauten.",
+    "src": [
+      "s35"
+    ],
+    "opp": "Effizienz im Betrieb, neue Planungsservices für Veranstalter.",
+    "risk": "Hohe Integrationskosten, BIM-Datenlage.",
+    "tta": "3–5",
+    "sc": [
+      3,
+      3,
+      4,
+      3,
+      4,
+      2
+    ],
+    "ev": "C",
+    "unc": true,
+    "fo": "INF",
+    "st": "Stadionbau",
+    "orig": "GLOBAL"
+  },
+  {
+    "id": 9,
+    "n": "Service-Robotik",
+    "c": "B",
+    "d": "Roboter übernehmen Lieferung, Reinigung und einfache Gästeservices in Venues und Hotels.",
+    "rel": [
+      1,
+      3,
+      2
+    ],
+    "use": "Lieferroboter im Hotel; Reinigungsroboter nach Events.",
+    "bp": "Wissensbasis: Erfahrungen mit Roboter-Hotels zeigen begrenzte Akzeptanz – zu validieren.",
+    "sig": "Prognose: Fachkräftemangel erhöht Druck; Reife für Gästeinteraktion gering.",
+    "src": [],
+    "opp": "Entlastung bei Personalmangel.",
+    "risk": "Akzeptanz, Wartung, Wirtschaftlichkeit.",
+    "tta": "6–10",
+    "sc": [
+      3,
+      2,
+      3,
+      2,
+      3,
+      2
+    ],
+    "ev": "C",
+    "unc": true,
+    "fo": "HOS",
+    "st": "Robotik",
+    "orig": "GLOBAL"
+  },
+  {
+    "id": 10,
+    "n": "Bar- & Küchenrobotik",
+    "c": "B",
+    "fo": "HOS",
+    "st": "Robotik",
+    "d": "Roboter übernehmen standardisierte Schritte in Küche und Bar, etwa Frittieren, Zapfen oder Cocktails.",
+    "rel": [
+      3,
+      2,
+      3
+    ],
+    "use": "Frittierstationen in Stadionküchen, Getränkeroboter in Fan-Zonen und Arenen.",
+    "bp": "Pilot des Küchenroboters Flippy (Miso Robotics) mit Caterer Levy im Dodger Stadium [s83].",
+    "sig": "Belegt: Piloten seit 2018. Unsicher: Skalierung in Europa, Wirtschaftlichkeit bei wenigen Spieltagen.",
+    "src": [
+      "s83"
+    ],
+    "opp": "Entlastung bei Personalmangel, konstante Qualität in Spitzenzeiten.",
+    "risk": "Auslastung nur an Eventtagen, Wartung, Hygienezulassung.",
+    "tta": "3–5",
+    "sc": [
+      3,
+      3,
+      3,
+      3,
+      4,
+      2
+    ],
+    "ev": "B",
+    "unc": true,
+    "orig": "US",
+    "eu": {
+      "tta": "6–10",
+      "sc": [
+        3,
+        3,
+        3,
+        2,
+        4,
+        2
+      ],
+      "note": "Wenige Eventtage im Jahr, Hygieneauflagen und Mitbestimmung beim Personaleinsatz schwächen den Business Case in Europa. Europäische Stadionpiloten sind bisher kaum belegt."
+    }
+  },
+  {
+    "id": 11,
+    "n": "KI-Gastroplanung",
+    "c": "B",
+    "fo": "HOS",
+    "st": "Kiosk & Gastro",
+    "d": "KI prognostiziert Absatz je Kiosk und Spieltag und steuert Einkauf, Produktion und Personal.",
+    "rel": [
+      3,
+      3,
+      3
+    ],
+    "use": "Mengenplanung nach Gegner, Wetter, Anstoßzeit; Personalplanung; weniger Food Waste.",
+    "bp": "Delicious Data aus München liefert KI-Absatzprognosen für Gastronomie und Catering und sammelte frisches Kapital ein [s84].",
+    "sig": "Belegt: Lösungen am Markt in DACH. Prognose: Standard bei Großcaterern.",
+    "src": [
+      "s84"
+    ],
+    "opp": "Weniger Abfall, höhere Marge, weniger Ausverkauf.",
+    "risk": "Datenqualität der Kassen, Integration beim Caterer.",
+    "tta": "0–2",
+    "sc": [
+      4,
+      2,
+      4,
+      4,
+      3,
+      4
+    ],
+    "ev": "B",
+    "orig": "EU"
+  },
+  {
+    "id": 12,
+    "n": "Fair Dynamic Pricing",
+    "c": "C",
+    "d": "Preise passen sich Nachfrage an – mit Transparenz- und Fairnessregeln, um Vertrauen zu sichern.",
+    "rel": [
+      3,
+      3,
+      3
+    ],
+    "use": "Nachfragebasierte Preise für Tagestickets und Hotelzimmer; Preisgarantie für Mitglieder.",
+    "bp": "CMA-Fall Oasis: keine dynamische Preisgestaltung nachgewiesen, Ticketmaster ändert UK-Verkauf [s15]; Hotelpreise steigen bei Großevents [s31].",
+    "sig": "Belegt: regulatorischer Druck in UK. Prognose: Transparenzpflichten nehmen zu.",
+    "src": [
+      "s15",
+      "s31"
+    ],
+    "opp": "Ertragsoptimierung, weniger Zweitmarkt.",
+    "risk": "Fan-Backlash, Regulierung, Reputationsschaden.",
+    "tta": "0–2",
+    "sc": [
+      5,
+      2,
+      5,
+      5,
+      2,
+      4
+    ],
+    "ev": "A",
+    "fo": "HOS",
+    "st": "VIP & Premium",
+    "orig": "US",
+    "eu": {
+      "tta": "3–5",
+      "sc": [
+        4,
+        2,
+        4,
+        4,
+        2,
+        3
+      ],
+      "note": "Fankultur, Dauerkarten-Preisbindung und Verbraucherschutz (CMA-Fall Oasis) begrenzen den Spielraum. Realistisch zuerst für Tageskarten, Hospitality und Hotel."
+    }
+  },
+  {
+    "id": 13,
+    "n": "Premium-Hospitality-Tiers",
+    "c": "C",
+    "d": "Ausdifferenzierte VIP-Stufen vom Social Club bis zur Suite steigern den Erlös pro Platz.",
+    "rel": [
+      3,
+      3,
+      3
+    ],
+    "use": "Tunnel-Club-Formate, Field-Level-Lounges, Konzert-Premium-Pakete.",
+    "bp": "FC Barcelona: neues VIP-Sitzmodell im Spotify Camp Nou [s46]; Las Vegas Grand Prix mit fast 220 Mio. US$ Hotelzimmerumsatz [s45].",
+    "sig": "Belegt: Clubs und Promoter erhöhen Premium-Anteil.",
+    "src": [
+      "s46",
+      "s45"
+    ],
+    "opp": "Höchster Erlös pro Quadratmeter.",
+    "risk": "Exklusionswirkung, Fan-Kultur-Konflikte.",
+    "tta": "0–2",
+    "sc": [
+      5,
+      4,
+      5,
+      5,
+      3,
+      4
+    ],
+    "ev": "A",
+    "fo": "HOS",
+    "st": "VIP & Premium",
+    "orig": "GLOBAL"
+  },
+  {
+    "id": 14,
+    "n": "Experience-Abos",
+    "c": "C",
+    "d": "Mitgliedschaften bündeln Zugang, Inhalte und Vorteile über eine Saison oder mehrere Venues.",
+    "rel": [
+      3,
+      2,
+      3
+    ],
+    "use": "Flex-Saisonpass mit wählbaren Spielen; Venue-Pass für Konzerte.",
+    "bp": "Wissensbasis: Flex- und Mitgliedschaftsmodelle in Ligen und bei Venue-Betreibern – zu validieren.",
+    "sig": "Prognose: Planbarkeit von Erlösen gewinnt an Bedeutung.",
+    "src": [],
+    "opp": "Planbare Erlöse, Datenzugang.",
+    "risk": "Kannibalisierung, Abo-Müdigkeit.",
+    "tta": "3–5",
+    "sc": [
+      4,
+      3,
+      4,
+      3,
+      3,
+      3
+    ],
+    "ev": "C",
+    "unc": true,
+    "fo": "FAN",
+    "st": "Loyalty",
+    "orig": "GLOBAL"
+  },
+  {
+    "id": 15,
+    "n": "Direct-to-Fan-Plattformen",
+    "c": "C",
+    "d": "Ligen, Clubs und Künstler bauen eigene Kanäle für Content, Commerce und Daten auf.",
+    "rel": [
+      3,
+      1,
+      3
+    ],
+    "use": "Eigene Streaming- und Community-Plattform; Creator-Kanäle der Spieler.",
+    "bp": "Kings League verbreitet Events über Kanäle von Team-Präsidenten und Partnern [s6].",
+    "sig": "Belegt: Reichweite über eigene und Creator-Kanäle.",
+    "src": [
+      "s6"
+    ],
+    "opp": "Eigene Daten, Unabhängigkeit von Intermediären.",
+    "risk": "Reichweitenverlust gegenüber Plattformen.",
+    "tta": "3–5",
+    "sc": [
+      4,
+      3,
+      4,
+      4,
+      3,
+      3
+    ],
+    "ev": "B",
+    "fo": "FAN",
+    "st": "Plattformen",
+    "orig": "GLOBAL"
+  },
+  {
+    "id": 16,
+    "n": "Event-Tourismus-Pakete",
+    "c": "C",
+    "d": "Ticket, Hotel, Mobilität und Rahmenprogramm werden als ein Reiseprodukt vermarktet.",
+    "rel": [
+      3,
+      3,
+      3
+    ],
+    "use": "Matchday-to-Stay-Pakete; Konzertreisen; Turnier-Pakete für internationale Fans.",
+    "bp": "Eras Tour treibt Hotelpreise und -umsätze in Europa [s31, s32]; Women's EURO 2025 mit 220 Mio. € Effekt für die Schweiz [s26]; Vegas GP [s45].",
+    "sig": "Belegt: messbare Tourismuseffekte von Großevents.",
+    "src": [
+      "s31",
+      "s32",
+      "s26",
+      "s45"
+    ],
+    "opp": "Zusatzerlöse, Destinationspartnerschaften.",
+    "risk": "Preis-Backlash, Kapazitätsengpässe.",
+    "tta": "0–2",
+    "sc": [
+      5,
+      4,
+      5,
+      4,
+      3,
+      4
+    ],
+    "ev": "A",
+    "fo": "HOS",
+    "st": "Hotellerie",
+    "orig": "GLOBAL"
+  },
+  {
+    "id": 17,
+    "n": "Fan Tokens & Web3",
+    "c": "C",
+    "fo": "FAN",
+    "st": "Loyalty",
+    "d": "Blockchain-basierte Tokens versprechen Mitbestimmung, Prämien und digitale Sammelobjekte.",
+    "rel": [
+      3,
+      1,
+      2
+    ],
+    "use": "Abstimmungen über Kleinigkeiten, Prämien, Zugang zu Erlebnissen.",
+    "bp": "Socios/Chiliz als größte Plattform; Chiliz wechselt 2026 auf Solana [s96]; Branchenkommentare sehen das Modell kritisch [s95].",
+    "sig": "Belegt: Plattform aktiv. Gegenposition: Zweifel am langfristigen Nutzen.",
+    "src": [
+      "s95",
+      "s96"
+    ],
+    "opp": "Zusatzerlöse, internationale Fans.",
+    "risk": "Spekulation, Regulierung (MiCA), Reputationsrisiko.",
+    "tta": "6–10",
+    "sc": [
+      2,
+      2,
+      2,
+      3,
+      3,
+      3
+    ],
+    "ev": "B",
+    "unc": true,
+    "orig": "GLOBAL",
+    "eu": {
+      "note": "Die EU-Kryptoregulierung (MiCA) erhöht Anforderungen an Anbieter; Fanszenen im DACH-Raum stehen Tokens kritisch gegenüber."
+    }
+  },
+  {
+    "id": 18,
+    "n": "Biometrischer Zugang",
+    "c": "D",
+    "d": "Gesicht als Ticket und Zahlungsmittel für reibungslosen Einlass und Kauf.",
+    "rel": [
+      3,
+      2,
+      3
+    ],
+    "use": "Opt-in-Gesichtseinlass; Bezahlung ohne Karte; Hotel-Check-in.",
+    "bp": "NFL rollt Gesichtsauthentifizierung ligaweit aus [s19]; LAFC nutzt Wicket für Einlass und Zahlung [s20]; Intuit Dome [s21].",
+    "sig": "Belegt: USA skaliert. Europa: DSGVO verlangt Einwilligung und Folgenabschätzung.",
+    "src": [
+      "s19",
+      "s20",
+      "s21"
+    ],
+    "opp": "Kürzere Wartezeiten, weniger Ticketbetrug.",
+    "risk": "Datenschutz, Akzeptanz, Diskriminierungsrisiken.",
+    "tta": "3–5",
+    "sc": [
+      3,
+      5,
+      4,
+      4,
+      3,
+      3
+    ],
+    "ev": "A",
+    "fo": "INF",
+    "st": "Einlass",
+    "orig": "US",
+    "eu": {
+      "tta": "6–10",
+      "sc": [
+        3,
+        5,
+        4,
+        2,
+        3,
+        2
+      ],
+      "note": "Biometrische Daten sind nach Art. 9 DSGVO besonders geschützt; der EU AI Act verbietet bestimmte biometrische Echtzeit-Identifikation und reguliert den Rest streng. Opt-in-Piloten möglich, flächiger Einsatz frühestens Anfang der 2030er.",
+      "src": [
+        "s105",
+        "s106"
+      ]
+    }
+  },
+  {
+    "id": 19,
+    "n": "Checkout-freie Gastronomie",
+    "c": "D",
+    "d": "Kaufen ohne Kasse per Sensorik oder Scan verkürzt Wartezeiten in Pausen.",
+    "rel": [
+      3,
+      1,
+      3
+    ],
+    "use": "Walk-out-Kioske im Stadion; Grab-and-go in Arenen und Festivals.",
+    "bp": "Tennessee Titans als erstes NFL-Team mit Just Walk Out (Januar 2026) [s30]; Zippin mit fünf Stores im NRG Stadium [s67].",
+    "sig": "Belegt: Ausbau in US-Venues.",
+    "src": [
+      "s30",
+      "s67"
+    ],
+    "opp": "Mehr Umsatz pro Kopf, weniger Personalbedarf.",
+    "risk": "Investition, Datenschutz, Diebstahlquote.",
+    "tta": "0–2",
+    "sc": [
+      4,
+      5,
+      4,
+      4,
+      3,
+      4
+    ],
+    "ev": "A",
+    "fo": "HOS",
+    "st": "Kiosk & Gastro",
+    "orig": "US",
+    "eu": {
+      "tta": "3–5",
+      "sc": [
+        4,
+        5,
+        4,
+        3,
+        3,
+        3
+      ],
+      "note": "Bisher überwiegend US-Venues. In Europa höhere Kosten pro Spieltag und datenschutzrechtliche Prüfung des Kameratrackings; Mobile Order und Cashless sind der schnellere Weg."
+    }
+  },
+  {
+    "id": 20,
+    "n": "Multi-Use-Arenen",
+    "c": "D",
+    "d": "Venues werden ganzjährig für Sport, Konzerte, Training, Breitensport und Firmenevents genutzt.",
+    "rel": [
+      3,
+      2,
+      3
+    ],
+    "use": "Mehrere Sportarten unter einem Dach; Off-Day-Programmierung mit Community-Formaten.",
+    "bp": "SAP Garden München für Eishockey, Basketball und Breitensport [s22]; Intuit Dome [s47].",
+    "sig": "Belegt: neue Arenen setzen auf Ganzjahresnutzung.",
+    "src": [
+      "s22",
+      "s47"
+    ],
+    "opp": "Höhere Auslastung, Diversifizierung.",
+    "risk": "Umbauzeiten, Konflikte zwischen Nutzern.",
+    "tta": "3–5",
+    "sc": [
+      4,
+      4,
+      5,
+      4,
+      3,
+      3
+    ],
+    "ev": "A",
+    "fo": "INF",
+    "st": "Stadionbau",
+    "orig": "EU"
+  },
+  {
+    "id": 21,
+    "n": "Stadion-Quartiere",
+    "c": "D",
+    "d": "Venues werden Kern gemischter Quartiere mit Hotel, Handel, Wohnen und Entertainment.",
+    "rel": [
+      3,
+      3,
+      3
+    ],
+    "use": "Hotel am Stadion; ganzjährige Gastronomie; Entertainment-Districts.",
+    "bp": "Hollywood Park Inglewood mit Cosm-Venue im Umfeld des SoFi Stadium [s9].",
+    "sig": "Belegt: US-Beispiele. Prognose: in Europa abhängig von Planungsrecht und Kapital.",
+    "src": [
+      "s9"
+    ],
+    "opp": "Ganzjährige Erlöse, Immobilienwert.",
+    "risk": "Lange Planungszyklen, Kapitalbedarf.",
+    "tta": "6–10",
+    "sc": [
+      5,
+      3,
+      5,
+      3,
+      3,
+      2
+    ],
+    "ev": "B",
+    "fo": "INF",
+    "st": "Stadionbau",
+    "orig": "US",
+    "eu": {
+      "note": "Planungsrecht, Flächenverfügbarkeit und kommunale Beteiligung verlängern die Zyklen in Europa gegenüber US-Entertainment-Districts."
+    }
+  },
+  {
+    "id": 22,
+    "n": "Smart Hotel Rooms",
+    "c": "D",
+    "d": "Digitaler Schlüssel, IoT-Steuerung und Sprachassistenten individualisieren das Zimmer.",
+    "rel": [
+      1,
+      3,
+      1
+    ],
+    "use": "Mobile Key; Raumprofil nach Gastpräferenz; Fan-Zimmer zum Event.",
+    "bp": "Wissensbasis: Mobile Key bei großen Hotelketten verbreitet – zu validieren.",
+    "sig": "Prognose: Verknüpfung mit Loyalty und Agentic Booking.",
+    "src": [],
+    "opp": "Effizienz, Upselling, Gästezufriedenheit.",
+    "risk": "Technikabhängigkeit, Sicherheitslücken.",
+    "tta": "0–2",
+    "sc": [
+      3,
+      4,
+      3,
+      4,
+      2,
+      4
+    ],
+    "ev": "C",
+    "fo": "HOS",
+    "st": "Hotellerie",
+    "orig": "GLOBAL"
+  },
+  {
+    "id": 23,
+    "n": "Private 5G & Wi-Fi 7",
+    "c": "D",
+    "d": "Hochleistungsnetze sind Grundlage für Streaming, Zahlungen, Biometrie und Produktion vor Ort.",
+    "rel": [
+      3,
+      2,
+      3
+    ],
+    "use": "Stabile Fan-Konnektivität; drahtlose TV-Produktion; Sensorik für Digital Twins.",
+    "bp": "Intuit Dome als technologieintensive Arena [s47].",
+    "sig": "Prognose: Konnektivität wird Basisvoraussetzung für alle digitalen Trends.",
+    "src": [
+      "s47"
+    ],
+    "opp": "Enabler für Commerce und Daten.",
+    "risk": "Investition, schnelle Technologiezyklen.",
+    "tta": "0–2",
+    "sc": [
+      3,
+      4,
+      4,
+      4,
+      2,
+      3
+    ],
+    "ev": "B",
+    "fo": "INF",
+    "st": "Stadionbau",
+    "orig": "GLOBAL"
+  },
+  {
+    "id": 24,
+    "n": "Mobile Order & In-Seat",
+    "c": "D",
+    "fo": "HOS",
+    "st": "Kiosk & Gastro",
+    "d": "Bestellen per App mit Abholung am Express-Schalter oder Lieferung an den Platz.",
+    "rel": [
+      3,
+      2,
+      3
+    ],
+    "use": "Pausen-Vorbestellung, Lieferung in Premium-Bereiche, Abholfächer.",
+    "bp": "SeatServe an der Anfield Road [s81]; Newcastle United liefert an den Platz [s82].",
+    "sig": "Belegt: Einsatz in der Premier League.",
+    "src": [
+      "s81",
+      "s82"
+    ],
+    "opp": "Mehr Umsatz pro Kopf, kürzere Schlangen, Daten zu Kaufverhalten.",
+    "risk": "Logistik in vollen Blöcken, Personal für Lieferung.",
+    "tta": "0–2",
+    "sc": [
+      4,
+      5,
+      4,
+      4,
+      3,
+      4
+    ],
+    "ev": "A",
+    "orig": "EU"
+  },
+  {
+    "id": 25,
+    "n": "Self-Pour & Smart Schank",
+    "c": "D",
+    "fo": "HOS",
+    "st": "Schanktechnik",
+    "d": "Selbstzapf-Wände, Hochleistungsschank und sensorgesteuertes Zapfen erhöhen Durchsatz und reduzieren Schwund.",
+    "rel": [
+      3,
+      2,
+      3
+    ],
+    "use": "Bierwände mit Bezahlung per Karte oder Armband, Schnellzapfsysteme für Pausenspitzen.",
+    "bp": "Sodexo Live! mit permanenten Ebar-Beerwalls beim Millwall FC als europäische Premiere [s77]; Draft Picks Perfect Pour im Honda Center ausgezeichnet [s78]; PourMyBeer für Stadien [s80].",
+    "sig": "Belegt: Ausbreitung in UK und USA [s79]. DACH: Altersprüfung und Jugendschutz klären.",
+    "src": [
+      "s77",
+      "s78",
+      "s79",
+      "s80"
+    ],
+    "opp": "Höherer Durchsatz, weniger Personal am Hahn, exakte Abrechnung.",
+    "risk": "Jugendschutz, Hygiene, Akzeptanz beim Bierpartner.",
+    "tta": "0–2",
+    "sc": [
+      4,
+      4,
+      4,
+      4,
+      3,
+      4
+    ],
+    "ev": "A",
+    "orig": "GLOBAL",
+    "eu": {
+      "note": "In Deutschland und Österreich Altersprüfung (Jugendschutz) und Schankrecht klären. Die Premiere beim Millwall FC zeigt die Machbarkeit in Europa."
+    }
+  },
+  {
+    "id": 26,
+    "n": "Cashless & Mobile POS",
+    "c": "D",
+    "fo": "HOS",
+    "st": "Kiosk & Gastro",
+    "d": "Offene Kartenzahlung und mobile Terminals ersetzen Bargeld und geschlossene Stadion-Bezahlkarten.",
+    "rel": [
+      3,
+      3,
+      3
+    ],
+    "use": "Mobile Terminals im Umlauf, Kartenzahlung an allen Kiosken, Zahlung per Smartphone.",
+    "bp": "VfB Stuttgart und LBBW führen mobile Terminals in der MHP Arena ein [s75]; LASK Raiffeisen Arena mit Mastercard und card complete [s100].",
+    "sig": "Belegt: Wechsel weg von geschlossenen Bezahlkarten, die Verbraucherschützer kritisiert haben [s76].",
+    "src": [
+      "s75",
+      "s100",
+      "s76"
+    ],
+    "opp": "Schnellere Abwicklung, kein Restguthaben-Ärger, bessere Daten.",
+    "risk": "Gebühren, Netzausfall, Fans mit Bargeldpräferenz.",
+    "tta": "0–2",
+    "sc": [
+      3,
+      4,
+      4,
+      5,
+      2,
+      5
+    ],
+    "ev": "A",
+    "orig": "EU"
+  },
+  {
+    "id": 27,
+    "n": "Digitale Tickets & Anti-Fraud",
+    "c": "D",
+    "fo": "INF",
+    "st": "Einlass",
+    "d": "Personalisierte, digitale Tickets mit kontrollierter Weitergabe gegen Fälschung und Schwarzmarkt.",
+    "rel": [
+      3,
+      1,
+      3
+    ],
+    "use": "Ticket-Wallet, offizieller Zweitmarkt, Weitergabe an Fanclubs, Einlass per App.",
+    "bp": "FC Bayern ab 2026/27 nur noch digitale Tickets, um Schwarzmarkt und Fälschungen zu verhindern [s74].",
+    "sig": "Belegt: DACH-Vorreiter. Offen: Barrierefreiheit der App, Lösungen für Fans ohne Smartphone.",
+    "src": [
+      "s74"
+    ],
+    "opp": "Weniger Betrug, Daten zu realen Besuchern, Zweitmarkterlöse.",
+    "risk": "Ausschluss, technische Ausfälle am Einlass, Fan-Widerstand.",
+    "tta": "0–2",
+    "sc": [
+      4,
+      4,
+      5,
+      5,
+      3,
+      4
+    ],
+    "ev": "A",
+    "orig": "EU"
+  },
+  {
+    "id": 28,
+    "n": "Phygitale Fan-Hubs",
+    "c": "E",
+    "d": "Fan-Zonen, Watch-Partys und Hotel-Lounges werden zu vernetzten Erlebnisorten mit Live-Daten und Commerce.",
+    "rel": [
+      3,
+      3,
+      2
+    ],
+    "use": "Hotelbar als offizieller Watch-Party-Ort; Fan-Zonen mit digitalem Check-in und Merchandising.",
+    "bp": "UEFA Women's EURO 2025 mit Rekordzahlen und Fan-Aktivierungen in der Schweiz [s25, s26].",
+    "sig": "Belegt: Großevents erzeugen hohe Nachfrage außerhalb des Stadions.",
+    "src": [
+      "s25",
+      "s26"
+    ],
+    "opp": "Erlöse jenseits der Stadionkapazität, Hotelauslastung.",
+    "risk": "Sicherheit, Lizenzrechte für öffentliche Vorführungen.",
+    "tta": "0–2",
+    "sc": [
+      3,
+      4,
+      4,
+      4,
+      3,
+      4
+    ],
+    "ev": "B",
+    "fo": "FAN",
+    "st": "Content & Community",
+    "orig": "EU"
+  },
+  {
+    "id": 29,
+    "n": "Competitive Socialising",
+    "c": "E",
+    "d": "Gastronomie trifft Spiel: Darts, Mini-Golf und Simulatoren als soziale Erlebnisse.",
+    "rel": [
+      2,
+      3,
+      3
+    ],
+    "use": "Social-Gaming-Zonen in Arenen und Hotels; Fan-Bars mit Spielangeboten.",
+    "bp": "Savills: schnelles Wachstum des Segments [s36]; Flight Club plant 45 neue Venues [s37]; Marktreife zeichnet sich ab [s38].",
+    "sig": "Belegt: Expansion. Unsicher: Sättigung in Metropolen.",
+    "src": [
+      "s36",
+      "s37",
+      "s38"
+    ],
+    "opp": "Ganzjährige Frequenz in Venue-Umfeld.",
+    "risk": "Sättigung, hoher Flächenbedarf.",
+    "tta": "0–2",
+    "sc": [
+      4,
+      4,
+      4,
+      5,
+      3,
+      4
+    ],
+    "ev": "A",
+    "fo": "HOS",
+    "st": "Kiosk & Gastro",
+    "orig": "EU"
+  },
+  {
+    "id": 30,
+    "n": "Gaming-Welten als Bühne",
+    "c": "E",
+    "d": "Plattformen wie Roblox und Fortnite werden Orte für Fan-Erlebnisse, Konzerte und Sponsoring.",
+    "rel": [
+      3,
+      1,
+      3
+    ],
+    "use": "Virtuelles Stadion; Konzerte in Games; digitale Fanartikel.",
+    "bp": "FIFA baut Roblox-Engagement aus [s39].",
+    "sig": "Belegt: Sportverbände investieren. Prognose: Zugang zu Gen Alpha.",
+    "src": [
+      "s39"
+    ],
+    "opp": "Neue Zielgruppen, digitale Güter.",
+    "risk": "Kurzlebigkeit, Kinderschutz.",
+    "tta": "3–5",
+    "sc": [
+      3,
+      3,
+      3,
+      4,
+      4,
+      3
+    ],
+    "ev": "B",
+    "fo": "FAN",
+    "st": "Gamification",
+    "orig": "GLOBAL"
+  },
+  {
+    "id": 31,
+    "n": "Circular Events",
+    "c": "F",
+    "d": "Mehrweg, Kreislauf und Abfallvermeidung werden Standard bei Events und Festivals.",
+    "rel": [
+      3,
+      2,
+      3
+    ],
+    "use": "Mehrwegbecher, Pfandsysteme, kreislauffähige Bühnenbauten.",
+    "bp": "Tomorrowland 2025 komplett auf Mehrweg mit Smart Cups [s42]; 97 % Rücklaufquote in Dänemark [s43]; Roskilde [s50].",
+    "sig": "Belegt: regulatorischer Druck. Gegenposition: Kritik an Materialwahl [s44].",
+    "src": [
+      "s42",
+      "s43",
+      "s44",
+      "s50"
+    ],
+    "opp": "Kosteneinsparung, Sponsor-Aktivierung.",
+    "risk": "Greenwashing-Vorwürfe, Logistik.",
+    "tta": "0–2",
+    "sc": [
+      2,
+      3,
+      4,
+      5,
+      2,
+      4
+    ],
+    "ev": "A",
+    "fo": "HOS",
+    "st": "Kiosk & Gastro",
+    "comp": true,
+    "orig": "EU"
+  },
+  {
+    "id": 32,
+    "n": "Green Fan Mobility",
+    "c": "F",
+    "d": "Anreise ist der größte Emissionsposten – ÖPNV-Kombitickets und Shuttles werden Pflichtprogramm.",
+    "rel": [
+      3,
+      2,
+      3
+    ],
+    "use": "Kombiticket, Fahrrad-Parking, E-Shuttles.",
+    "bp": "DFB/DFL testen digitale Parklösungen [s73]; Kombitickets mit ÖPNV sind in DACH verbreitet (Wissensbasis).",
+    "sig": "Prognose: Berichterstattung über Emissionen erhöht Druck.",
+    "src": [
+      "s73"
+    ],
+    "opp": "Weniger Parkflächen, besseres Erlebnis.",
+    "risk": "Kapazität im ÖPNV.",
+    "tta": "0–2",
+    "sc": [
+      2,
+      4,
+      4,
+      4,
+      2,
+      4
+    ],
+    "ev": "B",
+    "fo": "INF",
+    "st": "Mobilität",
+    "orig": "EU"
+  },
+  {
+    "id": 33,
+    "n": "Regenerative Hospitality",
+    "c": "F",
+    "d": "Hotels und Events wollen positive Effekte für Region und Umwelt erzeugen, nicht nur weniger Schaden.",
+    "rel": [
+      1,
+      3,
+      2
+    ],
+    "use": "Regionale Lieferketten, Renaturierung, Community-Programme.",
+    "bp": "Keine Primärquelle in dieser Recherche verifiziert.",
+    "sig": "Prognose: Differenzierung im Premium-Segment.",
+    "src": [],
+    "opp": "Markendifferenzierung, Preisbereitschaft.",
+    "risk": "Messbarkeit, Greenwashing.",
+    "tta": "6–10",
+    "sc": [
+      3,
+      3,
+      3,
+      2,
+      4,
+      2
+    ],
+    "ev": "C",
+    "unc": true,
+    "fo": "HOS",
+    "st": "Hotellerie",
+    "orig": "GLOBAL"
+  },
+  {
+    "id": 34,
+    "n": "Energiespeicher & EMS",
+    "c": "F",
+    "fo": "INF",
+    "st": "Energie",
+    "d": "Batteriespeicher und Energiemanagement glätten Lastspitzen an Eventtagen und vermarkten Flexibilität am Strommarkt.",
+    "rel": [
+      3,
+      2,
+      3
+    ],
+    "use": "Notstrom statt Dieselaggregat, Lastspitzen-Kappung, Netzdienstleistungen an Nicht-Eventtagen.",
+    "bp": "Johan Cruijff ArenA mit 3-MW-Speicher aus wiederverwendeten Nissan-Batterien [s90].",
+    "sig": "Belegt: Referenz seit 2018. Prognose: sinkende Speicherkosten erhöhen Wirtschaftlichkeit.",
+    "src": [
+      "s90"
+    ],
+    "opp": "Geringere Energiekosten, Zusatzerlöse, Versorgungssicherheit.",
+    "risk": "Investition, Brandschutz, Netzanschluss.",
+    "tta": "3–5",
+    "sc": [
+      3,
+      2,
+      4,
+      4,
+      3,
+      3
+    ],
+    "ev": "A",
+    "orig": "EU"
+  },
+  {
+    "id": 35,
+    "n": "Energiepositive Venues",
+    "c": "F",
+    "d": "Venues erzeugen mehr Energie als sie verbrauchen und werden Teil lokaler Energiesysteme.",
+    "rel": [
+      3,
+      2,
+      3
+    ],
+    "use": "PV-Dächer, Batteriespeicher, Wärmenetze.",
+    "bp": "Tottenham Hotspur Stadium als Nachhaltigkeitsbeispiel [s48].",
+    "sig": "Prognose: Energiepreise und Regulierung treiben Investitionen.",
+    "src": [
+      "s48"
+    ],
+    "opp": "Kostensenkung, neue Erlöse.",
+    "risk": "Hohe Anfangsinvestition.",
+    "tta": "6–10",
+    "sc": [
+      3,
+      2,
+      4,
+      3,
+      3,
+      2
+    ],
+    "ev": "B",
+    "fo": "INF",
+    "st": "Energie",
+    "orig": "EU"
+  },
+  {
+    "id": 36,
+    "n": "Holz- & Modularbau",
+    "c": "F",
+    "fo": "INF",
+    "st": "Stadionbau",
+    "d": "Holz und modulare Bauteile senken graue Emissionen und erlauben flexible Erweiterung oder Rückbau.",
+    "rel": [
+      3,
+      1,
+      2
+    ],
+    "use": "Holz-Tribünen, modulare Ausbaustufen, temporäre Tribünen für Turniere.",
+    "bp": "Forest Green Rovers planen mit Zaha Hadid Architects ein Stadion fast vollständig aus Holz [s91].",
+    "sig": "Belegt: Planungen. Unsicher: Umsetzung und Brandschutz bei Großstadien.",
+    "src": [
+      "s91"
+    ],
+    "opp": "Geringere CO2-Bilanz, schnellere Bauzeit, Anpassbarkeit.",
+    "risk": "Genehmigung, Brandschutz, Kostenunsicherheit.",
+    "tta": "6–10",
+    "sc": [
+      2,
+      3,
+      4,
+      2,
+      4,
+      2
+    ],
+    "ev": "B",
+    "orig": "EU"
+  },
+  {
+    "id": 37,
+    "n": "KI-Crowd-Management",
+    "c": "G",
+    "d": "KI prognostiziert Besucherströme für Einlass, Gastronomie und Abreise und steuert proaktiv.",
+    "rel": [
+      3,
+      2,
+      3
+    ],
+    "use": "Dynamische Einlasszeiten; Personalplanung nach Prognose; Abreise-Lenkung mit ÖPNV.",
+    "bp": "DFB/DFL testen 2025/26 KI-gestütztes Crowd-Management in der Projektgruppe Stadioninnovationen [s73]; Simulationsanbieter wie Simio [s35].",
+    "sig": "Belegt: Piloten in deutschen Stadien. Prognose: Teil der Sicherheits- und Einlassplanung.",
+    "src": [
+      "s73",
+      "s35"
+    ],
+    "opp": "Weniger Wartezeit, mehr Umsatz pro Kopf, Sicherheit.",
+    "risk": "Datenqualität, Integration in Sicherheitsprozesse.",
+    "tta": "3–5",
+    "sc": [
+      3,
+      4,
+      5,
+      3,
+      3,
+      3
+    ],
+    "ev": "A",
+    "unc": false,
+    "fo": "INF",
+    "st": "Sicherheit",
+    "orig": "EU"
+  },
+  {
+    "id": 38,
+    "n": "KI-Screening & Videoschutz",
+    "c": "G",
+    "fo": "INF",
+    "st": "Sicherheit",
+    "d": "KI-Videoanalyse und berührungsloses Waffen-Screening beschleunigen Einlass und erkennen Gefahren früher.",
+    "rel": [
+      3,
+      2,
+      3
+    ],
+    "use": "Walk-through-Screening am Einlass, Erkennung von Gedränge oder liegengebliebenen Objekten.",
+    "bp": "Evolv sichert die Club-WM 2025 und europäische Events [s86, s87]; Staige One liefert KI-Videoschutz u. a. für die Polizei Berlin [s85].",
+    "sig": "Belegt: Einsatz bei Großevents. Europa: EU AI Act und DSGVO begrenzen biometrische Auswertung.",
+    "src": [
+      "s86",
+      "s87",
+      "s85"
+    ],
+    "opp": "Schnellerer Einlass, höhere Sicherheit, weniger Personal an Kontrollen.",
+    "risk": "Fehlalarme, Rechtsrahmen, Akzeptanz bei Fanszenen.",
+    "tta": "3–5",
+    "sc": [
+      2,
+      4,
+      5,
+      4,
+      3,
+      3
+    ],
+    "ev": "A",
+    "orig": "US",
+    "eu": {
+      "tta": "3–5",
+      "sc": [
+        2,
+        4,
+        4,
+        3,
+        3,
+        2
+      ],
+      "note": "Waffen-Screening läuft auch bei europäischen Events. KI-Videoanalyse mit Personenbezug unterliegt dem EU AI Act und stößt bei aktiven Fanszenen auf Widerstand.",
+      "src": [
+        "s105"
+      ]
+    }
+  },
+  {
+    "id": 39,
+    "n": "Drohnenabwehr",
+    "c": "G",
+    "fo": "INF",
+    "st": "Sicherheit",
+    "d": "Detektion und Abwehr unerlaubter Drohnen über Stadien und Fan-Zonen.",
+    "rel": [
+      3,
+      1,
+      3
+    ],
+    "use": "Radar-Detektion, Lagebild für Sicherheitsdienst und Polizei, Flugverbotszonen.",
+    "bp": "USA planen 500 Mio. US$ für Drohnensicherheit bei der WM 2026 [s88]; Anbieter wie Robin Radar bieten Stadion-Detektion [s89].",
+    "sig": "Belegt: hoher Aufwand bei Großturnieren. Unsicher: Abwehr ist in Deutschland Sache der Behörden.",
+    "src": [
+      "s88",
+      "s89"
+    ],
+    "opp": "Schutz vor neuen Gefahren, Versicherbarkeit von Großevents.",
+    "risk": "Rechtslage, Kosten, Zuständigkeiten.",
+    "tta": "3–5",
+    "sc": [
+      1,
+      2,
+      4,
+      3,
+      3,
+      2
+    ],
+    "ev": "A",
+    "unc": true,
+    "orig": "GLOBAL",
+    "eu": {
+      "note": "Abwehr ist in Deutschland Aufgabe der Polizei; Veranstalter können Detektion und Meldeketten aufbauen."
+    }
+  },
+  {
+    "id": 40,
+    "n": "Cyber-Resilienz",
+    "c": "G",
+    "d": "Vernetzte Venues, Ticketing und Zahlungen werden zum Angriffsziel – Resilienz wird Erlebnisfaktor.",
+    "rel": [
+      3,
+      3,
+      3
+    ],
+    "use": "Notfallbetrieb für Ticketing und Einlass; Schutz von Fan-Daten.",
+    "bp": "Keine Primärquelle in dieser Recherche verifiziert.",
+    "sig": "Prognose: steigende Abhängigkeit von digitaler Infrastruktur erhöht Risiko.",
+    "src": [],
+    "opp": "Vertrauen, Ausfallsicherheit, Versicherbarkeit.",
+    "risk": "Betriebsausfall, Datenlecks, Reputationsschäden.",
+    "tta": "3–5",
+    "sc": [
+      3,
+      2,
+      4,
+      4,
+      2,
+      3
+    ],
+    "ev": "C",
+    "unc": true,
+    "fo": "INF",
+    "st": "Sicherheit",
+    "orig": "GLOBAL"
+  },
+  {
+    "id": 41,
+    "n": "Hitzeschutz & Wetterresilienz",
+    "c": "G",
+    "d": "Hitze und Unwetter verlangen Kühlzonen, Wetterwarnsysteme und angepasste Abläufe in Venues.",
+    "rel": [
+      3,
+      2,
+      3
+    ],
+    "use": "Wetterberatung für Spieltage, Trinkwasserstellen, Schattenzonen, Evakuierungspläne bei Gewitter.",
+    "bp": "DFB/DFL testen Wetterberatung zur Zuschauersicherheit [s73]; FIFPRO warnt nach der Club-WM 2025 vor Hitze [s23, s24].",
+    "sig": "Belegt: Spielergewerkschaft fordert Anpassungen.",
+    "src": [
+      "s73",
+      "s23",
+      "s24"
+    ],
+    "opp": "Gesundheit, Planbarkeit, neue Formate.",
+    "risk": "Konflikt mit TV-Slots, Kosten.",
+    "tta": "3–5",
+    "sc": [
+      3,
+      4,
+      5,
+      3,
+      3,
+      3
+    ],
+    "ev": "A",
+    "fo": "INF",
+    "st": "Sicherheit",
+    "orig": "GLOBAL"
+  },
+  {
+    "id": 42,
+    "n": "Barrierefreie Experiences",
+    "c": "G",
+    "d": "Digitale und physische Barrierefreiheit wird Pflicht und Qualitätsmerkmal.",
+    "rel": [
+      3,
+      3,
+      3
+    ],
+    "use": "Barrierefreie Ticketshops, sensorische Ruheräume, Audiodeskription.",
+    "bp": "European Accessibility Act seit Juni 2025 [s33, s34]; DFB/DFL testen flexible Rollstuhlplatz-Systeme [s73].",
+    "sig": "Belegt: gesetzliche Pflicht.",
+    "src": [
+      "s33",
+      "s34",
+      "s73"
+    ],
+    "opp": "Größere Zielgruppe, Rechtssicherheit.",
+    "risk": "Bußgelder bei Nichterfüllung.",
+    "tta": "0–2",
+    "sc": [
+      3,
+      4,
+      5,
+      4,
+      3,
+      4
+    ],
+    "ev": "A",
+    "fo": "INF",
+    "st": "Inklusion",
+    "comp": true,
+    "orig": "EU"
+  },
+  {
+    "id": 43,
+    "n": "Sensory-inklusive Venues",
+    "c": "G",
+    "fo": "INF",
+    "st": "Inklusion",
+    "d": "Ruheräume, Sinnes-Karten und geschultes Personal für neurodivergente Besucher.",
+    "rel": [
+      3,
+      2,
+      3
+    ],
+    "use": "Sensory Rooms mit Blick aufs Spielfeld, Ruhezonen, Lärmschutz-Kits, Vorab-Informationen.",
+    "bp": "WM 2026 als erstes „sensory inclusive“ Turnier ausgezeichnet [s97]; Sensory Rooms in Wembley [s98] und bei Manchester City [s99].",
+    "sig": "Belegt: wachsende Verbreitung in UK und bei Turnieren.",
+    "src": [
+      "s97",
+      "s98",
+      "s99"
+    ],
+    "opp": "Neue Zielgruppen, Familienfreundlichkeit, Reputation.",
+    "risk": "Flächenbedarf, Schulungsaufwand.",
+    "tta": "0–2",
+    "sc": [
+      2,
+      5,
+      4,
+      4,
+      3,
+      4
+    ],
+    "ev": "A",
+    "orig": "GLOBAL"
+  },
+  {
+    "id": 44,
+    "n": "Faire Preise & Teilhabe",
+    "c": "G",
+    "fo": "FAN",
+    "st": "Teilhabe",
+    "d": "Bezahlbare Kontingente, Stehplätze, Preisobergrenzen und Fan-Dialog sichern den Zugang breiter Zielgruppen – als Gegengewicht zu Premiumisierung und dynamischen Preisen.",
+    "rel": [
+      3,
+      1,
+      3
+    ],
+    "use": "Preisdeckel für Gästetickets, Jugend- und Sozialkontingente, Erhalt von Stehplätzen, Fanbeiräte bei Preisentscheidungen.",
+    "bp": "Premier League verlängert die 30-£-Obergrenze für Auswärtstickets um zwei Spielzeiten [s101, s102]; UEFA senkt Preisobergrenzen für Gästetickets [s104]; Bundesliga meldet Zuschauerrekorde 2025/26 [s103].",
+    "sig": "Belegt: Preisobergrenzen in UK und bei der UEFA. Prognose: Teilhabe wird zur Lizenz- und Reputationsfrage, wenn Premium-Anteile steigen.",
+    "src": [
+      "s101",
+      "s102",
+      "s104",
+      "s103"
+    ],
+    "opp": "Fanbindung, Legitimation für Premium-Ausbau, Reputation bei Politik und Sponsoren.",
+    "risk": "Erlösverzicht, Zielkonflikt mit dynamischen Preisen.",
+    "tta": "3–5",
+    "sc": [
+      3,
+      4,
+      4,
+      3,
+      3,
+      4
+    ],
+    "ev": "A",
+    "orig": "EU",
+    "eu": {
+      "tta": "0–2",
+      "sc": [
+        3,
+        4,
+        5,
+        4,
+        3,
+        4
+      ],
+      "note": "In Europa durch Stehplätze, Fankultur und Preisobergrenzen (Premier League, UEFA) deutlich stärker verankert als in US-Märkten mit dynamischen Preisen."
+    }
+  }
+]

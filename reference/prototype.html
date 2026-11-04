@@ -1,0 +1,840 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Future of Experiences Radar</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: Arena-Dashboard – Anzeigetafel-Kopf, ovale Trend-Arena mit Detailkarte rechts, darunter Kapitel in einer Spalte (max. 1260px) */
+:root{
+  --bg:#EDF0EE; --surface:#FFFFFF; --sunk:#E2E7E4; --ink:#0F1F1A; --muted:#55645E; --line:#CFD8D3;
+  --accent:#E0532A; --on-accent:#FFFFFF; --pitch:#DCE8E0; --pitch-line:#9DB8A8;
+  --tier1:rgba(15,31,26,.075); --tier2:rgba(15,31,26,.04); --tier3:rgba(15,31,26,.015);
+  --dot-fg:#FFFFFF; --lock:#55645E;
+  --cA:#C23A4B; --cB:#2C66A8; --cC:#A8701A; --cD:#12806A; --cE:#7448A0; --cF:#4F8128; --cG:#B03A86;
+  --f-display:"Archivo", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --f-body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0A1310; --surface:#111D19; --sunk:#182722; --ink:#E5EDE9; --muted:#93A59D; --line:#253731;
+  --accent:#FF7547; --on-accent:#14100E; --pitch:#15291F; --pitch-line:#3E6B53;
+  --tier1:rgba(229,237,233,.08); --tier2:rgba(229,237,233,.045); --tier3:rgba(229,237,233,.018);
+  --dot-fg:#0A1310; --lock:#93A59D;
+  --cA:#EF7584; --cB:#74A6E8; --cC:#E0A84E; --cD:#45C4A4; --cE:#B28CE0; --cF:#93C462; --cG:#E27DBF; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#0A1310; --surface:#111D19; --sunk:#182722; --ink:#E5EDE9; --muted:#93A59D; --line:#253731;
+  --accent:#FF7547; --on-accent:#14100E; --pitch:#15291F; --pitch-line:#3E6B53;
+  --tier1:rgba(229,237,233,.08); --tier2:rgba(229,237,233,.045); --tier3:rgba(229,237,233,.018);
+  --dot-fg:#0A1310; --lock:#93A59D;
+  --cA:#EF7584; --cB:#74A6E8; --cC:#E0A84E; --cD:#45C4A4; --cE:#B28CE0; --cF:#93C462; --cG:#E27DBF; color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15.5px;line-height:1.55;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:24px 64px}
+.wrap{max-width:1260px;margin:0 auto;display:flex;flex-direction:column;gap:60px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
+h1{font-size:clamp(38px,6.4vw,78px);line-height:.92;font-weight:800;font-stretch:72%;text-transform:uppercase;letter-spacing:-.005em}
+h2{font-size:clamp(26px,3.2vw,38px);font-weight:800;font-stretch:78%;line-height:1.02}
+h3{font-size:18px;font-weight:700;font-stretch:90%}
+p{margin:0}
+a{color:var(--accent)}
+.eyebrow{font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+section{display:flex;flex-direction:column;gap:20px;min-width:0}
+.sec-head{display:grid;grid-template-columns:72px minmax(0,1fr);gap:4px 16px;align-items:start}
+.sec-no{font-family:var(--f-display);font-weight:800;font-stretch:72%;font-size:56px;line-height:.85;color:var(--accent);font-variant-numeric:tabular-nums}
+.sec-head > div{display:flex;flex-direction:column;gap:6px;min-width:0}
+.sec-head p{max-width:74ch;color:var(--muted)}
+
+/* Header */
+header{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:28px;align-items:end;padding-bottom:22px;border-bottom:3px solid var(--ink)}
+header .lede{max-width:62ch;color:var(--muted);margin-top:16px;font-size:16px}
+.board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:var(--ink);color:var(--bg);border-radius:6px;overflow:hidden}
+.board div{padding:12px 12px 10px;display:flex;flex-direction:column;gap:2px;border-right:1px solid color-mix(in srgb, var(--bg) 18%, transparent)}
+.board div:last-child{border-right:none}
+.board b{font-family:var(--f-mono);font-size:30px;font-weight:500;line-height:1;font-variant-numeric:tabular-nums}
+.board span{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;opacity:.75}
+.board .k b{color:var(--accent)}
+.board-cap{font-size:12.5px;color:var(--muted);margin-top:8px}
+.notice{font-size:13px;color:var(--muted);max-width:80ch}
+
+/* Executive Summary */
+.insights{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 40px;counter-reset:ins;list-style:none;margin:0;padding:0}
+.insights li{display:grid;grid-template-columns:38px minmax(0,1fr);gap:10px;padding:14px 0;border-top:1px solid var(--line)}
+.insights li::before{counter-increment:ins;content:counter(ins,decimal-leading-zero);font-family:var(--f-mono);font-weight:500;color:var(--accent);font-size:13px;padding-top:3px}
+.insights b{display:block;font-weight:700;font-size:16px}
+.insights span{color:var(--muted);font-size:14.5px}
+
+/* Methodik */
+.method{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:16px 18px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.wtable{width:100%;border-collapse:collapse;font-size:14px}
+.wtable td{padding:5px 0;border-bottom:1px dashed var(--line)}
+.wtable td:last-child{text-align:right;font-family:var(--f-mono)}
+.rule{font-size:14px;display:flex;flex-direction:column;gap:9px}
+.rule code{font-family:var(--f-mono);font-size:12.5px;background:var(--sunk);padding:1px 5px;border-radius:3px}
+
+/* Zone marks: Form statt nur Farbe */
+.zp{display:inline-flex;align-items:center;gap:5px;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:3px;font-weight:500;white-space:nowrap;line-height:1.5}
+.z-KICKOFF{background:var(--accent);color:var(--on-accent);border:1px solid var(--accent)}
+.z-WARMUP{border:1px solid var(--ink);color:var(--ink)}
+.z-SCOUTING{border:1px dashed var(--muted);color:var(--muted)}
+.zt{font-family:var(--f-mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.05em}
+.zt.z-KICKOFF{background:none;border:none;color:var(--accent);font-weight:500}
+.zt.z-WARMUP{border:none;color:var(--ink)}
+.zt.z-SCOUTING{border:none;color:var(--muted)}
+
+/* Toolbar */
+.toolbar{display:flex;flex-direction:column;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px 14px}
+.trow{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center}
+.fgroup{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.fgroup > .eyebrow{margin-right:2px}
+.seg{display:inline-flex;border:1.5px solid var(--ink);border-radius:5px;overflow:hidden}
+.seg button{font:inherit;font-size:13.5px;font-weight:700;padding:6px 14px;border:none;background:transparent;color:var(--ink);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.chip{font:inherit;font-size:13px;padding:3px 10px;border-radius:4px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+.chip:hover{border-color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip .sw{width:9px;height:9px;border-radius:2px}
+.chip:focus-visible,.btn:focus-visible,input:focus-visible,select:focus-visible,.seg button:focus-visible,.dot:focus-visible,tr:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+input[type=search],select{font:inherit;font-size:13.5px;padding:5px 10px;border-radius:4px;border:1px solid var(--line);background:var(--bg);color:var(--ink);min-width:0}
+input[type=search]{width:200px}
+.btn{font:inherit;font-size:13.5px;font-weight:700;padding:6px 12px;border-radius:4px;border:1px solid var(--ink);background:var(--ink);color:var(--bg);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.ghost:hover{border-color:var(--muted)}
+.spacer{flex:1}
+.persp-note{font-size:13px;color:var(--muted);max-width:90ch}
+
+/* Arena */
+.radar-grid{display:grid;grid-template-columns:minmax(0,2.15fr) minmax(0,1fr);gap:18px;align-items:start}
+.radar-box{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:10px;position:relative;min-width:0}
+#radar{width:100%;height:auto;display:block}
+.dot{cursor:pointer;transition:transform .7s cubic-bezier(.3,.8,.3,1), opacity .2s}
+.dot circle{stroke:var(--surface);stroke-width:2}
+.dot text{font-family:var(--f-mono);font-size:13px;font-weight:500;fill:var(--dot-fg);pointer-events:none}
+.dot.dim{opacity:.12}
+.dot.sel circle{stroke:var(--ink);stroke-width:3.2}
+.dot.moved circle{stroke:var(--accent);stroke-width:3;stroke-dasharray:3 2}
+.ring-label{font-family:var(--f-mono);font-size:10px;letter-spacing:.16em;fill:var(--muted);text-transform:uppercase}
+.cl-label{font-family:var(--f-display);font-stretch:85%;font-size:15px;font-weight:700}
+.cl-label2{font-family:var(--f-display);font-stretch:85%;font-size:15px;font-weight:500;fill:var(--muted)}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);padding:10px 12px;border-radius:5px;font-size:13px;max-width:270px;line-height:1.4;box-shadow:0 6px 24px rgba(0,0,0,.2);z-index:5}
+.tip b{display:block;font-size:14px;margin-bottom:3px}
+.tip .mono{opacity:.8;font-size:11.5px;display:block;margin-top:5px}
+.radar-key{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:12.5px;color:var(--muted);padding:8px 6px 2px;align-items:center}
+.radar-key > span{display:inline-flex;align-items:center;gap:6px}
+.size-key i{display:inline-block;border-radius:50%;background:var(--muted)}
+.mv-key{display:inline-block;width:14px;height:14px;border-radius:50%;border:2.5px dashed var(--accent)}
+
+/* Legend */
+.legend{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px 22px}
+.legend h3{font-size:14px;font-family:var(--f-body);font-weight:700;display:flex;gap:8px;align-items:center;margin-bottom:6px;font-stretch:100%}
+.legend h3 i{width:10px;height:10px;border-radius:2px;flex:none}
+.legend ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:1px}
+.legend button{all:unset;cursor:pointer;display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:6px;font-size:13.5px;padding:2px 4px;border-radius:3px;width:100%;box-sizing:border-box;align-items:baseline}
+.legend button:hover{background:var(--sunk)}
+.legend button:focus-visible{outline:2px solid var(--accent)}
+.legend .n{font-family:var(--f-mono);color:var(--muted);font-size:12px}
+
+/* Detail card */
+.card{background:var(--surface);border:1px solid var(--line);border-top:5px solid var(--cc, var(--ink));border-radius:6px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.card-top{display:flex;gap:12px;align-items:flex-start;justify-content:space-between}
+.badge-num{font-family:var(--f-mono);font-size:13px;color:var(--dot-fg);border-radius:50%;width:34px;height:34px;display:grid;place-items:center;flex:none;font-weight:500}
+.card h3{font-size:24px;font-stretch:80%;font-weight:800;line-height:1.05}
+.tags{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px}
+.tag{font-family:var(--f-mono);font-size:10.5px;padding:2px 7px;border-radius:3px;background:var(--sunk);color:var(--muted);white-space:nowrap}
+.bigscore{text-align:right;flex:none}
+.bigscore b{font-family:var(--f-mono);font-weight:500;font-size:32px;line-height:1;font-variant-numeric:tabular-nums}
+.bigscore span{display:block;font-size:11px;color:var(--muted)}
+.bars{display:grid;grid-template-columns:minmax(0,1fr) 80px 16px;gap:5px 10px;font-size:13px;align-items:center}
+.bar{height:6px;background:var(--sunk);border-radius:1px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ink)}
+.bar i.eu{background:var(--accent)}
+.fields{display:flex;flex-direction:column;gap:10px;font-size:14px}
+.fields dt{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.fields dd{margin:2px 0 0}
+.eubox{border:1.5px solid var(--accent);border-radius:5px;padding:10px 12px;font-size:13.5px;display:flex;flex-direction:column;gap:6px}
+.eubox .cmpline{font-family:var(--f-mono);font-size:12px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.rec{background:var(--sunk);border-radius:5px;padding:10px 12px;font-size:14px}
+.rec b{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;display:block;color:var(--muted);margin-bottom:2px}
+.locked{border:1px dashed var(--line);border-radius:5px;padding:10px 12px;font-size:13.5px;color:var(--muted);display:grid;grid-template-columns:22px minmax(0,1fr);gap:8px;align-items:start}
+.locked svg{width:18px;height:18px;margin-top:2px}
+.locked b{color:var(--ink);display:block}
+.relrow{display:flex;gap:12px;flex-wrap:wrap;font-size:13px}
+.relrow span{display:inline-flex;gap:5px;align-items:center}
+.pips{letter-spacing:1px;font-family:var(--f-mono)}
+.srcs{display:flex;flex-direction:column;gap:3px;font-size:13px}
+.unc{color:var(--accent);font-size:12px}
+.plist{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.plist li{display:grid;grid-template-columns:minmax(0,1fr);gap:1px;padding:6px 10px;border:1px solid var(--line);border-radius:4px;background:var(--bg)}
+.plist b{font-size:13.5px;font-weight:700;color:var(--ink)}
+.plist span{font-size:13px;color:var(--muted)}
+.plist .psrc{font-family:var(--f-mono);font-size:11px}
+
+/* Compare */
+.compare{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:16px 18px}
+.tscroll{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+table.cmp{border-collapse:collapse;width:100%;font-size:13.5px;min-width:560px}
+table.cmp th,table.cmp td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+table.cmp th{font-weight:700}
+table.cmp td:first-child{font-family:var(--f-mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+
+/* Fokus-Matrix */
+.fmx{display:grid;grid-template-columns:200px repeat(3,minmax(0,1fr));border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--line);gap:1px}
+.fmx > div{background:var(--surface);padding:10px 12px;min-width:0}
+.fmx .fh{background:var(--ink);color:var(--bg);display:flex;flex-direction:column;gap:2px}
+.fmx .fh h3{font-size:20px;font-stretch:80%;font-weight:800}
+.fmx .fh span{font-size:12px;opacity:.75}
+.fmx .fh .mono{font-size:11px;opacity:.9}
+.fmx .corner{background:var(--ink);color:var(--bg);font-family:var(--f-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;display:flex;align-items:flex-end}
+.fmx .cl{display:flex;gap:8px;align-items:flex-start;font-weight:700;font-size:14px;border-left:5px solid var(--cc)}
+.fmx .cell ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.fmx .cell button{all:unset;cursor:pointer;display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:6px;font-size:13.5px;padding:3px 4px;border-radius:3px;width:100%;box-sizing:border-box;align-items:baseline}
+.fmx .cell button:hover{background:var(--sunk)}
+.fmx .cell button:focus-visible{outline:2px solid var(--accent)}
+.fmx .cell .n{font-family:var(--f-mono);font-size:11.5px;color:var(--muted)}
+.fmx .cell small{display:block;color:var(--muted);font-size:11.5px}
+.fmx .cell .empty{color:var(--line);font-family:var(--f-mono)}
+.fmx .mlabel{display:none}
+
+/* Premium (gesperrt) */
+.paywall{border:2px solid var(--ink);border-radius:8px;overflow:hidden;background:var(--surface)}
+.pw-head{background:var(--ink);color:var(--bg);padding:22px 24px;display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:20px;align-items:end}
+.pw-head h2{color:var(--bg)}
+.pw-head p{opacity:.8;margin-top:8px;max-width:60ch}
+.pw-badge{display:inline-flex;align-items:center;gap:8px;font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.pw-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:1px;background:var(--line)}
+.pw-tile{background:var(--surface);padding:16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.pw-tile .sec-mini{font-family:var(--f-display);font-weight:800;font-stretch:72%;font-size:30px;color:var(--accent);line-height:1}
+.pw-tile h3{font-size:17px}
+.pw-tile p{font-size:13.5px;color:var(--muted)}
+.skel{display:flex;flex-direction:column;gap:5px;margin-top:auto;padding-top:8px}
+.skel i{display:block;height:7px;border-radius:2px;background:var(--sunk)}
+.pw-foot{padding:14px 24px;font-size:13.5px;color:var(--muted);display:flex;flex-wrap:wrap;gap:8px 20px;justify-content:space-between}
+
+/* Datenbank (Premium) */
+table.db{border-collapse:collapse;width:100%;font-size:13px;min-width:1180px}
+table.db th,table.db td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+table.db th{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:var(--sunk);position:sticky;top:0;cursor:pointer;white-space:nowrap}
+table.db th[aria-sort]::after{content:" ↓"}
+table.db td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;text-align:right}
+table.db tbody tr{cursor:pointer}
+table.db tbody tr:hover{background:var(--sunk)}
+table.db .clsw{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px}
+textarea{width:100%;min-height:160px;font-family:var(--f-mono);font-size:11.5px;background:var(--sunk);color:var(--ink);border:1px solid var(--line);border-radius:5px;padding:10px}
+.top10{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.tcard{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:16px;display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:4px 14px;cursor:pointer}
+.tcard:hover{border-color:var(--muted)}
+.tcard .rank{font-family:var(--f-display);font-weight:800;font-stretch:72%;font-size:40px;line-height:.9;color:var(--accent);grid-row:span 3}
+.tcard .sc{font-family:var(--f-mono);font-size:18px;text-align:right}
+.tcard p{grid-column:2 / 4;font-size:14px;color:var(--muted)}
+.tcard .tags{grid-column:2 / 4}
+.opp-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start}
+.opp-grid > .box{position:sticky;top:calc(env(safe-area-inset-top, 0px) + 12px)}
+.opps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.opps li{display:grid;grid-template-columns:34px minmax(0,1fr);gap:10px;padding:14px 0;border-bottom:1px solid var(--line)}
+.opps .oid{font-family:var(--f-mono);font-size:12px;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;border:1.5px solid var(--accent);color:var(--accent)}
+.opps .mono{font-size:11.5px;color:var(--muted)}
+#matrix{width:100%;height:auto;display:block}
+.mx-axis{font-family:var(--f-mono);font-size:11px;fill:var(--muted)}
+.mx-q{font-family:var(--f-body);font-size:12px;font-weight:700;fill:var(--muted)}
+.road{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--line);gap:1px}
+.phase{background:var(--surface);padding:18px;display:flex;flex-direction:column;gap:12px}
+.phase .yr{font-family:var(--f-mono);font-size:24px;font-weight:500;font-variant-numeric:tabular-nums}
+.phase ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px}
+.phase li{font-size:14px;padding-left:14px;position:relative}
+.phase li::before{content:"";position:absolute;left:0;top:.6em;width:6px;height:6px;background:var(--accent)}
+.phase .refs{font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+.cases{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.case-empty{border:1.5px dashed var(--line);border-radius:6px;padding:22px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}
+.case-empty ul{margin:6px 0 0;padding-left:18px;font-size:14px;color:var(--muted)}
+
+/* Quellen */
+.sources{columns:2;column-gap:32px;font-size:13.5px;margin:0;padding:0;list-style:none}
+.sources li{break-inside:avoid;padding:6px 0;border-bottom:1px dashed var(--line);display:grid;grid-template-columns:44px minmax(0,1fr);gap:6px}
+.sources .sid{font-family:var(--f-mono);color:var(--muted);font-size:11.5px}
+.sources a{overflow-wrap:anywhere}
+.sources small{display:block;color:var(--muted);font-size:12px}
+footer{font-size:13px;color:var(--muted);border-top:3px solid var(--ink);padding-top:16px}
+
+@media (max-width:1060px){
+  header,.radar-grid,.opp-grid,.pw-head{grid-template-columns:minmax(0,1fr)}
+  .method{grid-template-columns:minmax(0,1fr)}
+  .legend{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .road,.pw-grid{grid-template-columns:minmax(0,1fr)}
+  .opp-grid > .box{position:static}
+  .fmx{grid-template-columns:minmax(0,1fr)}
+  .fmx .fh,.fmx .corner{display:none}
+  .fmx .cl{border-left-width:5px;background:var(--sunk)}
+  .fmx .mlabel{display:block;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+  .fmx .cell.isempty{display:none}
+}
+@media (max-width:640px){
+  .insights,.top10,.cases,.case-empty{grid-template-columns:minmax(0,1fr)}
+  .legend{grid-template-columns:minmax(0,1fr)}
+  .sources{columns:1}
+  .board b{font-size:22px}
+  .sec-head{grid-template-columns:minmax(0,1fr)}
+  .sec-no{font-size:40px}
+  input[type=search]{width:100%}
+}
+@media (prefers-reduced-motion: reduce){ *{transition:none!important;scroll-behavior:auto!important} }
+</style>
+
+<div class="wrap">
+<header>
+  <div>
+    <div class="eyebrow">Trendradar 2027–2035 · Hospitality · Infrastruktur · Fan Engagement · Stand 04.11.2026</div>
+    <h1 style="margin-top:12px">Future of<br>Experiences</h1>
+    <p class="lede">44 Trends für Sport-, Hospitality- und Live-Venues in sieben Clustern, gewichtet bewertet und in drei Spielphasen eingeordnet: Anstoß, Aufwärmen, Scouting. Mit eigener Europa-Perspektive, weil Datenschutz, Tempo und Investitionsrahmen in Europa anders sind als in den USA.</p>
+  </div>
+  <div>
+    <div class="board" id="board"></div>
+    <p class="board-cap" id="boardcap"></p>
+    <p class="notice" style="margin-top:10px">Alle Scores sind KI-basierte Hypothesen und werden durch ein Expertengremium validiert. Belegte Signale und Prognosen sind je Trend getrennt ausgewiesen.</p>
+  </div>
+</header>
+
+<section id="summary">
+  <div class="sec-head"><span class="sec-no">01</span><div><div class="eyebrow">Executive Summary</div><h2>Zehn Erkenntnisse für Entscheider</h2></div></div>
+  <ol class="insights" id="insights"></ol>
+</section>
+
+<section id="method">
+  <div class="sec-head"><span class="sec-no">02</span><div><div class="eyebrow">Methodik</div><h2>Bewertungsmodell, Spielphasen und Europa-Perspektive</h2>
+  <p>Trends wurden aus Branchenreports, Marktanalysen, Anbieterinformationen und Praxisbeispielen identifiziert (rund 50 Recherchen, Stand 04.11.2026), in sieben Cluster gegliedert, je einem Fokusfeld zugeordnet und nach einem einheitlichen Modell bewertet.</p></div></div>
+  <div class="method">
+    <div class="box"><h3>Kriterien und Gewichtung</h3>
+      <table class="wtable"><tbody>
+        <tr><td>Business Impact</td><td>25 %</td></tr><tr><td>Customer Experience Impact</td><td>20 %</td></tr>
+        <tr><td>Strategic Fit</td><td>20 %</td></tr><tr><td>Market Readiness</td><td>15 %</td></tr>
+        <tr><td>Innovation Potential</td><td>10 %</td></tr><tr><td>Implementation Feasibility</td><td>10 %</td></tr>
+      </tbody></table>
+      <p class="muted" style="font-size:13.5px">Jedes Kriterium 1–5, Gesamtscore als gewichtete Summe (1–5). Time-to-Adoption separat: 0–2, 3–5 oder 6–10 Jahre. Evidenz: A = mehrere verlinkte Marktsignale, B = einzelne Signale oder Piloten, C = Prognose ohne verlinkte Primärquelle.</p>
+    </div>
+    <div class="box"><h3>Drei Spielphasen</h3>
+      <div class="rule">
+        <div><span class="zp z-KICKOFF">Anstoß</span> Jetzt umsetzen: Time-to-Adoption <code>0–2</code> und Score <code>≥ 3,5</code> – oder gesetzliche Pflicht.</div>
+        <div><span class="zp z-WARMUP">Aufwärmen</span> Kompetenzen, Partner und Piloten aufbauen: alle übrigen Trends.</div>
+        <div><span class="zp z-SCOUTING">Scouting</span> Systematisch beobachten: Time-to-Adoption <code>6–10</code> oder Market Readiness <code>≤ 2</code>.</div>
+        <p class="muted">Ein Trend mit hoher Wirkung kann im Scouting liegen, wenn er erst langfristig marktreif wird (z. B. Stadion-Quartiere, Score 3,80).</p>
+      </div>
+    </div>
+    <div class="box"><h3>Europa-Perspektive</h3>
+      <div class="rule">
+        <div>Für Trends, deren Signale überwiegend aus den USA kommen, werden Market Readiness, Umsetzbarkeit und Time-to-Adoption zusätzlich für Europa und DACH bewertet: DSGVO, EU AI Act, Mitbestimmung, Fankultur und Investitionsvolumen.</div>
+        <div>Der Schalter <b>Europa / Global</b> verschiebt die Punkte in der Arena. Gestrichelte Ränder markieren Trends, die in der gewählten Perspektive anders eingeordnet sind.</div>
+        <div><b>Signalherkunft</b>: Europa, USA oder global – je nachdem, woher die belegten Marktsignale stammen.</div>
+      </div>
+    </div>
+    <div class="box"><h3>Aufbau der Arena</h3>
+      <div class="rule">
+        <div><b>Sektor</b> = Cluster A–G (je rund 51°). <b>Rang</b> = Spielphase: innen Anstoß, Mitte Aufwärmen, außen Scouting.</div>
+        <div><b>Winkel</b>: Trends eines Segments gleichmäßig verteilt, im Uhrzeigersinn nach Score absteigend. <b>Abstand zur Mitte</b>: Bahnen werden abgewechselt, damit sich keine Punkte überdecken.</div>
+        <div><b>Punktgröße</b> = Business Impact (1–5).</div>
+      </div>
+    </div>
+    <div class="box"><h3>Fokusfelder</h3>
+      <div class="rule">
+        <div><b>Hospitality</b> (Venue und Hotellerie): VIP & Premium, Kiosk & Gastro, Schanktechnik, Robotik, Hotellerie.</div>
+        <div><b>Infrastruktur</b>: Stadionbau, Mobilität, Energie, Einlass, Sicherheit, Inklusion.</div>
+        <div><b>Fan Engagement</b>: Plattformen, Gamification, Loyalty, Content & Community, Teilhabe.</div>
+      </div>
+    </div>
+    <div class="box"><h3>Cluster G: Safety, Inclusion & Participation</h3>
+      <div class="rule">
+        <div>Sicherheit, Barrierefreiheit und soziale Teilhabe bilden einen eigenen Cluster. Sie betreffen alle drei Fokusfelder und wären in Technologie- oder Nachhaltigkeitsclustern unsichtbar.</div>
+        <div>Sicherheit und Inklusion zählen zum Fokusfeld Infrastruktur, faire Preise und Teilhabe zu Fan Engagement.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="radar-sec">
+  <div class="sec-head"><span class="sec-no">03</span><div><div class="eyebrow">Trendradar</div><h2>Die Arena</h2>
+  <p>Punkt anklicken öffnet die Trendkarte. Filter blenden nicht passende Trends ab, der Perspektiv-Schalter verschiebt sie.</p></div></div>
+
+  <div class="toolbar" role="group" aria-label="Perspektive und Filter">
+    <div class="trow">
+      <div class="fgroup"><span class="eyebrow">Perspektive</span><span class="seg" id="persp"><button data-p="EU" aria-pressed="true">Europa / DACH</button><button data-p="GL" aria-pressed="false">Global</button></span></div>
+      <div class="fgroup"><span class="eyebrow">Signalherkunft</span><span id="f-orig"></span></div>
+      <div class="spacer"></div>
+      <input type="search" id="q" placeholder="Trend suchen" aria-label="Trend suchen">
+      <button class="btn ghost" id="reset">Filter zurücksetzen</button>
+    </div>
+    <div class="trow">
+      <div class="fgroup"><span class="eyebrow">Fokus</span><span id="f-fo"></span><select id="f-st" aria-label="Unterthema"></select></div>
+      <div class="fgroup"><span class="eyebrow">Phase</span><span id="f-zone"></span></div>
+      <div class="fgroup"><span class="eyebrow">Horizont</span><span id="f-tta"></span></div>
+      <div class="fgroup"><span class="eyebrow">Cluster</span><span id="f-cl"></span></div>
+    </div>
+    <p class="persp-note" id="perspnote"></p>
+  </div>
+
+  <div class="radar-grid">
+    <div class="radar-box">
+      <svg id="radar" viewBox="-80 0 1280 830" role="img" aria-label="Ovale Trend-Arena mit sieben Clustern und drei Spielphasen"></svg>
+      <div class="tip" id="tip" hidden></div>
+      <div class="radar-key">
+        <span><span class="zp z-KICKOFF">Anstoß</span> innen</span>
+        <span><span class="zp z-WARMUP">Aufwärmen</span> Mitte</span>
+        <span><span class="zp z-SCOUTING">Scouting</span> außen</span>
+        <span class="size-key">Business Impact <i style="width:10px;height:10px"></i>2 <i style="width:14px;height:14px"></i>3 <i style="width:18px;height:18px"></i>4 <i style="width:22px;height:22px"></i>5</span>
+        <span><i class="mv-key"></i> anders als in der anderen Perspektive</span>
+        <span id="count" class="mono"></span>
+      </div>
+    </div>
+    <div id="detail"></div>
+  </div>
+
+  <div class="compare" id="compare"></div>
+
+  <div class="box"><h3>Alle Trendnummern</h3><div class="legend" id="legend"></div></div>
+</section>
+
+<section id="focus">
+  <div class="sec-head"><span class="sec-no">04</span><div><div class="eyebrow">Fokus-Ansicht</div><h2>Cluster × Fokusfeld</h2>
+  <p>Alle sieben Cluster der Arena, aufgeteilt auf die drei Fokusfelder. Phase und Score folgen der gewählten Perspektive; ein Klick öffnet die Trendkarte.</p></div></div>
+  <div class="fmx" id="focusview"></div>
+</section>
+
+<div id="premium" style="display:flex;flex-direction:column;gap:60px"></div>
+
+<section id="src">
+  <div class="sec-head"><span class="sec-no" id="srcno">10</span><div><div class="eyebrow">Quellenverzeichnis</div><h2>Quellen</h2>
+  <p>Angaben aus Überschriften und Kernaussagen der verlinkten Quellen; Zahlen vor Verwendung im Original prüfen. „o. D.“ = Veröffentlichungsdatum nicht erfasst.</p></div></div>
+  <ol class="sources" id="sources"></ol>
+</section>
+
+<footer id="foot">Future of Experiences · Trendradar 2027–2035 · Stand 04.11.2026 · Bewertungen sind Hypothesen zur Validierung durch ein Expertengremium.</footer>
+</div>
+<script>
+// Future of Experiences – Trenddaten (Stand 04.11.2026). Scores = KI-Hypothesen zur Validierung durch ein Expertengremium.
+const SOURCES = {"s6":{"t":"Kings League World Cup Nations reaches 120m livestream viewers","p":"Broadcast","d":"o. D.","u":"https://www.broadcastnow.co.uk/broadcasting/kings-league-world-cup-nations-reaches-120m-livestream-viewers/5213066.article"},"s9":{"t":"The shared fan experience: how Cosm's immersive venues change what it means to attend a live event","p":"Sports Video Group","d":"22.01.2025","u":"https://www.sportsvideo.org/2025/01/22/the-shared-fan-experience-how-cosms-immersive-venues-change-what-it-means-to-attend-a-live-event/"},"s13":{"t":"DFL and Amazon Web Services expand partnership to further drive innovation","p":"bundesliga.com","d":"o. D.","u":"https://www.bundesliga.com/en/bundesliga/news/dfl-amazon-web-services-expand-partnership-to-further-drive-innovation-26653"},"s14":{"t":"Bundesliga – Amazon Nova (Case Study)","p":"AWS","d":"o. D.","u":"https://aws.amazon.com/solutions/case-studies/bundesliga-amazon-nova"},"s15":{"t":"Ticketmaster didn't use dynamic pricing for Oasis concerts, will change how it sells tickets in UK, watchdog says","p":"Music Business Worldwide","d":"2025","u":"https://www.musicbusinessworldwide.com/ticketmaster-didnt-use-dynamic-pricing-for-oasis-concerts-will-change-how-it-sells-tickets-in-uk-watchdog-says"},"s19":{"t":"NFL to roll out facial authentication software league-wide","p":"The Record","d":"2024","u":"https://therecord.media/nfl-to-roll-out-facial-authentication-league-wide"},"s20":{"t":"LAFC brings Wicket's facial recognition technology to BMO Stadium","p":"Inside World Football","d":"07.05.2025","u":"https://www.insideworldfootball.com/2025/05/07/lafc-brings-wickets-facial-recognition-technology-bmo-stadium/"},"s21":{"t":"HALO Sports & Entertainment: Ballmer, Clippers, facial recognition with Clear","p":"Fortune","d":"10.06.2025","u":"https://www.fortune.com/2025/06/10/halo-sports-entertainment-steve-ballmer-la-clippers-nba-tech-facial-recognition-clear"},"s22":{"t":"New era for sport in Munich as SAP Garden opens to public","p":"infra.global","d":"2024","u":"https://infra.global/new-era-for-sport-in-munich-as-sap-garden-opens-to-public/"},"s23":{"t":"FIFA Club World Cup: player welfare","p":"The National","d":"15.07.2025","u":"https://www.thenationalnews.com/sport/football/2025/07/15/fifa-club-world-cup-player-welfare/"},"s24":{"t":"FIFPRO sounds alarm over extreme conditions at 2026 World Cup","p":"beIN Sports","d":"29.09.2025","u":"https://www.beinsports.com/en-mena/football/fifa-world-cup-2026/articles-video/fifpro-sounds-alarm-over-extreme-conditions-at-2026-world-cup-2025-09-29"},"s25":{"t":"Euro 2025 concludes with record-breaking numbers from fans to finance","p":"Inside World Football","d":"28.07.2025","u":"https://insideworldfootball.com/2025/07/28/euro-2025-concludes-record-breaking-numbers-fans-finance"},"s26":{"t":"Record breaking Euro 2025 delivered Swiss hosts €220m of economic impact","p":"Inside World Football","d":"15.09.2025","u":"https://www.insideworldfootball.com/2025/09/15/record-breaking-euro-2025-delivered-swiss-hosts-e220m-economic-impact/"},"s27":{"t":"Marriott says Google AI Mode will process hotel bookings, not just send links","p":"Skift","d":"11.02.2026","u":"https://skift.com/2026/02/11/marriott-google-agentic-travel-booking/"},"s28":{"t":"Mews Outlook: AI to consolidate hotel search and booking by 2035","p":"Hotel Management","d":"o. D.","u":"https://www.hotelmanagement.net/data-trends/mews-outlook-ai-consolidate-hotel-search-booking-and-service-2035"},"s29":{"t":"New ZentrumHub report: AI agents are starting to book hotel rooms","p":"PR Newswire","d":"17.06.2026","u":"https://tools.prnewswire.com/en-us/live/20813/release/20260617EN84821"},"s30":{"t":"Tennessee Titans partner with Amazon to become first NFL team with 'just walk out' concessions","p":"WSMV","d":"09.01.2026","u":"https://www.wsmv.com/2026/01/09/tennessee-titans-partner-with-amazon-become-first-nfl-team-with-just-walk-out-concessions/"},"s31":{"t":"Taylor Swift Eras Tour arrives in Europe and ignites hotel room prices","p":"Hospitality Net","d":"2024","u":"https://www.hospitalitynet.org/news/4121185.html"},"s32":{"t":"Event tourism: Taylor Swift boosts hotel revenues","p":"fvw","d":"2024","u":"https://www.fvw.de/international/travel-news/-event-tourism-taylor-swift-boosts-hotel-revenues-245545"},"s33":{"t":"A new milestone for accessibility – the European Accessibility Act now applies","p":"Travers Smith","d":"06/2025","u":"https://www.traverssmith.com/knowledge/knowledge-container/a-new-milestone-for-accessibility-the-european-accessibility-act-now-applies/"},"s34":{"t":"European Accessibility Act: Was Hotels jetzt beachten müssen","p":"HOGAPAGE","d":"o. D.","u":"https://www.hogapage.de/nachrichten/arbeitswelt/ratgeber/european-accessibility-act-was-hotels-jetzt-beachten-m%C3%BCssen/"},"s35":{"t":"Stadium Digital Twin (Anbieterseite)","p":"Simio","d":"o. D.","u":"https://www.simio.com/stadium-digital-twin"},"s36":{"t":"Competitive socialising sector grows at rapid rate, says Savills","p":"Savills","d":"o. D.","u":"https://www.savills.co.uk/insight-and-opinion/savills-news/354444/competitive-socialising-sector-grows-at-rapid-rate--says-savills"},"s37":{"t":"Flight Club owner plots 45 new venues in long-term expansion plan","p":"Guernsey Press / PA","d":"25.03.2025","u":"https://guernseypress.com/news/uk-news/2025/03/25/flight-club-owner-plots-45-new-venues-in-long-term-expansion-plan"},"s38":{"t":"Competitive Socialising: From a booming trend to a maturing market","p":"The Social Gaming Group","d":"o. D.","u":"https://thesocialgaminggroup.com/blog/competitive-socialising-from-a-booming-trend-to-a-maturing-market"},"s39":{"t":"FIFA doubles down on digital youth engagement with Roblox expansion","p":"Drop Media","d":"o. D.","u":"https://www.dropmedia.co.uk/fifa-doubles-down-on-digital-youth-engagement-with-roblox-expansion/"},"s42":{"t":"Raising the bar: Tomorrowland 2025 goes fully reusable with smart cups","p":"Packaging Europe","d":"2025","u":"https://packagingeurope.com/features/raising-the-bar-tomorrowland-2025-goes-fully-reusable-with-smart-cups/13181.article"},"s43":{"t":"Royal Unibrew and Færch's recyclable cups achieve 97% return rate at Danish festival","p":"Packaging Europe","d":"o. D.","u":"https://packagingeurope.com/news/royal-unibrew-and-faerchs-recyclable-cups-achieve-97-return-rate-at-danish-festival/13539.article"},"s44":{"t":"Tomorrowland criticised for reusable cups made from rare earth minerals","p":"Brussels Times","d":"o. D.","u":"https://brusselstimes.com/1516955/tomorrowland-criticised-for-reusable-cups-made-from-rare-earth-minerals"},"s45":{"t":"Vegas Grand Prix generates nearly $220 million in hotel room revenue despite early bumps","p":"CoStar","d":"o. D.","u":"https://www.costar.com/article/1401406573/vegas-grand-prix-generates-nearly-220-million-in-hotel-room-revenue-despite-early-bumps"},"s46":{"t":"FC Barcelona drive forward a new model of VIP seats at Spotify Camp Nou","p":"FC Barcelona","d":"o. D.","u":"https://www.fcbarcelona.com/en/club/news/4456324/fc-barcelona-drive-forward-a-new-model-of-vip-seats-at-spotify-camp-nou-and-increase-stadium-revenue-predictions"},"s47":{"t":"Clippers' Intuit Dome sets new standard with AI-driven fan experience and sustainability","p":"Ministry of Sport","d":"o. D.","u":"https://ministryofsport.com/clippers-intuit-dome-sets-new-standard-with-ai-driven-fan-experience-and-sustainability"},"s48":{"t":"Sustainable Building Success Stories: Tottenham Hotspur Stadium","p":"Verdantix","d":"o. D.","u":"https://www.verdantix.com/detail-resource/climate-innovation-network/sustainable-building-success-stories-tottenham-hotspur-stadium"},"s50":{"t":"Roskilde Festival: Smaller footprint, greater care","p":"Roskilde Festival","d":"o. D.","u":"https://www.roskilde-festival.dk/en/this-is-roskilde/smaller-footprint-greater-care"},"s51":{"t":"A smoother matchday at Club Brugge","p":"Borro","d":"o. D.","u":"https://www.borro.one/blog/case-brugge"},"s52":{"t":"Borro aims to conquer Europe with its digital deposit system","p":"Sustainable Packaging News","d":"o. D.","u":"https://spnews.com/borro-aims-to-conquer/"},"s53":{"t":"Borro releases QR code-driven cup reuse system for cost reductions and convenience","p":"Packaging Insights","d":"o. D.","u":"https://www.packaginginsights.com/news/borro-reuse-system-cups-stadiums.html"},"s54":{"t":"Future of Festivals 2025: A real-life showcase for large-scale reuse systems","p":"Vytal","d":"2025","u":"https://vytal.org/blog-news/future-of-festivals-2025-a-real-life-showcase-for-large-scale-reuse-systems"},"s57":{"t":"Cup Concept Mehrwegsysteme GmbH (Firmenprofil)","p":"StadiaWorld","d":"o. D.","u":"https://www.stadiaworld.com/company/89790/cup-concept-mehrwegsysteme-gmbh"},"s58":{"t":"Hotels are putting AI agents to work in live operations, with Apaleo MCP Server use up 70%","p":"Hospitality Net","d":"o. D.","u":"https://www.hospitalitynet.org/news/4135158/hotels-are-putting-ai-agents-to-work-in-live-operations-with-apaleo-mcp-server-use-up-70"},"s59":{"t":"Apaleo launches first MCP server to connect AI agents with hotel systems","p":"Travel Daily News","d":"o. D.","u":"https://www.traveldailynews.com/technology/apaleo-launches-first-mcp-server-to-connect-ai-agents-with-hotel-systems/"},"s60":{"t":"Sportsbreaks extends partnership with Manchester United","p":"Manchester United","d":"2025","u":"https://www.manutd.com/en/news/detail/sportsbreaks-extends-partnership-with-man-utd-2025"},"s61":{"t":"Brentford announce multi-year partnership with Destination Sport","p":"Brentford FC","d":"o. D.","u":"https://www.brentfordfc.com/en/news/article/club-news-brentford-announce-multi-year-partnership-with-destination-sport"},"s62":{"t":"Borussia Dortmund selects WSC Sports to power digital content and fan engagement goals","p":"WSC Sports","d":"o. D.","u":"https://wsc-sports.com/blog/news/borussia-dortmund-selects-wsc-sports-to-power-digital-content-and-fan-engagement-goals/"},"s63":{"t":"German Football Association using WSC Sports to grow DFB-Pokal's international standing through localized highlights","p":"WSC Sports","d":"o. D.","u":"https://wsc-sports.com/blog/news/german-football-association-dfb-leveraging-wsc-sports-ai-technology-to-grow-the-dfb-pokals-international-standing-with-localized-highlights/"},"s64":{"t":"Red Bull Munich, WSC Sports bring AI hockey highlights","p":"Advanced Television","d":"o. D.","u":"https://www.advanced-television.com/?p=203325"},"s66":{"t":"Latham advises Two Circles on acquisition of KORE","p":"Latham & Watkins","d":"10/2024","u":"https://www.lw.com/en/news/2024/10/latham-advises-two-circles-on-acquisition-of-kore"},"s67":{"t":"NRG Stadium launches 5 new Zippin stores","p":"Zippin","d":"o. D.","u":"https://www.getzippin.com/blog/nrg-stadium-launches-5-new-zippin-stores"},"s68":{"t":"Duetto and PredictHQ empower hotels with events data","p":"Duetto","d":"o. D.","u":"https://www.duettocloud.com/library/duetto-and-predicthq-empower-hotels-with-events-data"},"s69":{"t":"How hotels can generate the most revenue from major events","p":"IDeaS","d":"o. D.","u":"https://go.rev.ideas.com/amer-major-events-strategy"},"s72":{"t":"Booked in seconds, inside ChatGPT: a conversation with Apaleo at ITB Berlin","p":"Hospitality Net","d":"o. D.","u":"https://www.hospitalitynet.org/interview/4131321/booked-in-seconds-inside-chatgpt-a-conversation-with-apaleo-at-itb-berlin"},"s73":{"t":"DFB veröffentlicht Abschlussbericht Stadioninnovationen für 2025/26","p":"DFB","d":"29.07.2026","u":"https://www.dfb.de/news/dfb-veroeffentlicht-abschlussbericht-stadioninnovationen-fuer-2025/26"},"s74":{"t":"Technische Weiterentwicklung: Ticket-Umstellung bei Besuchen der Allianz Arena","p":"FC Bayern München","d":"07/2026","u":"https://fcbayern.com/de/news/2026/07/technische-weiterentwicklung-ticket-umstellung-bei-besuchen-der-allianz-arena"},"s75":{"t":"Cashless Payment in der MHP Arena","p":"LBBW","d":"04/2026","u":"https://www.lbbw.de/artikel/banking-erleben/cashless-payment-mhp-arena_ampn8ogpzc_d.html"},"s76":{"t":"Bezahlkarten im Fußballstadion: Wie einige Bundesliga-Vereine ihre Fans verprellen","p":"Stiftung Warentest","d":"o. D.","u":"https://www.test.de/Bezahlkarten-im-Fussballstadion-Wie-einige-Bundesliga-Vereine-ihre-Fans-verprellen-4805888-0/"},"s77":{"t":"European first for Sodexo Live! with launch of permanent self-serve Ebar Beerwalls at Millwall Football Club","p":"Sodexo UK","d":"o. D.","u":"https://uk.sodexo.com/home/media/news-room/newsList-area/uk-press-releases/ebar-beerwalls-millwall-fc.html"},"s78":{"t":"Best New Technology: Draft Picks Perfect Pour, Honda Center (Excellence in Concessions 2026)","p":"Pollstar","d":"02.09.2026","u":"https://news.pollstar.com/2026/09/02/best-new-technology-draft-picks-perfect-pour-honda-center-excellence-in-concessions-2026/"},"s79":{"t":"Stadiums embracing self-serve beverage technology","p":"Stadium Tech Report","d":"o. D.","u":"https://stadiumtechreport.com/feature/stadiums-embracing-self-serve-beverage-technology/"},"s80":{"t":"PourMyBeer: Self-pour solutions for stadiums","p":"PourMyBeer","d":"o. D.","u":"https://pourmybeer.com/commercial-tap-solutions/stadiums/"},"s81":{"t":"Beat the queues with SeatServe at Anfield","p":"Liverpool FC","d":"o. D.","u":"https://www.liverpoolfc.com/news/announcements/331975-beat-the-queues-with-seatserve-at-anfield"},"s82":{"t":"Order food directly to your seat","p":"Newcastle United","d":"o. D.","u":"https://www.newcastleunited.com/news/archive/order-food-directly-to-your-seat/"},"s83":{"t":"Collaborative pilot project debuts sports world's first AI and robotic kitchen assistant at Dodger Stadium","p":"Levy","d":"26.07.2018","u":"https://www.levyrestaurants.com/blog/2018-07-26-collaborative-pilot-project-debuts-sports-worlds-first-ai-and-robotic-kitchen-assistant-at-dodger-stadium"},"s84":{"t":"KI in der Küche: Frisches Geld für Delicious Data","p":"Tageskarte","d":"o. D.","u":"https://www.tageskarte.io/technologie/detail/ki-in-der-kueche-frisches-geld-fuer-delicious-data.html"},"s85":{"t":"Staige One AG: Polizei Berlin setzt am Kottbusser Tor auf KI-Videoschutz","p":"stock3 / pta","d":"o. D.","u":"https://stock3.com/news/pta-news-staige-one-ag-polizei-berlin-setzt-am-kottbusser-tor-auf-ki-videoschutz-von-staige-one-17303065"},"s86":{"t":"Evolv helps FIFA Club World Cup 2025 continue to enhance the fan experience","p":"Evolv","d":"07/2025","u":"https://evolv.com/resources/press-releases/evolv-fifa-club-world-cup-2025/"},"s87":{"t":"Evolv Technology helps to protect European events this summer","p":"Business Wire","d":"16.08.2024","u":"https://www.businesswire.com/news/home/20240816875334/en/Evolv-Technology-Helps-to-Protect-European-Events-This-Summer"},"s88":{"t":"US has $500 million drone security plan for 2026 World Cup","p":"Straight Arrow News","d":"o. D.","u":"https://san.com/cc/us-has-500-million-drone-security-plan-for-2026-world-cup/"},"s89":{"t":"The main event: how to protect stadiums from the drone threat","p":"Robin Radar","d":"o. D.","u":"https://www.robinradar.com/blog/the-main-event-how-to-protect-stadiums-from-the-drone-threat"},"s90":{"t":"Europe's largest energy storage system now live at the Johan Cruijff ArenA","p":"Nissan","d":"07/2018","u":"https://global.nissannews.com/en/releases/europes-largest-energy-storage-system-now-live-at-the-johan-cruijff-arena"},"s91":{"t":"Forest Green Rovers Eco Park Stadium","p":"Zaha Hadid Architects","d":"o. D.","u":"https://www.zaha-hadid.com/architecture/forest-green-rovers-eco-park-stadium/"},"s92":{"t":"Vitória SC's digital leap: building a superapp for fans","p":"Football Business Inside","d":"o. D.","u":"https://www.footballbusinessinside.com/vitoria-scs-digital-leap-building-a-superapp-for-fans"},"s93":{"t":"Infobip launches PitchMate – an AI fan companion for global football","p":"Infobip","d":"o. D.","u":"https://www.infobip.com/news/infobip-launches-pitchmate"},"s94":{"t":"The Premier League Companion is a new AI-powered tool for soccer fans, but it's useless – at least for now","p":"TechRadar","d":"o. D.","u":"https://www.techradar.com/computing/artificial-intelligence/the-premier-league-companion-is-a-new-ai-powered-tool-for-soccer-fans-but-its-useless-at-least-for-now"},"s95":{"t":"Why Socios, and football fan tokens as we know them, are probably doomed","p":"Premier Sports Network","d":"o. D.","u":"https://premiersportsnetwork.com/news/why-socios-and-football-fan-tokens-as-we-know-them-are-probably-doomed"},"s96":{"t":"Chiliz brings sports industry to Solana","p":"Solana","d":"27.05.2026","u":"https://solana.com/news/chiliz-sports-industry-on-solana"},"s97":{"t":"FIFA World Cup 2026 earns first-ever sensory inclusive tournament recognition","p":"FIFA","d":"o. D.","u":"https://inside.fifa.com/organisation/media-releases/fifa-world-cup-2026-tm-earns-first-ever-sensory-inclusive-tournament-recognition"},"s98":{"t":"Sensory and inclusion rooms","p":"Wembley Stadium","d":"o. D.","u":"https://wembleystadium.com/plan-your-visit/disabled-services-and-accessibility/Sensory-and-Inclusion-Rooms"},"s99":{"t":"Sensory Room – accessible matchday experience at Man City","p":"Manchester City","d":"o. D.","u":"https://www.mancity.com/ticketing-and-hospitality/access/sensory-suite"},"s100":{"t":"Mastercard und card complete statten neue Raiffeisen Arena des LASK mit bargeldlosem Bezahlsystem aus","p":"Mastercard","d":"2023","u":"https://www.mastercard.com/news/europe/de-at/newsroom/pressemitteilungen/de-at/2023/mastercard-und-card-complete-statten-neue-raiffeisen-arena-des-lask/"},"s101":{"t":"Premier League price cap on away tickets extended","p":"RTÉ","d":"19.03.2026","u":"https://www.rte.ie/sport/soccer/2026/0319/1564217-premier-league-price-cap-on-away-tickets-extended"},"s102":{"t":"£30 cap on away ticket prices extended","p":"Brighton & Hove Albion","d":"2026","u":"https://www.brightonandhovealbion.com/media-article/gbp30-cap-on-away-ticket-prices-extended"},"s103":{"t":"DFL Economic Report: Spectator Report 2025/26","p":"DFL","d":"2026","u":"https://report.bundesliga.de/2526/en/current-reports/spectator-report.html"},"s104":{"t":"UEFA senkt Ticketpreis-Obergrenzen für Gästetickets","p":"Die falsche 9","d":"o. D.","u":"https://www.diefalsche9.de/?p=42390"},"s105":{"t":"EU AI Act – Article 5: Prohibited AI practices","p":"euaiact.com","d":"o. D.","u":"https://www.euaiact.com/article/5"},"s106":{"t":"EU AI Act unpacked #28: Commission guidelines on prohibited AI practices","p":"Freshfields","d":"2025","u":"https://technologyquotient.freshfields.com/post/102kzaz/eu-ai-act-unpacked-28-european-commission-releases-critical-ai-act-implementati"}};
+const TRENDS = [{"id":1,"n":"Hyper-Personalisierung","c":"A","d":"KI steuert Angebote, Inhalte und Services entlang der gesamten Gast- und Fan-Journey individuell – vom Ticketkauf bis zum Hotelzimmer.","rel":[3,3,3],"use":"Personalisierte Matchday-Journey in der Club-App; Upgrade-Angebote nach Präferenzprofil; individuelle Konzert-Pakete.","bp":"DFL/Bundesliga mit AWS als GenAI-Partner für personalisierte Inhalte [s13, s14].","sig":"Belegt: DFL baut KI-Partnerschaft mit AWS aus. Prognose: Personalisierung wird Standarderwartung.","src":["s13","s14"],"opp":"Höhere Conversion, Warenkorb und Wiederkehr.","risk":"DSGVO, Datensilos, Filterblasen-Effekt.","tta":"0–2","sc":[4,5,5,4,3,3],"ev":"A","fo":"FAN","st":"Plattformen","orig":"EU"},{"id":2,"n":"Loyalty-Ökosysteme","c":"A","d":"Branchenübergreifende Treueprogramme verbinden Stadion, Hotel, Mobilität und Entertainment in einer Währung.","rel":[3,3,2],"use":"Punkte aus Hotelaufenthalten für Matchday-Erlebnisse einlösen; Status-Stufen über Partner hinweg.","bp":"Wissensbasis: Hotel-Loyalty-Programme mit Event-Erlebnissen als Prämie (z. B. Marriott Bonvoy Moments) – im Detail zu validieren.","sig":"Prognose: Loyalty wird zum Datenrückgrat für Personalisierung und Agentic Booking.","src":[],"opp":"Höherer Customer Lifetime Value, Partner-Erlöse.","risk":"Komplexe Abrechnung, Programmmüdigkeit.","tta":"0–2","sc":[4,4,5,4,3,3],"ev":"B","fo":"FAN","st":"Loyalty","orig":"GLOBAL"},{"id":3,"n":"Gamifizierte Second Screens","c":"A","d":"Interaktive Live-Daten, Prognosespiele und Echtzeit-Statistiken binden Fans vor Ort und zu Hause.","rel":[3,1,2],"use":"Live-Predictions in der App, Match-Facts-Overlays, Belohnungen für Teilnahme.","bp":"Bundesliga Match Facts auf Basis der AWS-Partnerschaft [s13].","sig":"Belegt: datengetriebene Fan-Features im Ligabetrieb.","src":["s13"],"opp":"Mehr Nutzungszeit und Sponsoring-Inventar.","risk":"Nähe zu Glücksspiel, Ablenkung vom Live-Erlebnis.","tta":"0–2","sc":[3,4,3,4,3,4],"ev":"B","fo":"FAN","st":"Gamification","orig":"EU"},{"id":4,"n":"Club-Superapps","c":"A","fo":"FAN","st":"Plattformen","d":"Eine App bündelt Ticket, Einlass, Bezahlen, Bestellen, Content und Loyalty – statt vieler Einzel-Apps.","rel":[3,2,3],"use":"Digitales Ticket mit Wallet, In-Seat-Bestellung, Mitgliederstatus und Live-Daten in einer Oberfläche.","bp":"FC Bayern stellt ab 2026/27 auf rein digitale Tickets in der App um, inkl. Wallet und Zweitmarkt [s74]; Vitória SC baut mit Blocksport eine Fan-Superapp [s92].","sig":"Belegt: Clubs bündeln Funktionen in eigenen Apps. Offen: Fans ohne Smartphone.","src":["s74","s92"],"opp":"Datenhoheit, höhere Nutzungsfrequenz, Grundlage für Personalisierung.","risk":"Entwicklungskosten, Ausschluss von Fans ohne Smartphone, App-Müdigkeit.","tta":"0–2","sc":[4,4,5,4,3,3],"ev":"A","orig":"EU"},{"id":5,"n":"KI-Fan-Assistenten","c":"A","fo":"FAN","st":"Plattformen","d":"Sprach- und Chat-Assistenten beantworten Fragen zu Ticket, Anreise, Stadion und Club rund um die Uhr.","rel":[3,2,3],"use":"Matchday-Fragen (Einlass, Parken, Barrierefreiheit), Ticket-Support, personalisierte Club-Inhalte.","bp":"Infobip startet den KI-Fan-Companion PitchMate [s93]; die Premier League testet einen KI-Companion, der in Tests noch schwach abschneidet [s94].","sig":"Belegt: erste Produkte am Markt. Unsicher: Qualität und Mehrwert.","src":["s93","s94"],"opp":"Entlastung des Service, Datengewinn, 24/7-Erreichbarkeit.","risk":"Falschauskünfte, Markenrisiko, Datenschutz.","tta":"0–2","sc":[3,4,4,4,4,4],"ev":"A","orig":"GLOBAL"},{"id":6,"n":"Agentic Booking","c":"B","d":"KI-Agenten recherchieren, kombinieren und buchen Tickets, Hotel und Anreise selbstständig im Auftrag des Gastes.","rel":[2,3,3],"use":"Agent bucht Matchday-Paket inkl. Hotel; automatische Umbuchung bei Spielverlegung.","bp":"Marriott: Google AI Mode soll Hotelbuchungen direkt abwickeln [s27]; Bericht: KI-Agenten beginnen Hotelzimmer zu buchen [s29].","sig":"Belegt: erste agentische Buchungen. Prognose: KI konsolidiert Hotelsuche und -buchung bis 2035 [s28].","src":["s27","s28","s29"],"opp":"Neue Vertriebskanäle, Paketierung in Echtzeit.","risk":"Disintermediation, Verlust des Kundenkontakts, Plattformabhängigkeit.","tta":"3–5","sc":[5,4,5,3,5,3],"ev":"A","fo":"HOS","st":"Hotellerie","orig":"GLOBAL"},{"id":7,"n":"GenAI-Content-Automation","c":"B","d":"Generative KI erstellt Highlights, Zusammenfassungen und mehrsprachige Inhalte in Echtzeit.","rel":[3,2,3],"use":"Automatische Clips je Spieler; mehrsprachige Spielberichte; personalisierte Konzert-Recaps.","bp":"WSC Sports erstellt KI-Highlights für BVB, DFB-Pokal und Red Bull München [s62, s63, s64]; Bundesliga nutzt Amazon Nova [s14].","sig":"Belegt: Produktivbetrieb in der Bundesliga.","src":["s13","s14","s62","s63"],"opp":"Mehr Reichweite bei geringeren Produktionskosten.","risk":"Rechtefragen, Qualitäts- und Markenrisiken.","tta":"0–2","sc":[4,4,4,5,3,4],"ev":"A","fo":"FAN","st":"Content & Community","orig":"EU"},{"id":8,"n":"Venue Digital Twins","c":"B","d":"Virtuelle Echtzeit-Abbilder von Venues für Planung, Betrieb, Energie und Vermarktung.","rel":[3,2,3],"use":"Event-Szenarien simulieren; Sponsoring-Sichtbarkeit planen; Energieverbrauch optimieren.","bp":"Anbieter-Lösungen für Stadion-Digital-Twins [s35].","sig":"Belegt: Anbieterangebote. Prognose: Standard bei Neubauten.","src":["s35"],"opp":"Effizienz im Betrieb, neue Planungsservices für Veranstalter.","risk":"Hohe Integrationskosten, BIM-Datenlage.","tta":"3–5","sc":[3,3,4,3,4,2],"ev":"C","unc":true,"fo":"INF","st":"Stadionbau","orig":"GLOBAL"},{"id":9,"n":"Service-Robotik","c":"B","d":"Roboter übernehmen Lieferung, Reinigung und einfache Gästeservices in Venues und Hotels.","rel":[1,3,2],"use":"Lieferroboter im Hotel; Reinigungsroboter nach Events.","bp":"Wissensbasis: Erfahrungen mit Roboter-Hotels zeigen begrenzte Akzeptanz – zu validieren.","sig":"Prognose: Fachkräftemangel erhöht Druck; Reife für Gästeinteraktion gering.","src":[],"opp":"Entlastung bei Personalmangel.","risk":"Akzeptanz, Wartung, Wirtschaftlichkeit.","tta":"6–10","sc":[3,2,3,2,3,2],"ev":"C","unc":true,"fo":"HOS","st":"Robotik","orig":"GLOBAL"},{"id":10,"n":"Bar- & Küchenrobotik","c":"B","fo":"HOS","st":"Robotik","d":"Roboter übernehmen standardisierte Schritte in Küche und Bar, etwa Frittieren, Zapfen oder Cocktails.","rel":[3,2,3],"use":"Frittierstationen in Stadionküchen, Getränkeroboter in Fan-Zonen und Arenen.","bp":"Pilot des Küchenroboters Flippy (Miso Robotics) mit Caterer Levy im Dodger Stadium [s83].","sig":"Belegt: Piloten seit 2018. Unsicher: Skalierung in Europa, Wirtschaftlichkeit bei wenigen Spieltagen.","src":["s83"],"opp":"Entlastung bei Personalmangel, konstante Qualität in Spitzenzeiten.","risk":"Auslastung nur an Eventtagen, Wartung, Hygienezulassung.","tta":"3–5","sc":[3,3,3,3,4,2],"ev":"B","unc":true,"orig":"US","eu":{"tta":"6–10","sc":[3,3,3,2,4,2],"note":"Wenige Eventtage im Jahr, Hygieneauflagen und Mitbestimmung beim Personaleinsatz schwächen den Business Case in Europa. Europäische Stadionpiloten sind bisher kaum belegt."}},{"id":11,"n":"KI-Gastroplanung","c":"B","fo":"HOS","st":"Kiosk & Gastro","d":"KI prognostiziert Absatz je Kiosk und Spieltag und steuert Einkauf, Produktion und Personal.","rel":[3,3,3],"use":"Mengenplanung nach Gegner, Wetter, Anstoßzeit; Personalplanung; weniger Food Waste.","bp":"Delicious Data aus München liefert KI-Absatzprognosen für Gastronomie und Catering und sammelte frisches Kapital ein [s84].","sig":"Belegt: Lösungen am Markt in DACH. Prognose: Standard bei Großcaterern.","src":["s84"],"opp":"Weniger Abfall, höhere Marge, weniger Ausverkauf.","risk":"Datenqualität der Kassen, Integration beim Caterer.","tta":"0–2","sc":[4,2,4,4,3,4],"ev":"B","orig":"EU"},{"id":12,"n":"Fair Dynamic Pricing","c":"C","d":"Preise passen sich Nachfrage an – mit Transparenz- und Fairnessregeln, um Vertrauen zu sichern.","rel":[3,3,3],"use":"Nachfragebasierte Preise für Tagestickets und Hotelzimmer; Preisgarantie für Mitglieder.","bp":"CMA-Fall Oasis: keine dynamische Preisgestaltung nachgewiesen, Ticketmaster ändert UK-Verkauf [s15]; Hotelpreise steigen bei Großevents [s31].","sig":"Belegt: regulatorischer Druck in UK. Prognose: Transparenzpflichten nehmen zu.","src":["s15","s31"],"opp":"Ertragsoptimierung, weniger Zweitmarkt.","risk":"Fan-Backlash, Regulierung, Reputationsschaden.","tta":"0–2","sc":[5,2,5,5,2,4],"ev":"A","fo":"HOS","st":"VIP & Premium","orig":"US","eu":{"tta":"3–5","sc":[4,2,4,4,2,3],"note":"Fankultur, Dauerkarten-Preisbindung und Verbraucherschutz (CMA-Fall Oasis) begrenzen den Spielraum. Realistisch zuerst für Tageskarten, Hospitality und Hotel."}},{"id":13,"n":"Premium-Hospitality-Tiers","c":"C","d":"Ausdifferenzierte VIP-Stufen vom Social Club bis zur Suite steigern den Erlös pro Platz.","rel":[3,3,3],"use":"Tunnel-Club-Formate, Field-Level-Lounges, Konzert-Premium-Pakete.","bp":"FC Barcelona: neues VIP-Sitzmodell im Spotify Camp Nou [s46]; Las Vegas Grand Prix mit fast 220 Mio. US$ Hotelzimmerumsatz [s45].","sig":"Belegt: Clubs und Promoter erhöhen Premium-Anteil.","src":["s46","s45"],"opp":"Höchster Erlös pro Quadratmeter.","risk":"Exklusionswirkung, Fan-Kultur-Konflikte.","tta":"0–2","sc":[5,4,5,5,3,4],"ev":"A","fo":"HOS","st":"VIP & Premium","orig":"GLOBAL"},{"id":14,"n":"Experience-Abos","c":"C","d":"Mitgliedschaften bündeln Zugang, Inhalte und Vorteile über eine Saison oder mehrere Venues.","rel":[3,2,3],"use":"Flex-Saisonpass mit wählbaren Spielen; Venue-Pass für Konzerte.","bp":"Wissensbasis: Flex- und Mitgliedschaftsmodelle in Ligen und bei Venue-Betreibern – zu validieren.","sig":"Prognose: Planbarkeit von Erlösen gewinnt an Bedeutung.","src":[],"opp":"Planbare Erlöse, Datenzugang.","risk":"Kannibalisierung, Abo-Müdigkeit.","tta":"3–5","sc":[4,3,4,3,3,3],"ev":"C","unc":true,"fo":"FAN","st":"Loyalty","orig":"GLOBAL"},{"id":15,"n":"Direct-to-Fan-Plattformen","c":"C","d":"Ligen, Clubs und Künstler bauen eigene Kanäle für Content, Commerce und Daten auf.","rel":[3,1,3],"use":"Eigene Streaming- und Community-Plattform; Creator-Kanäle der Spieler.","bp":"Kings League verbreitet Events über Kanäle von Team-Präsidenten und Partnern [s6].","sig":"Belegt: Reichweite über eigene und Creator-Kanäle.","src":["s6"],"opp":"Eigene Daten, Unabhängigkeit von Intermediären.","risk":"Reichweitenverlust gegenüber Plattformen.","tta":"3–5","sc":[4,3,4,4,3,3],"ev":"B","fo":"FAN","st":"Plattformen","orig":"GLOBAL"},{"id":16,"n":"Event-Tourismus-Pakete","c":"C","d":"Ticket, Hotel, Mobilität und Rahmenprogramm werden als ein Reiseprodukt vermarktet.","rel":[3,3,3],"use":"Matchday-to-Stay-Pakete; Konzertreisen; Turnier-Pakete für internationale Fans.","bp":"Eras Tour treibt Hotelpreise und -umsätze in Europa [s31, s32]; Women's EURO 2025 mit 220 Mio. € Effekt für die Schweiz [s26]; Vegas GP [s45].","sig":"Belegt: messbare Tourismuseffekte von Großevents.","src":["s31","s32","s26","s45"],"opp":"Zusatzerlöse, Destinationspartnerschaften.","risk":"Preis-Backlash, Kapazitätsengpässe.","tta":"0–2","sc":[5,4,5,4,3,4],"ev":"A","fo":"HOS","st":"Hotellerie","orig":"GLOBAL"},{"id":17,"n":"Fan Tokens & Web3","c":"C","fo":"FAN","st":"Loyalty","d":"Blockchain-basierte Tokens versprechen Mitbestimmung, Prämien und digitale Sammelobjekte.","rel":[3,1,2],"use":"Abstimmungen über Kleinigkeiten, Prämien, Zugang zu Erlebnissen.","bp":"Socios/Chiliz als größte Plattform; Chiliz wechselt 2026 auf Solana [s96]; Branchenkommentare sehen das Modell kritisch [s95].","sig":"Belegt: Plattform aktiv. Gegenposition: Zweifel am langfristigen Nutzen.","src":["s95","s96"],"opp":"Zusatzerlöse, internationale Fans.","risk":"Spekulation, Regulierung (MiCA), Reputationsrisiko.","tta":"6–10","sc":[2,2,2,3,3,3],"ev":"B","unc":true,"orig":"GLOBAL","eu":{"note":"Die EU-Kryptoregulierung (MiCA) erhöht Anforderungen an Anbieter; Fanszenen im DACH-Raum stehen Tokens kritisch gegenüber."}},{"id":18,"n":"Biometrischer Zugang","c":"D","d":"Gesicht als Ticket und Zahlungsmittel für reibungslosen Einlass und Kauf.","rel":[3,2,3],"use":"Opt-in-Gesichtseinlass; Bezahlung ohne Karte; Hotel-Check-in.","bp":"NFL rollt Gesichtsauthentifizierung ligaweit aus [s19]; LAFC nutzt Wicket für Einlass und Zahlung [s20]; Intuit Dome [s21].","sig":"Belegt: USA skaliert. Europa: DSGVO verlangt Einwilligung und Folgenabschätzung.","src":["s19","s20","s21"],"opp":"Kürzere Wartezeiten, weniger Ticketbetrug.","risk":"Datenschutz, Akzeptanz, Diskriminierungsrisiken.","tta":"3–5","sc":[3,5,4,4,3,3],"ev":"A","fo":"INF","st":"Einlass","orig":"US","eu":{"tta":"6–10","sc":[3,5,4,2,3,2],"note":"Biometrische Daten sind nach Art. 9 DSGVO besonders geschützt; der EU AI Act verbietet bestimmte biometrische Echtzeit-Identifikation und reguliert den Rest streng. Opt-in-Piloten möglich, flächiger Einsatz frühestens Anfang der 2030er.","src":["s105","s106"]}},{"id":19,"n":"Checkout-freie Gastronomie","c":"D","d":"Kaufen ohne Kasse per Sensorik oder Scan verkürzt Wartezeiten in Pausen.","rel":[3,1,3],"use":"Walk-out-Kioske im Stadion; Grab-and-go in Arenen und Festivals.","bp":"Tennessee Titans als erstes NFL-Team mit Just Walk Out (Januar 2026) [s30]; Zippin mit fünf Stores im NRG Stadium [s67].","sig":"Belegt: Ausbau in US-Venues.","src":["s30","s67"],"opp":"Mehr Umsatz pro Kopf, weniger Personalbedarf.","risk":"Investition, Datenschutz, Diebstahlquote.","tta":"0–2","sc":[4,5,4,4,3,4],"ev":"A","fo":"HOS","st":"Kiosk & Gastro","orig":"US","eu":{"tta":"3–5","sc":[4,5,4,3,3,3],"note":"Bisher überwiegend US-Venues. In Europa höhere Kosten pro Spieltag und datenschutzrechtliche Prüfung des Kameratrackings; Mobile Order und Cashless sind der schnellere Weg."}},{"id":20,"n":"Multi-Use-Arenen","c":"D","d":"Venues werden ganzjährig für Sport, Konzerte, Training, Breitensport und Firmenevents genutzt.","rel":[3,2,3],"use":"Mehrere Sportarten unter einem Dach; Off-Day-Programmierung mit Community-Formaten.","bp":"SAP Garden München für Eishockey, Basketball und Breitensport [s22]; Intuit Dome [s47].","sig":"Belegt: neue Arenen setzen auf Ganzjahresnutzung.","src":["s22","s47"],"opp":"Höhere Auslastung, Diversifizierung.","risk":"Umbauzeiten, Konflikte zwischen Nutzern.","tta":"3–5","sc":[4,4,5,4,3,3],"ev":"A","fo":"INF","st":"Stadionbau","orig":"EU"},{"id":21,"n":"Stadion-Quartiere","c":"D","d":"Venues werden Kern gemischter Quartiere mit Hotel, Handel, Wohnen und Entertainment.","rel":[3,3,3],"use":"Hotel am Stadion; ganzjährige Gastronomie; Entertainment-Districts.","bp":"Hollywood Park Inglewood mit Cosm-Venue im Umfeld des SoFi Stadium [s9].","sig":"Belegt: US-Beispiele. Prognose: in Europa abhängig von Planungsrecht und Kapital.","src":["s9"],"opp":"Ganzjährige Erlöse, Immobilienwert.","risk":"Lange Planungszyklen, Kapitalbedarf.","tta":"6–10","sc":[5,3,5,3,3,2],"ev":"B","fo":"INF","st":"Stadionbau","orig":"US","eu":{"note":"Planungsrecht, Flächenverfügbarkeit und kommunale Beteiligung verlängern die Zyklen in Europa gegenüber US-Entertainment-Districts."}},{"id":22,"n":"Smart Hotel Rooms","c":"D","d":"Digitaler Schlüssel, IoT-Steuerung und Sprachassistenten individualisieren das Zimmer.","rel":[1,3,1],"use":"Mobile Key; Raumprofil nach Gastpräferenz; Fan-Zimmer zum Event.","bp":"Wissensbasis: Mobile Key bei großen Hotelketten verbreitet – zu validieren.","sig":"Prognose: Verknüpfung mit Loyalty und Agentic Booking.","src":[],"opp":"Effizienz, Upselling, Gästezufriedenheit.","risk":"Technikabhängigkeit, Sicherheitslücken.","tta":"0–2","sc":[3,4,3,4,2,4],"ev":"C","fo":"HOS","st":"Hotellerie","orig":"GLOBAL"},{"id":23,"n":"Private 5G & Wi-Fi 7","c":"D","d":"Hochleistungsnetze sind Grundlage für Streaming, Zahlungen, Biometrie und Produktion vor Ort.","rel":[3,2,3],"use":"Stabile Fan-Konnektivität; drahtlose TV-Produktion; Sensorik für Digital Twins.","bp":"Intuit Dome als technologieintensive Arena [s47].","sig":"Prognose: Konnektivität wird Basisvoraussetzung für alle digitalen Trends.","src":["s47"],"opp":"Enabler für Commerce und Daten.","risk":"Investition, schnelle Technologiezyklen.","tta":"0–2","sc":[3,4,4,4,2,3],"ev":"B","fo":"INF","st":"Stadionbau","orig":"GLOBAL"},{"id":24,"n":"Mobile Order & In-Seat","c":"D","fo":"HOS","st":"Kiosk & Gastro","d":"Bestellen per App mit Abholung am Express-Schalter oder Lieferung an den Platz.","rel":[3,2,3],"use":"Pausen-Vorbestellung, Lieferung in Premium-Bereiche, Abholfächer.","bp":"SeatServe an der Anfield Road [s81]; Newcastle United liefert an den Platz [s82].","sig":"Belegt: Einsatz in der Premier League.","src":["s81","s82"],"opp":"Mehr Umsatz pro Kopf, kürzere Schlangen, Daten zu Kaufverhalten.","risk":"Logistik in vollen Blöcken, Personal für Lieferung.","tta":"0–2","sc":[4,5,4,4,3,4],"ev":"A","orig":"EU"},{"id":25,"n":"Self-Pour & Smart Schank","c":"D","fo":"HOS","st":"Schanktechnik","d":"Selbstzapf-Wände, Hochleistungsschank und sensorgesteuertes Zapfen erhöhen Durchsatz und reduzieren Schwund.","rel":[3,2,3],"use":"Bierwände mit Bezahlung per Karte oder Armband, Schnellzapfsysteme für Pausenspitzen.","bp":"Sodexo Live! mit permanenten Ebar-Beerwalls beim Millwall FC als europäische Premiere [s77]; Draft Picks Perfect Pour im Honda Center ausgezeichnet [s78]; PourMyBeer für Stadien [s80].","sig":"Belegt: Ausbreitung in UK und USA [s79]. DACH: Altersprüfung und Jugendschutz klären.","src":["s77","s78","s79","s80"],"opp":"Höherer Durchsatz, weniger Personal am Hahn, exakte Abrechnung.","risk":"Jugendschutz, Hygiene, Akzeptanz beim Bierpartner.","tta":"0–2","sc":[4,4,4,4,3,4],"ev":"A","orig":"GLOBAL","eu":{"note":"In Deutschland und Österreich Altersprüfung (Jugendschutz) und Schankrecht klären. Die Premiere beim Millwall FC zeigt die Machbarkeit in Europa."}},{"id":26,"n":"Cashless & Mobile POS","c":"D","fo":"HOS","st":"Kiosk & Gastro","d":"Offene Kartenzahlung und mobile Terminals ersetzen Bargeld und geschlossene Stadion-Bezahlkarten.","rel":[3,3,3],"use":"Mobile Terminals im Umlauf, Kartenzahlung an allen Kiosken, Zahlung per Smartphone.","bp":"VfB Stuttgart und LBBW führen mobile Terminals in der MHP Arena ein [s75]; LASK Raiffeisen Arena mit Mastercard und card complete [s100].","sig":"Belegt: Wechsel weg von geschlossenen Bezahlkarten, die Verbraucherschützer kritisiert haben [s76].","src":["s75","s100","s76"],"opp":"Schnellere Abwicklung, kein Restguthaben-Ärger, bessere Daten.","risk":"Gebühren, Netzausfall, Fans mit Bargeldpräferenz.","tta":"0–2","sc":[3,4,4,5,2,5],"ev":"A","orig":"EU"},{"id":27,"n":"Digitale Tickets & Anti-Fraud","c":"D","fo":"INF","st":"Einlass","d":"Personalisierte, digitale Tickets mit kontrollierter Weitergabe gegen Fälschung und Schwarzmarkt.","rel":[3,1,3],"use":"Ticket-Wallet, offizieller Zweitmarkt, Weitergabe an Fanclubs, Einlass per App.","bp":"FC Bayern ab 2026/27 nur noch digitale Tickets, um Schwarzmarkt und Fälschungen zu verhindern [s74].","sig":"Belegt: DACH-Vorreiter. Offen: Barrierefreiheit der App, Lösungen für Fans ohne Smartphone.","src":["s74"],"opp":"Weniger Betrug, Daten zu realen Besuchern, Zweitmarkterlöse.","risk":"Ausschluss, technische Ausfälle am Einlass, Fan-Widerstand.","tta":"0–2","sc":[4,4,5,5,3,4],"ev":"A","orig":"EU"},{"id":28,"n":"Phygitale Fan-Hubs","c":"E","d":"Fan-Zonen, Watch-Partys und Hotel-Lounges werden zu vernetzten Erlebnisorten mit Live-Daten und Commerce.","rel":[3,3,2],"use":"Hotelbar als offizieller Watch-Party-Ort; Fan-Zonen mit digitalem Check-in und Merchandising.","bp":"UEFA Women's EURO 2025 mit Rekordzahlen und Fan-Aktivierungen in der Schweiz [s25, s26].","sig":"Belegt: Großevents erzeugen hohe Nachfrage außerhalb des Stadions.","src":["s25","s26"],"opp":"Erlöse jenseits der Stadionkapazität, Hotelauslastung.","risk":"Sicherheit, Lizenzrechte für öffentliche Vorführungen.","tta":"0–2","sc":[3,4,4,4,3,4],"ev":"B","fo":"FAN","st":"Content & Community","orig":"EU"},{"id":29,"n":"Competitive Socialising","c":"E","d":"Gastronomie trifft Spiel: Darts, Mini-Golf und Simulatoren als soziale Erlebnisse.","rel":[2,3,3],"use":"Social-Gaming-Zonen in Arenen und Hotels; Fan-Bars mit Spielangeboten.","bp":"Savills: schnelles Wachstum des Segments [s36]; Flight Club plant 45 neue Venues [s37]; Marktreife zeichnet sich ab [s38].","sig":"Belegt: Expansion. Unsicher: Sättigung in Metropolen.","src":["s36","s37","s38"],"opp":"Ganzjährige Frequenz in Venue-Umfeld.","risk":"Sättigung, hoher Flächenbedarf.","tta":"0–2","sc":[4,4,4,5,3,4],"ev":"A","fo":"HOS","st":"Kiosk & Gastro","orig":"EU"},{"id":30,"n":"Gaming-Welten als Bühne","c":"E","d":"Plattformen wie Roblox und Fortnite werden Orte für Fan-Erlebnisse, Konzerte und Sponsoring.","rel":[3,1,3],"use":"Virtuelles Stadion; Konzerte in Games; digitale Fanartikel.","bp":"FIFA baut Roblox-Engagement aus [s39].","sig":"Belegt: Sportverbände investieren. Prognose: Zugang zu Gen Alpha.","src":["s39"],"opp":"Neue Zielgruppen, digitale Güter.","risk":"Kurzlebigkeit, Kinderschutz.","tta":"3–5","sc":[3,3,3,4,4,3],"ev":"B","fo":"FAN","st":"Gamification","orig":"GLOBAL"},{"id":31,"n":"Circular Events","c":"F","d":"Mehrweg, Kreislauf und Abfallvermeidung werden Standard bei Events und Festivals.","rel":[3,2,3],"use":"Mehrwegbecher, Pfandsysteme, kreislauffähige Bühnenbauten.","bp":"Tomorrowland 2025 komplett auf Mehrweg mit Smart Cups [s42]; 97 % Rücklaufquote in Dänemark [s43]; Roskilde [s50].","sig":"Belegt: regulatorischer Druck. Gegenposition: Kritik an Materialwahl [s44].","src":["s42","s43","s44","s50"],"opp":"Kosteneinsparung, Sponsor-Aktivierung.","risk":"Greenwashing-Vorwürfe, Logistik.","tta":"0–2","sc":[2,3,4,5,2,4],"ev":"A","fo":"HOS","st":"Kiosk & Gastro","comp":true,"orig":"EU"},{"id":32,"n":"Green Fan Mobility","c":"F","d":"Anreise ist der größte Emissionsposten – ÖPNV-Kombitickets und Shuttles werden Pflichtprogramm.","rel":[3,2,3],"use":"Kombiticket, Fahrrad-Parking, E-Shuttles.","bp":"DFB/DFL testen digitale Parklösungen [s73]; Kombitickets mit ÖPNV sind in DACH verbreitet (Wissensbasis).","sig":"Prognose: Berichterstattung über Emissionen erhöht Druck.","src":["s73"],"opp":"Weniger Parkflächen, besseres Erlebnis.","risk":"Kapazität im ÖPNV.","tta":"0–2","sc":[2,4,4,4,2,4],"ev":"B","fo":"INF","st":"Mobilität","orig":"EU"},{"id":33,"n":"Regenerative Hospitality","c":"F","d":"Hotels und Events wollen positive Effekte für Region und Umwelt erzeugen, nicht nur weniger Schaden.","rel":[1,3,2],"use":"Regionale Lieferketten, Renaturierung, Community-Programme.","bp":"Keine Primärquelle in dieser Recherche verifiziert.","sig":"Prognose: Differenzierung im Premium-Segment.","src":[],"opp":"Markendifferenzierung, Preisbereitschaft.","risk":"Messbarkeit, Greenwashing.","tta":"6–10","sc":[3,3,3,2,4,2],"ev":"C","unc":true,"fo":"HOS","st":"Hotellerie","orig":"GLOBAL"},{"id":34,"n":"Energiespeicher & EMS","c":"F","fo":"INF","st":"Energie","d":"Batteriespeicher und Energiemanagement glätten Lastspitzen an Eventtagen und vermarkten Flexibilität am Strommarkt.","rel":[3,2,3],"use":"Notstrom statt Dieselaggregat, Lastspitzen-Kappung, Netzdienstleistungen an Nicht-Eventtagen.","bp":"Johan Cruijff ArenA mit 3-MW-Speicher aus wiederverwendeten Nissan-Batterien [s90].","sig":"Belegt: Referenz seit 2018. Prognose: sinkende Speicherkosten erhöhen Wirtschaftlichkeit.","src":["s90"],"opp":"Geringere Energiekosten, Zusatzerlöse, Versorgungssicherheit.","risk":"Investition, Brandschutz, Netzanschluss.","tta":"3–5","sc":[3,2,4,4,3,3],"ev":"A","orig":"EU"},{"id":35,"n":"Energiepositive Venues","c":"F","d":"Venues erzeugen mehr Energie als sie verbrauchen und werden Teil lokaler Energiesysteme.","rel":[3,2,3],"use":"PV-Dächer, Batteriespeicher, Wärmenetze.","bp":"Tottenham Hotspur Stadium als Nachhaltigkeitsbeispiel [s48].","sig":"Prognose: Energiepreise und Regulierung treiben Investitionen.","src":["s48"],"opp":"Kostensenkung, neue Erlöse.","risk":"Hohe Anfangsinvestition.","tta":"6–10","sc":[3,2,4,3,3,2],"ev":"B","fo":"INF","st":"Energie","orig":"EU"},{"id":36,"n":"Holz- & Modularbau","c":"F","fo":"INF","st":"Stadionbau","d":"Holz und modulare Bauteile senken graue Emissionen und erlauben flexible Erweiterung oder Rückbau.","rel":[3,1,2],"use":"Holz-Tribünen, modulare Ausbaustufen, temporäre Tribünen für Turniere.","bp":"Forest Green Rovers planen mit Zaha Hadid Architects ein Stadion fast vollständig aus Holz [s91].","sig":"Belegt: Planungen. Unsicher: Umsetzung und Brandschutz bei Großstadien.","src":["s91"],"opp":"Geringere CO2-Bilanz, schnellere Bauzeit, Anpassbarkeit.","risk":"Genehmigung, Brandschutz, Kostenunsicherheit.","tta":"6–10","sc":[2,3,4,2,4,2],"ev":"B","orig":"EU"},{"id":37,"n":"KI-Crowd-Management","c":"G","d":"KI prognostiziert Besucherströme für Einlass, Gastronomie und Abreise und steuert proaktiv.","rel":[3,2,3],"use":"Dynamische Einlasszeiten; Personalplanung nach Prognose; Abreise-Lenkung mit ÖPNV.","bp":"DFB/DFL testen 2025/26 KI-gestütztes Crowd-Management in der Projektgruppe Stadioninnovationen [s73]; Simulationsanbieter wie Simio [s35].","sig":"Belegt: Piloten in deutschen Stadien. Prognose: Teil der Sicherheits- und Einlassplanung.","src":["s73","s35"],"opp":"Weniger Wartezeit, mehr Umsatz pro Kopf, Sicherheit.","risk":"Datenqualität, Integration in Sicherheitsprozesse.","tta":"3–5","sc":[3,4,5,3,3,3],"ev":"A","unc":false,"fo":"INF","st":"Sicherheit","orig":"EU"},{"id":38,"n":"KI-Screening & Videoschutz","c":"G","fo":"INF","st":"Sicherheit","d":"KI-Videoanalyse und berührungsloses Waffen-Screening beschleunigen Einlass und erkennen Gefahren früher.","rel":[3,2,3],"use":"Walk-through-Screening am Einlass, Erkennung von Gedränge oder liegengebliebenen Objekten.","bp":"Evolv sichert die Club-WM 2025 und europäische Events [s86, s87]; Staige One liefert KI-Videoschutz u. a. für die Polizei Berlin [s85].","sig":"Belegt: Einsatz bei Großevents. Europa: EU AI Act und DSGVO begrenzen biometrische Auswertung.","src":["s86","s87","s85"],"opp":"Schnellerer Einlass, höhere Sicherheit, weniger Personal an Kontrollen.","risk":"Fehlalarme, Rechtsrahmen, Akzeptanz bei Fanszenen.","tta":"3–5","sc":[2,4,5,4,3,3],"ev":"A","orig":"US","eu":{"tta":"3–5","sc":[2,4,4,3,3,2],"note":"Waffen-Screening läuft auch bei europäischen Events. KI-Videoanalyse mit Personenbezug unterliegt dem EU AI Act und stößt bei aktiven Fanszenen auf Widerstand.","src":["s105"]}},{"id":39,"n":"Drohnenabwehr","c":"G","fo":"INF","st":"Sicherheit","d":"Detektion und Abwehr unerlaubter Drohnen über Stadien und Fan-Zonen.","rel":[3,1,3],"use":"Radar-Detektion, Lagebild für Sicherheitsdienst und Polizei, Flugverbotszonen.","bp":"USA planen 500 Mio. US$ für Drohnensicherheit bei der WM 2026 [s88]; Anbieter wie Robin Radar bieten Stadion-Detektion [s89].","sig":"Belegt: hoher Aufwand bei Großturnieren. Unsicher: Abwehr ist in Deutschland Sache der Behörden.","src":["s88","s89"],"opp":"Schutz vor neuen Gefahren, Versicherbarkeit von Großevents.","risk":"Rechtslage, Kosten, Zuständigkeiten.","tta":"3–5","sc":[1,2,4,3,3,2],"ev":"A","unc":true,"orig":"GLOBAL","eu":{"note":"Abwehr ist in Deutschland Aufgabe der Polizei; Veranstalter können Detektion und Meldeketten aufbauen."}},{"id":40,"n":"Cyber-Resilienz","c":"G","d":"Vernetzte Venues, Ticketing und Zahlungen werden zum Angriffsziel – Resilienz wird Erlebnisfaktor.","rel":[3,3,3],"use":"Notfallbetrieb für Ticketing und Einlass; Schutz von Fan-Daten.","bp":"Keine Primärquelle in dieser Recherche verifiziert.","sig":"Prognose: steigende Abhängigkeit von digitaler Infrastruktur erhöht Risiko.","src":[],"opp":"Vertrauen, Ausfallsicherheit, Versicherbarkeit.","risk":"Betriebsausfall, Datenlecks, Reputationsschäden.","tta":"3–5","sc":[3,2,4,4,2,3],"ev":"C","unc":true,"fo":"INF","st":"Sicherheit","orig":"GLOBAL"},{"id":41,"n":"Hitzeschutz & Wetterresilienz","c":"G","d":"Hitze und Unwetter verlangen Kühlzonen, Wetterwarnsysteme und angepasste Abläufe in Venues.","rel":[3,2,3],"use":"Wetterberatung für Spieltage, Trinkwasserstellen, Schattenzonen, Evakuierungspläne bei Gewitter.","bp":"DFB/DFL testen Wetterberatung zur Zuschauersicherheit [s73]; FIFPRO warnt nach der Club-WM 2025 vor Hitze [s23, s24].","sig":"Belegt: Spielergewerkschaft fordert Anpassungen.","src":["s73","s23","s24"],"opp":"Gesundheit, Planbarkeit, neue Formate.","risk":"Konflikt mit TV-Slots, Kosten.","tta":"3–5","sc":[3,4,5,3,3,3],"ev":"A","fo":"INF","st":"Sicherheit","orig":"GLOBAL"},{"id":42,"n":"Barrierefreie Experiences","c":"G","d":"Digitale und physische Barrierefreiheit wird Pflicht und Qualitätsmerkmal.","rel":[3,3,3],"use":"Barrierefreie Ticketshops, sensorische Ruheräume, Audiodeskription.","bp":"European Accessibility Act seit Juni 2025 [s33, s34]; DFB/DFL testen flexible Rollstuhlplatz-Systeme [s73].","sig":"Belegt: gesetzliche Pflicht.","src":["s33","s34","s73"],"opp":"Größere Zielgruppe, Rechtssicherheit.","risk":"Bußgelder bei Nichterfüllung.","tta":"0–2","sc":[3,4,5,4,3,4],"ev":"A","fo":"INF","st":"Inklusion","comp":true,"orig":"EU"},{"id":43,"n":"Sensory-inklusive Venues","c":"G","fo":"INF","st":"Inklusion","d":"Ruheräume, Sinnes-Karten und geschultes Personal für neurodivergente Besucher.","rel":[3,2,3],"use":"Sensory Rooms mit Blick aufs Spielfeld, Ruhezonen, Lärmschutz-Kits, Vorab-Informationen.","bp":"WM 2026 als erstes „sensory inclusive“ Turnier ausgezeichnet [s97]; Sensory Rooms in Wembley [s98] und bei Manchester City [s99].","sig":"Belegt: wachsende Verbreitung in UK und bei Turnieren.","src":["s97","s98","s99"],"opp":"Neue Zielgruppen, Familienfreundlichkeit, Reputation.","risk":"Flächenbedarf, Schulungsaufwand.","tta":"0–2","sc":[2,5,4,4,3,4],"ev":"A","orig":"GLOBAL"},{"id":44,"n":"Faire Preise & Teilhabe","c":"G","fo":"FAN","st":"Teilhabe","d":"Bezahlbare Kontingente, Stehplätze, Preisobergrenzen und Fan-Dialog sichern den Zugang breiter Zielgruppen – als Gegengewicht zu Premiumisierung und dynamischen Preisen.","rel":[3,1,3],"use":"Preisdeckel für Gästetickets, Jugend- und Sozialkontingente, Erhalt von Stehplätzen, Fanbeiräte bei Preisentscheidungen.","bp":"Premier League verlängert die 30-£-Obergrenze für Auswärtstickets um zwei Spielzeiten [s101, s102]; UEFA senkt Preisobergrenzen für Gästetickets [s104]; Bundesliga meldet Zuschauerrekorde 2025/26 [s103].","sig":"Belegt: Preisobergrenzen in UK und bei der UEFA. Prognose: Teilhabe wird zur Lizenz- und Reputationsfrage, wenn Premium-Anteile steigen.","src":["s101","s102","s104","s103"],"opp":"Fanbindung, Legitimation für Premium-Ausbau, Reputation bei Politik und Sponsoren.","risk":"Erlösverzicht, Zielkonflikt mit dynamischen Preisen.","tta":"3–5","sc":[3,4,4,3,3,4],"ev":"A","orig":"EU","eu":{"tta":"0–2","sc":[3,4,5,4,3,4],"note":"In Europa durch Stehplätze, Fankultur und Preisobergrenzen (Premier League, UEFA) deutlich stärker verankert als in US-Märkten mit dynamischen Preisen."}}];
+const P = {"aws":{"n":"AWS (DFL-Partner)","r":"GenAI- und Cloud-Partner der Bundesliga, u. a. Amazon Nova und Match Facts","s":["s13","s14"]},"twocircles":{"n":"Two Circles / KORE","r":"Fan-Daten- und CRM-Plattform für Rechteinhaber; Two Circles übernahm KORE","s":["s66"]},"bonvoy":{"n":"Marriott Bonvoy Moments","r":"Loyalty-Punkte gegen Event-Erlebnisse eintauschen","s":[],"kb":true},"blocksport":{"n":"Blocksport","r":"Plattform für Club-Superapps, u. a. Vitória SC","s":["s92"]},"fcbticket":{"n":"FC Bayern München (Referenz)","r":"Ab 2026/27 nur noch digitale Tickets über App mit Wallet, Weitergabe und Zweitmarkt","s":["s74"]},"infobip":{"n":"Infobip PitchMate","r":"KI-Fan-Companion für Fußballclubs","s":["s93"]},"plcomp":{"n":"Premier League Companion","r":"KI-Assistent der Liga; Testberichte zeigen noch geringe Qualität","s":["s94"]},"apaleo":{"n":"Apaleo","r":"Hotel-PMS aus München mit MCP-Server, über den KI-Agenten Hotelsysteme anbinden und Buchungen auslösen","s":["s59","s58","s72"]},"gaimode":{"n":"Google AI Mode × Marriott","r":"Agentische Hotelbuchung direkt in der Suche","s":["s27"]},"wsc":{"n":"WSC Sports","r":"KI-generierte Highlights; Kunden u. a. Borussia Dortmund, DFB (DFB-Pokal), Red Bull München","s":["s62","s63","s64"]},"dfbinno":{"n":"DFB/DFL Projektgruppe Stadioninnovationen","r":"8 Piloten an 12 Standorten 2025/26: KI-Crowd-Management, digitales Parken, Wetterberatung, flexible Rollstuhlplätze","s":["s73"]},"simio":{"n":"Simio","r":"Simulation und Digital Twins für Spieltagsabläufe","s":["s35"]},"miso":{"n":"Miso Robotics (Flippy) × Levy","r":"KI-Küchenroboter für Frittierstationen, Pilot im Dodger Stadium","s":["s83"]},"delicious":{"n":"Delicious Data","r":"Münchner Start-up für KI-Absatzprognosen in Gastronomie und Catering gegen Food Waste","s":["s84"]},"evolv":{"n":"Evolv","r":"KI-gestütztes Waffen-Screening am Einlass, u. a. Club-WM 2025 und europäische Events","s":["s86","s87"]},"staige":{"n":"Staige One","r":"KI-gestützter Videoschutz, u. a. Pilot mit der Polizei Berlin","s":["s85"]},"robin":{"n":"Robin Radar","r":"Radar-basierte Drohnendetektion für Stadien und Großveranstaltungen","s":["s89"]},"duetto":{"n":"Duetto + PredictHQ","r":"Hotel-Revenue-Management mit Event-Nachfragedaten (Konzerte, Spiele, Messen)","s":["s68"]},"ideas":{"n":"IDeaS","r":"Revenue-Management-Software mit Strategien für Großevent-Nachfrage","s":["s69"]},"sportsbreaks":{"n":"Sportsbreaks","r":"Ticket-Hotel-Pakete und Corporate Hospitality; offizieller Partner von Manchester United","s":["s60"]},"destination":{"n":"Destination Sport","r":"Sportreise-Pakete; Mehrjahrespartner des Brentford FC","s":["s61"]},"socios":{"n":"Socios / Chiliz","r":"Fan-Token-Plattform; Geschäftsmodell wird kritisch bewertet","s":["s95","s96"]},"wicket":{"n":"Wicket","r":"Gesichtsbasierter Einlass und Bezahlung, u. a. bei der NFL und LAFC","s":["s19","s20"]},"clear":{"n":"CLEAR","r":"Biometrische Identität für Einlass, u. a. im Intuit Dome","s":["s21"]},"jwo":{"n":"Amazon Just Walk Out","r":"Checkout-freie Kioske; Tennessee Titans erstes NFL-Team mit vollständigem Einsatz","s":["s30"]},"zippin":{"n":"Zippin","r":"Checkout-freie Stores in Stadien, u. a. fünf Stores im NRG Stadium","s":["s67"]},"sapgarden":{"n":"SAP Garden (Referenz)","r":"Multi-Use-Arena in München für Profi- und Breitensport","s":["s22"]},"seatserve":{"n":"SeatServe","r":"In-Seat-Bestellung und Lieferung an den Platz, im Einsatz an der Anfield Road (Liverpool FC)","s":["s81"]},"ebar":{"n":"Ebar Beerwalls × Sodexo Live!","r":"Permanente Self-Serve-Bierwände, europäische Premiere beim Millwall FC","s":["s77"]},"pourmybeer":{"n":"PourMyBeer","r":"Self-Pour-Zapfsysteme mit RFID-Abrechnung für Stadien","s":["s80","s79"]},"draftpicks":{"n":"Draft Picks Perfect Pour","r":"Schanktechnik im Honda Center, ausgezeichnet als „Best New Technology“ 2026","s":["s78"]},"lbbw":{"n":"LBBW × VfB Stuttgart","r":"Mobile Kartenterminals für bargeldloses Bezahlen in der MHP Arena (35 Terminals, 30 weitere geplant)","s":["s75"]},"cardcomplete":{"n":"Mastercard × card complete","r":"Bargeldloses Bezahlsystem in der Raiffeisen Arena des LASK","s":["s100"]},"borro":{"n":"Borro","r":"Digitales QR-Pfandsystem für Mehrwegbecher in Stadien; Referenz Club Brügge, Expansion in Europa","s":["s51","s52","s53"]},"vytal":{"n":"Vytal","r":"Mehrweg-Poolsystem für Festivals und Großveranstaltungen","s":["s54"]},"cupconcept":{"n":"Cup Concept","r":"Mehrwegbecher-Dienstleister (Verleih, Spülung, Logistik) für Stadien und Events in DACH","s":["s57"]},"faerch":{"n":"Royal Unibrew × Færch","r":"Kreislauffähige Becher mit 97 % Rücklaufquote auf einem dänischen Festival","s":["s43"]},"fifpro":{"n":"FIFPRO (Stakeholder)","r":"Spielergewerkschaft mit Forderungen zu Hitzeschutz und Anstoßzeiten","s":["s23","s24"]},"fifasensory":{"n":"FIFA WM 2026 (Referenz)","r":"Erstes als „sensory inclusive“ ausgezeichnetes Turnier","s":["s97"]},"wembley":{"n":"Wembley Stadium (Referenz)","r":"Zwei multifunktionale Sensory- und Inclusion-Rooms","s":["s98"]},"mancity":{"n":"Manchester City (Referenz)","r":"Sensory Suite für einen barrierearmen Matchday","s":["s99"]},"jca":{"n":"Johan Cruijff ArenA × Nissan (Referenz)","r":"3-MW-Speicher aus wiederverwendeten E-Auto-Batterien","s":["s90"]},"fgr":{"n":"Forest Green Rovers / Zaha Hadid (Referenz)","r":"Geplantes Eco Park Stadium fast vollständig aus Holz","s":["s91"]}};
+const TP = {"1":["aws","twocircles"],"2":["twocircles","bonvoy"],"3":["aws"],"4":["blocksport","fcbticket"],"5":["infobip","plcomp"],"6":["apaleo","gaimode"],"7":["wsc","aws"],"8":["simio"],"10":["miso"],"11":["delicious"],"12":["duetto","ideas"],"13":["sportsbreaks"],"16":["sportsbreaks","destination","duetto"],"17":["socios"],"18":["wicket","clear"],"19":["jwo","zippin"],"20":["sapgarden"],"24":["seatserve"],"25":["ebar","pourmybeer","draftpicks"],"26":["lbbw","cardcomplete"],"27":["fcbticket"],"31":["borro","vytal","cupconcept","faerch"],"32":["dfbinno"],"34":["jca"],"36":["fgr"],"37":["dfbinno","simio"],"38":["evolv","staige"],"39":["robin"],"41":["dfbinno","fifpro"],"42":["dfbinno"],"43":["fifasensory","wembley","mancity"]};
+</script><script>
+const W = [0.25,0.20,0.20,0.15,0.10,0.10];
+const CLUSTERS = {
+  A:{n:"Fan & Guest Experience"}, B:{n:"AI, Data & Technology"}, C:{n:"Business Models & Monetization"},
+  D:{n:"Venues & Smart Infrastructure"}, E:{n:"Culture, Lifestyle & Community"}, F:{n:"Sustainability & Resources"},
+  G:{n:"Safety, Inclusion & Participation"}
+};
+const CK = ["A","B","C","D","E","F","G"];
+const ZK = ["KICKOFF","WARMUP","SCOUTING"];
+const ZONES = {KICKOFF:{n:"Anstoß",s:"Jetzt umsetzen"}, WARMUP:{n:"Aufwärmen",s:"Kompetenz und Piloten aufbauen"}, SCOUTING:{n:"Scouting",s:"Systematisch beobachten"}};
+const RINGS = {KICKOFF:[78,172],WARMUP:[172,266],SCOUTING:[266,345]};
+const CX = 560, CY = 400, SX = 1.22, SEG = 360/CK.length;
+
+function scoreOf(sc){ return Math.round(sc.reduce((s,v,i)=>s+v*W[i],0)*100)/100; }
+function view(t, persp){
+  const o = (persp==="EU" && t.eu) ? t.eu : {};
+  const sc = o.sc || t.sc, tta = o.tta || t.tta;
+  const total = scoreOf(sc);
+  let zone;
+  if(tta==="6–10" || sc[3]<=2) zone="SCOUTING";
+  else if(tta==="0–2" && (total>=3.5 || t.comp)) zone="KICKOFF";
+  else zone="WARMUP";
+  return {sc, tta, total, zone};
+}
+function layout(trends, persp){
+  const pos = {};
+  trends.forEach(t=>{ pos[t.id] = view(t, persp); pos[t.id].r = 8 + (pos[t.id].sc[0]-1)*2.4; });
+  CK.forEach((c,ci)=>{
+    ZK.forEach(z=>{
+      const g = trends.filter(t=>t.c===c && pos[t.id].zone===z).sort((a,b)=>pos[b.id].total-pos[a.id].total || a.id-b.id);
+      const [r0,r1] = RINGS[z], w = r1-r0, pad = 5, start = -90 + ci*SEG;
+      g.forEach((t,i)=>{
+        const ang = start + pad + (SEG-2*pad)*(i+0.5)/g.length;
+        let f;
+        if(g.length<=2) f = i===0?0.36:0.64;
+        else if(g.length<=4) f = i%2===0?0.3:0.7;
+        else f = [0.2,0.5,0.8][i%3];
+        const rad = r0 + w*f, a = ang*Math.PI/180;
+        Object.assign(pos[t.id], {ang, rad, x: CX + rad*SX*Math.cos(a), y: CY + rad*Math.sin(a)});
+      });
+    });
+  });
+  return pos;
+}
+if(typeof module!=="undefined") module.exports = {layout, view, scoreOf, CK, ZK, CLUSTERS, RINGS};
+</script>
+<script>
+(function(){
+const PREM = (typeof PREMIUM !== "undefined");
+const T = TRENDS;
+const byId = Object.fromEntries(T.map(t=>[t.id,t]));
+const POS = {EU: layout(T,"EU"), GL: layout(T,"GL")};
+const IND = ["Sport","Hospitality","Live Entertainment"];
+const CRIT = ["Business Impact","CX Impact","Strategic Fit","Market Readiness","Innovation Potential","Feasibility"];
+const FOCUS = {HOS:{n:"Hospitality",d:"Venue und Hotellerie",st:["VIP & Premium","Kiosk & Gastro","Schanktechnik","Robotik","Hotellerie"]},
+  INF:{n:"Infrastruktur",d:"Bau, Mobilität, Energie, Einlass, Sicherheit, Inklusion",st:["Stadionbau","Mobilität","Energie","Einlass","Sicherheit","Inklusion"]},
+  FAN:{n:"Fan Engagement",d:"Plattformen, Gamification, Loyalty, Content, Teilhabe",st:["Plattformen","Gamification","Loyalty","Content & Community","Teilhabe"]}};
+const FK = ["HOS","INF","FAN"];
+const ORIG = {EU:"Europa",US:"USA",GLOBAL:"Global"};
+const PN = {EU:"Europa / DACH",GL:"Global"};
+const cvar = c => `var(--c${c})`;
+const fmt = n => n.toFixed(2).replace(".",",");
+const esc = s => String(s).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
+const zp = (z,cls="zp") => `<span class="${cls} z-${z}">${ZONES[z].n}</span>`;
+const LOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>';
+const state = {persp:"EU", fo:new Set(), st:"", orig:new Set(), zone:new Set(), tta:new Set(), cl:new Set(), q:"", sel:null, cmp:[], sort:"total", dir:-1};
+const P_ = id => POS[state.persp][id];
+const moved = id => POS.EU[id].zone !== POS.GL[id].zone;
+const rankEU = T.slice().sort((a,b)=>POS.EU[b.id].total-POS.EU[a.id].total||a.id-b.id);
+state.sel = rankEU[0].id;
+
+// Anzeigetafel
+function renderBoard(){
+  const c = z => T.filter(t=>P_(t.id).zone===z).length;
+  document.getElementById("board").innerHTML = [["",T.length,"Trends"],["k",c("KICKOFF"),"Anstoß"],["",c("WARMUP"),"Aufwärmen"],["",c("SCOUTING"),"Scouting"]]
+    .map(([k,b,s])=>`<div class="${k}"><b>${b}</b><span>${s}</span></div>`).join("");
+  const mv = T.filter(t=>moved(t.id)).length;
+  document.getElementById("boardcap").textContent = `Perspektive ${PN[state.persp]} · ${mv} Trends werden in Europa anders eingeordnet als global.`;
+}
+
+// Executive Summary
+const INS = [
+ ["Frictionless Matchday ist das größte Anstoß-Feld.","Digitale Tickets (#27, Score 4,25), Mobile Order & In-Seat (#24) und Cashless (#26) liegen in Europa im Anstoß. FC Bayern verkauft ab 2026/27 nur noch digitale Tickets, der VfB Stuttgart setzt mit der LBBW mobile Kartenterminals ein."],
+ ["US-Tempo ist kein Europa-Tempo.","Fünf Trends werden in Europa anders eingeordnet als global: Biometrischer Zugang (#18) und Bar- & Küchenrobotik (#10) rutschen ins Scouting, Checkout-freie Gastronomie (#19) und Dynamic Pricing (#12) ins Aufwärmen. Treiber sind DSGVO, EU AI Act und Fankultur."],
+ ["Schanktechnik wird zum Umsatzhebel.","Self-Pour-Bierwände laufen mit Sodexo Live! beim Millwall FC erstmals dauerhaft in Europa; 2026 wurde ein Schanksystem im Honda Center als beste neue Technologie ausgezeichnet (#25)."],
+ ["Automatisierung beginnt bei der Planung, nicht beim Roboter.","KI-Absatzplanung im Catering (#11) ist reif und in DACH verfügbar, etwa mit Delicious Data aus München. Roboter in Küche, Bar und Service (#9, #10) bleiben in Europa im Scouting."],
+ ["Premium trägt das Ergebnis.","Premium-Hospitality-Tiers (#13) haben mit 4,50 den höchsten Score; verbunden mit Hotel und Anreise (#16) entsteht das stärkste Produkt an der Schnittstelle von Venue und Hotellerie."],
+ ["KI-Agenten verändern den Hotelvertrieb.","Marriott-Buchungen sollen direkt in Google AI Mode laufen; Apaleo bindet KI-Agenten per MCP-Server an Hotelsysteme an (#6). Die Schnittstellen müssen jetzt entstehen, auch wenn der Trend noch im Aufwärmen liegt."],
+ ["Sicherheit wird datengetrieben.","DFB und DFL testeten 2025/26 acht Piloten an zwölf Standorten, darunter KI-Crowd-Management und Wetterberatung (#37, #41). KI-Screening (#38) und Drohnenabwehr (#39) sind in Deutschland rechtlich und organisatorisch eng begrenzt."],
+ ["Teilhabe ist das Gegengewicht zu Premium.","Faire Preise & Teilhabe (#44) steht in Europa im Anstoß: Die Premier League verlängert die 30-£-Obergrenze für Auswärtstickets. Der European Accessibility Act (#42) und Sensory Rooms (#43) machen Inklusion zur Pflicht und zum Profil."],
+ ["Energie wird eigene Infrastrukturaufgabe.","Speicher und Energiemanagement (#34) glätten Lastspitzen an Eventtagen; die Johan Cruijff ArenA nutzt 3 MW aus wiederverwendeten E-Auto-Batterien. Holz- und Modularbau (#36) bleibt eine langfristige Option."],
+ ["Fan Engagement bündelt sich in einer Plattform.","Club-Superapps (#4) vereinen Ticket, Bezahlen und Loyalty; KI-Fan-Assistenten (#5) sind früh und in der Qualität noch schwankend. Fan Tokens (#17) bleiben im Scouting."]
+];
+document.getElementById("insights").innerHTML = INS.map(([b,s])=>`<li><div><b>${b}</b><span>${s}</span></div></li>`).join("");
+
+// Filter
+function chips(el, items, set){
+  const host = document.getElementById(el);
+  host.className = "fgroup";
+  host.innerHTML = items.map(([k,l,col])=>`<button class="chip" data-k="${esc(k)}" aria-pressed="false">${col?`<i class="sw" style="background:${col}"></i>`:""}${l}</button>`).join("");
+  host.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{
+    const k=b.dataset.k; set.has(k)?set.delete(k):set.add(k); b.setAttribute("aria-pressed",set.has(k)); update();
+  }));
+}
+chips("f-orig", Object.entries(ORIG), state.orig);
+chips("f-fo", FK.map(k=>[k,FOCUS[k].n]), state.fo);
+const stSel=document.getElementById("f-st");
+stSel.innerHTML='<option value="">Alle Unterthemen</option>'+FK.map(k=>`<optgroup label="${FOCUS[k].n}">${FOCUS[k].st.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join("")}</optgroup>`).join("");
+stSel.addEventListener("change",()=>{state.st=stSel.value;update();});
+chips("f-zone", ZK.map(z=>[z,ZONES[z].n]), state.zone);
+chips("f-tta", ["0–2","3–5","6–10"].map(z=>[z,z+" J."]), state.tta);
+chips("f-cl", CK.map(c=>[c,c,cvar(c)]), state.cl);
+document.getElementById("q").addEventListener("input",e=>{state.q=e.target.value.trim().toLowerCase();update();});
+document.getElementById("reset").addEventListener("click",()=>{
+  ["fo","orig","zone","tta","cl"].forEach(k=>state[k].clear()); state.q=""; state.st=""; stSel.value="";
+  document.getElementById("q").value=""; document.querySelectorAll(".toolbar .chip").forEach(b=>b.setAttribute("aria-pressed","false")); update();
+});
+document.querySelectorAll("#persp button").forEach(b=>b.addEventListener("click",()=>setPersp(b.dataset.p)));
+function setPersp(p){
+  state.persp=p;
+  document.querySelectorAll("#persp button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.p===p));
+  placeDots(); renderBoard(); renderFocus(); select(state.sel); renderCmp(); update();
+  if(PREM) renderPremiumDynamic();
+}
+function match(t){
+  const v=P_(t.id);
+  if(state.fo.size && !state.fo.has(t.fo)) return false;
+  if(state.st && t.st!==state.st) return false;
+  if(state.orig.size && !state.orig.has(t.orig)) return false;
+  if(state.zone.size && !state.zone.has(v.zone)) return false;
+  if(state.tta.size && !state.tta.has(v.tta)) return false;
+  if(state.cl.size && !state.cl.has(t.c)) return false;
+  if(state.q && !(t.n+" "+t.d+" "+CLUSTERS[t.c].n+" "+t.st+" "+FOCUS[t.fo].n).toLowerCase().includes(state.q)) return false;
+  return true;
+}
+
+// Arena
+const svg = document.getElementById("radar");
+const NS="http://www.w3.org/2000/svg";
+function el(tag, attrs, parent){ const e=document.createElementNS(NS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); (parent||svg).appendChild(e); return e; }
+const pt=(r,a)=>[CX+r*SX*Math.cos(a*Math.PI/180),CY+r*Math.sin(a*Math.PI/180)];
+function wedge(r0,r1,a0,a1){
+  const [x0,y0]=pt(r1,a0),[x1,y1]=pt(r1,a1),[x2,y2]=pt(r0,a1),[x3,y3]=pt(r0,a0);
+  return `M${x0},${y0} A${r1*SX},${r1} 0 0 1 ${x1},${y1} L${x2},${y2} A${r0*SX},${r0} 0 0 0 ${x3},${y3}Z`;
+}
+(function drawBase(){
+  const tiers={KICKOFF:"var(--tier1)",WARMUP:"var(--tier2)",SCOUTING:"var(--tier3)"};
+  ["SCOUTING","WARMUP","KICKOFF"].forEach(z=>{ const r=RINGS[z][1]; el("ellipse",{cx:CX,cy:CY,rx:r*SX,ry:r,fill:tiers[z],stroke:"var(--line)","stroke-width":1.4}); });
+  CK.forEach((c,i)=>{
+    const a0=-90+i*SEG, a1=a0+SEG;
+    el("path",{d:wedge(RINGS.KICKOFF[0],RINGS.SCOUTING[1],a0,a1),fill:cvar(c),"fill-opacity":.045,stroke:"none"});
+    el("path",{d:wedge(RINGS.SCOUTING[1]+5,RINGS.SCOUTING[1]+12,a0+1.2,a1-1.2),fill:cvar(c),stroke:"none"});
+    const [xa,ya]=pt(RINGS.KICKOFF[0],a0),[xb,yb]=pt(RINGS.SCOUTING[1],a0);
+    el("line",{x1:xa,y1:ya,x2:xb,y2:yb,stroke:"var(--line)","stroke-width":1.4,"stroke-dasharray":"6 5"});
+    const m=a0+SEG/2, [x,y]=pt(385,m), cs=Math.cos(m*Math.PI/180);
+    const anchor = Math.abs(cs)<0.25?"middle":(cs>0?"start":"end");
+    const lines={A:["Fan & Guest","Experience"],B:["AI, Data &","Technology"],C:["Business Models","& Monetization"],D:["Venues & Smart","Infrastructure"],E:["Culture, Lifestyle","& Community"],F:["Sustainability","& Resources"],G:["Safety, Inclusion","& Participation"]}[c];
+    const dy = Math.sin(m*Math.PI/180)>0.9?10:0;
+    el("text",{x,y:y-6+dy,"text-anchor":anchor,class:"cl-label",fill:cvar(c)}).textContent=c+" · "+lines[0];
+    el("text",{x,y:y+12+dy,"text-anchor":anchor,class:"cl-label2"}).textContent=lines[1];
+  });
+  // Spielfeld in der Mitte
+  const r0=RINGS.KICKOFF[0], w=r0*SX*1.3, h=r0*1.15;
+  el("ellipse",{cx:CX,cy:CY,rx:r0*SX,ry:r0,fill:"var(--surface)",stroke:"var(--line)","stroke-width":1.4});
+  el("rect",{x:CX-w/2,y:CY-h/2,width:w,height:h,rx:4,fill:"var(--pitch)",stroke:"var(--pitch-line)","stroke-width":1.5});
+  el("line",{x1:CX,y1:CY-h/2,x2:CX,y2:CY+h/2,stroke:"var(--pitch-line)","stroke-width":1.5});
+  el("circle",{cx:CX,cy:CY,r:h*0.22,fill:"none",stroke:"var(--pitch-line)","stroke-width":1.5});
+  el("rect",{x:CX-w/2,y:CY-h*0.27,width:w*0.13,height:h*0.54,fill:"none",stroke:"var(--pitch-line)","stroke-width":1.5});
+  el("rect",{x:CX+w/2-w*0.13,y:CY-h*0.27,width:w*0.13,height:h*0.54,fill:"none",stroke:"var(--pitch-line)","stroke-width":1.5});
+  el("text",{x:CX,y:CY+h/2+16,"text-anchor":"middle",class:"ring-label"}).textContent="2027–2035";
+  ZK.forEach(z=>{
+    const r=RINGS[z][1]-7, id="rp-"+z;
+    el("path",{id,d:`M ${CX-r*SX} ${CY} A ${r*SX} ${r} 0 0 1 ${CX+r*SX} ${CY}`,fill:"none"});
+    const tx=el("text",{class:"ring-label"}); const tp=el("textPath",{href:"#"+id,startOffset:"50%","text-anchor":"middle"},tx); tp.textContent=ZONES[z].n;
+  });
+})();
+const dots={};
+T.forEach(t=>{
+  const g=el("g",{class:"dot",tabindex:0,role:"button"});
+  const c=el("circle",{cx:0,cy:0,r:6,fill:cvar(t.c)},g);
+  const tx=el("text",{x:0,y:4.5,"text-anchor":"middle"},g); tx.textContent=t.id;
+  g.addEventListener("mouseenter",e=>showTip(t,e)); g.addEventListener("mousemove",e=>showTip(t,e));
+  g.addEventListener("mouseleave",hideTip); g.addEventListener("focus",()=>showTip(t,null,g)); g.addEventListener("blur",hideTip);
+  g.addEventListener("click",()=>select(t.id));
+  g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();select(t.id);}});
+  dots[t.id]={g,c};
+});
+function placeDots(){
+  T.forEach(t=>{const p=P_(t.id), d=dots[t.id];
+    d.g.style.transform=`translate(${p.x}px,${p.y}px)`; d.c.setAttribute("r",p.r);
+    d.g.classList.toggle("moved",moved(t.id));
+    d.g.setAttribute("aria-label",`${t.id} ${t.n}, Score ${fmt(p.total)}, ${ZONES[p.zone].n}`);
+  });
+}
+const tip=document.getElementById("tip"), box=svg.parentElement;
+function showTip(t,e,g){
+  const p=P_(t.id);
+  tip.innerHTML=`<b>${t.id} · ${esc(t.n)}</b>${esc(t.d)}<span class="mono">${FOCUS[t.fo].n} · ${esc(t.st)} · Signale: ${ORIG[t.orig]}<br>Score ${fmt(p.total)} · ${ZONES[p.zone].n} · ${p.tta} Jahre${moved(t.id)?" · Europa ≠ Global":""}</span>`;
+  tip.hidden=false;
+  const br=box.getBoundingClientRect();
+  let x,y;
+  if(e){x=e.clientX-br.left+14;y=e.clientY-br.top+14;}
+  else{const r=g.getBoundingClientRect();x=r.right-br.left+8;y=r.top-br.top;}
+  x=Math.min(x,br.width-tip.offsetWidth-6); y=Math.min(y,br.height-tip.offsetHeight-6);
+  tip.style.left=Math.max(6,x)+"px"; tip.style.top=Math.max(6,y)+"px";
+}
+function hideTip(){tip.hidden=true;}
+
+// Trendkarte
+const pips=n=>"●".repeat(n)+"○".repeat(3-n);
+function srcA(s){const q=SOURCES[s];return `<a href="${q.u}" target="_blank" rel="noopener">[${s}] ${esc(q.p)}: ${esc(q.t)}</a> <span class="muted">(${q.d})</span>`;}
+function srcLinks(t){
+  if(!t.src.length) return `<span class="muted">Keine verlinkte Primärquelle – Evidenz C, Validierung erforderlich.</span>`;
+  return t.src.map(srcA).join("");
+}
+function partnerHTML(keys){
+  if(!keys||!keys.length) return "";
+  return `<ul class="plist">${keys.map(k=>{const p=P[k];return `<li><b>${esc(p.n)}</b><span>${esc(p.r)}</span><span class="psrc">${p.kb?"Wissensbasis, zu validieren":p.s.map(s=>`<a href="${SOURCES[s].u}" target="_blank" rel="noopener">${s}</a>`).join(" · ")}</span></li>`;}).join("")}</ul>`;
+}
+function euBox(t){
+  if(!t.eu) return "";
+  const g=POS.GL[t.id], e=POS.EU[t.id];
+  return `<div class="eubox"><div class="eyebrow" style="color:var(--accent)">Europa-Einordnung</div>
+    <div class="cmpline"><span>Global ${fmt(g.total)}</span>${zp(g.zone)}<span>${g.tta} J.</span><span aria-hidden="true">→</span><span>Europa ${fmt(e.total)}</span>${zp(e.zone)}<span>${e.tta} J.</span></div>
+    <div>${esc(t.eu.note)}</div>${t.eu.src?`<div class="srcs">${t.eu.src.map(srcA).join("")}</div>`:""}</div>`;
+}
+function recBlock(t){
+  if(PREM){
+    const cs=(PREMIUM.CASES||[]).filter(c=>c.trends.includes(t.id));
+    return `<div class="rec"><b>Handlungsempfehlung</b>${esc(t.rec)}</div>${cs.map(c=>`<div class="rec" style="border-left:4px solid var(--accent)"><b>Umgesetzt mit New Spice</b>${esc(c.title)} – ${esc(c.result)}</div>`).join("")}`;
+  }
+  return `<div class="locked">${LOCK}<div><b>Handlungsempfehlung · Premium</b>Konkrete Empfehlung, Priorisierung und umgesetzte New-Spice-Cases zu diesem Trend sind im Premium-Bereich freigeschaltet.</div></div>`;
+}
+function select(id){
+  state.sel=id; const t=byId[id], p=P_(id);
+  Object.values(dots).forEach(d=>d.g.classList.remove("sel")); dots[id].g.classList.add("sel");
+  const inCmp=state.cmp.includes(id);
+  document.getElementById("detail").innerHTML=`<article class="card" style="--cc:${cvar(t.c)}" aria-live="polite">
+    <div class="card-top">
+      <div style="display:flex;gap:12px;align-items:flex-start;min-width:0">
+        <span class="badge-num" style="background:${cvar(t.c)}">${t.id}</span>
+        <div style="min-width:0"><div class="eyebrow">${t.c} · ${esc(CLUSTERS[t.c].n)}</div><h3>${esc(t.n)}</h3></div>
+      </div>
+      <div class="bigscore"><b>${fmt(p.total)}</b><span>Score ${state.persp==="EU"?"Europa":"Global"}</span></div>
+    </div>
+    <div class="tags">${zp(p.zone)}<span class="tag">${p.tta} Jahre</span><span class="tag">${FOCUS[t.fo].n} · ${esc(t.st)}</span><span class="tag">Signale: ${ORIG[t.orig]}</span><span class="tag">Evidenz ${t.ev}</span>${t.comp?'<span class="tag">Pflicht</span>':""}${t.unc?'<span class="unc">● unsichere Einschätzung</span>':""}</div>
+    <p>${esc(t.d)}</p>
+    ${euBox(t)}
+    <div class="bars">${p.sc.map((v,i)=>`<span>${CRIT[i]} <span class="muted mono">${Math.round(W[i]*100)} %</span></span><span class="bar"><i class="${t.eu&&t.eu.sc&&state.persp==="EU"&&t.eu.sc[i]!==t.sc[i]?"eu":""}" style="width:${v*20}%"></i></span><span class="mono">${v}</span>`).join("")}</div>
+    <div class="relrow">${IND.map((l,i)=>`<span>${l} <span class="pips" title="Relevanz ${t.rel[i]} von 3">${pips(t.rel[i])}</span></span>`).join("")}</div>
+    <dl class="fields">
+      <div><dt>Anwendungsfälle</dt><dd>${esc(t.use)}</dd></div>
+      <div><dt>Best Practices</dt><dd>${esc(t.bp)}</dd></div>
+      <div><dt>Markt- und Innovationssignale</dt><dd>${esc(t.sig)}</dd></div>
+      <div><dt>Chancen</dt><dd>${esc(t.opp)}</dd></div>
+      <div><dt>Risiken</dt><dd>${esc(t.risk)}</dd></div>
+    </dl>
+    ${TP[t.id]?`<div class="fields"><div><dt>Lösungen &amp; Partner (Beispiele)</dt><dd>${partnerHTML(TP[t.id])}</dd></div></div>`:""}
+    ${recBlock(t)}
+    <div class="fields"><div><dt>Quellen</dt><dd class="srcs">${srcLinks(t)}</dd></div></div>
+    <div><button class="btn ${inCmp?"":"ghost"}" id="cmpbtn">${inCmp?"Aus Vergleich entfernen":"Zum Vergleich hinzufügen"}</button></div>
+  </article>`;
+  document.getElementById("cmpbtn").addEventListener("click",()=>toggleCmp(id));
+}
+function toggleCmp(id){
+  const i=state.cmp.indexOf(id);
+  if(i>=0) state.cmp.splice(i,1); else { if(state.cmp.length>=3) state.cmp.shift(); state.cmp.push(id); }
+  renderCmp(); select(state.sel);
+}
+function renderCmp(){
+  const host=document.getElementById("compare");
+  if(!state.cmp.length){ host.innerHTML=`<h3>Trendvergleich</h3><p class="muted" style="font-size:14px;margin-top:6px">Bis zu drei Trends über „Zum Vergleich hinzufügen“ in der Trendkarte auswählen. Beispiel: Self-Pour & Smart Schank (#25) neben Mobile Order & In-Seat (#24).</p>`; return; }
+  const ts=state.cmp.map(i=>byId[i]);
+  const rows=[["Cluster",t=>t.c+" · "+CLUSTERS[t.c].n],["Fokusfeld",t=>FOCUS[t.fo].n+" · "+esc(t.st)],["Signalherkunft",t=>ORIG[t.orig]],
+    ["Score Europa",t=>`<b class="mono">${fmt(POS.EU[t.id].total)}</b> ${zp(POS.EU[t.id].zone)}`],["Score Global",t=>`<span class="mono">${fmt(POS.GL[t.id].total)}</span> ${zp(POS.GL[t.id].zone)}`],
+    ...CRIT.map((c,i)=>[c,t=>`<span class="mono">${P_(t.id).sc[i]}</span>`]),["Horizont",t=>P_(t.id).tta+" Jahre"],["Evidenz",t=>t.ev],
+    ...(PREM?[["Empfehlung",t=>esc(t.rec)]]:[])];
+  host.innerHTML=`<div style="display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px"><h3>Trendvergleich</h3><button class="btn ghost" id="cmpclear">Vergleich leeren</button></div>
+  <div class="tscroll" style="border:none"><table class="cmp"><thead><tr><th></th>${ts.map(t=>`<th><span class="badge-num" style="background:${cvar(t.c)};display:inline-grid;width:24px;height:24px;font-size:11px;margin-right:6px;vertical-align:middle">${t.id}</span>${esc(t.n)}</th>`).join("")}</tr></thead>
+  <tbody>${rows.map(([l,f])=>`<tr><td>${l}</td>${ts.map(t=>`<td>${f(t)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+  document.getElementById("cmpclear").addEventListener("click",()=>{state.cmp=[];renderCmp();select(state.sel);});
+}
+function goTo(id){ select(id); document.getElementById("radar-sec").scrollIntoView({behavior:"smooth",block:"start"}); }
+
+// Legende
+function renderLegend(){
+  document.getElementById("legend").innerHTML=CK.map(c=>`<div><h3><i style="background:${cvar(c)}"></i>${c} · ${esc(CLUSTERS[c].n)}</h3><ol>${
+    T.filter(t=>t.c===c).map(t=>`<li><button data-id="${t.id}"><span class="n">${t.id}</span><span>${esc(t.n)}</span>${zp(P_(t.id).zone,"zt")}</button></li>`).join("")}</ol></div>`).join("");
+  document.querySelectorAll("#legend button").forEach(b=>b.addEventListener("click",()=>select(+b.dataset.id)));
+}
+
+// Fokus-Matrix
+function renderFocus(){
+  let h=`<div class="corner">Cluster \\ Fokusfeld</div>`+FK.map(k=>{const ts=T.filter(t=>t.fo===k);const ko=ts.filter(t=>P_(t.id).zone==="KICKOFF").length;
+    return `<div class="fh"><h3>${FOCUS[k].n}</h3><span>${FOCUS[k].d}</span><span class="mono">${ts.length} Trends · ${ko} Anstoß · Ø ${fmt(ts.reduce((s,t)=>s+P_(t.id).total,0)/ts.length)}</span></div>`;}).join("");
+  CK.forEach(c=>{
+    h+=`<div class="cl" style="--cc:${cvar(c)}"><span>${c} · ${esc(CLUSTERS[c].n)}</span></div>`;
+    FK.forEach(k=>{
+      const g=T.filter(t=>t.c===c&&t.fo===k).sort((a,b)=>P_(b.id).total-P_(a.id).total);
+      h+=`<div class="cell${g.length?"":" isempty"}"><span class="mlabel">${FOCUS[k].n}</span>${g.length?`<ul>${g.map(t=>`<li><button data-id="${t.id}"><span class="n">${t.id}</span><span>${esc(t.n)}<small>${esc(t.st)} · ${fmt(P_(t.id).total)}</small></span>${zp(P_(t.id).zone,"zt")}</button></li>`).join("")}</ul>`:`<span class="empty">–</span>`}</div>`;
+    });
+  });
+  const fv=document.getElementById("focusview"); fv.innerHTML=h;
+  fv.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>goTo(+b.dataset.id)));
+}
+
+// Quellen
+(function(){
+  const used={}; T.forEach(t=>[...t.src,...((t.eu&&t.eu.src)||[])].forEach(s=>(used[s]=used[s]||new Set()).add(t.id)));
+  const pused={}; Object.values(P).forEach(p=>p.s.forEach(s=>(pused[s]=pused[s]||new Set()).add(p.n)));
+  document.getElementById("sources").innerHTML=Object.entries(SOURCES).map(([k,s])=>`<li><span class="sid">${k}</span><div><a href="${s.u}" target="_blank" rel="noopener">${esc(s.t)}</a><small>${esc(s.p)} · ${s.d}${used[k]?" · Trends "+[...used[k]].map(x=>"#"+x).join(" "):""}${pused[k]?" · Partner: "+[...pused[k]].join(", "):""}</small></div></li>`).join("");
+})();
+
+// Premium-Bereich
+const secHead=(no,eb,h,p)=>`<div class="sec-head"><span class="sec-no">${no}</span><div><div class="eyebrow">${eb}</div><h2>${h}</h2>${p?`<p>${p}</p>`:""}</div></div>`;
+function renderPaywall(){
+  const tiles=[["05","Trenddatenbank","Alle 44 Trends mit Einzelbewertungen, Europa- und Global-Score, Signalherkunft und CSV-Export.",6],
+    ["06","Top 10 Strategic Trends","Rangfolge für Europa mit Begründung der Priorität und Handlungsempfehlung.",4],
+    ["07","Cross-Industry Opportunities","Acht Konvergenz-Chancen mit Opportunity Matrix und konkreten Lösungspartnern.",5],
+    ["08","Handlungsempfehlungen","Roadmap 2027–2028, 2029–2031 und 2032–2035 mit Trendbezug.",5],
+    ["09","Umgesetzt mit New Spice","Konkrete Use Cases aus Projekten von New Spice, verknüpft mit den Trends.",4]];
+  document.getElementById("premium").innerHTML=`<section id="pw"><div class="paywall">
+    <div class="pw-head"><div><span class="pw-badge">${LOCK.replace('aria-hidden','width="16" height="16" aria-hidden')} Premium-Bereich</span><h2 style="margin-top:8px">Vom Trend zur Entscheidung</h2>
+      <p>Die Kapitel 05 bis 09 übersetzen die Arena in Prioritäten, Chancen, Roadmap und erprobte Lösungen. Sie sind für Premium-Kunden freigeschaltet.</p></div>
+      <div style="font-size:14px;opacity:.85">Freischaltung über Ihre Ansprechperson bei New Spice.</div></div>
+    <div class="pw-grid">${tiles.map(([n,h,p,k])=>`<div class="pw-tile"><span class="sec-mini">${n}</span><h3>${h}</h3><p>${p}</p><div class="skel" aria-hidden="true">${Array.from({length:k},(_,i)=>`<i style="width:${92-i*13%40}%"></i>`).join("")}</div></div>`).join("")}</div>
+    <div class="pw-foot"><span>Öffentlich: Executive Summary, Methodik, Arena mit Trendkarten, Fokus-Ansicht und Quellen.</span><span class="mono">Premium: 05–09</span></div>
+  </div></section>`;
+}
+function renderPremium(){
+  document.getElementById("premium").innerHTML=`
+  <section id="db">${secHead("05","Trenddatenbank","Alle 44 Trends","Spaltenkopf sortiert, Zeile öffnet die Trendkarte. Filter und Perspektive aus der Arena gelten auch hier.")}
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><button class="btn" id="csvcopy">CSV kopieren</button><button class="btn ghost" id="csvshow" aria-expanded="false">CSV anzeigen</button><span class="muted" id="csvmsg" style="font-size:13px" role="status"></span></div>
+    <textarea id="csvbox" hidden readonly aria-label="CSV-Daten"></textarea>
+    <div class="tscroll"><table class="db" id="dbt"></table></div></section>
+  <section id="top">${secHead("06","Top 10 Strategic Trends","Die zehn relevantesten Trends für Europa","Rangfolge nach Score in der Europa-Perspektive. Agentic Booking steht trotz Aufwärm-Phase in den Top 10: hohe Wirkung, noch geringe Marktreife.")}
+    <div class="top10" id="top10"></div></section>
+  <section id="opps">${secHead("07","Cross-Industry Opportunities","Konvergenz-Chancen und Opportunity Matrix","Acht Chancen an den Schnittstellen von Hospitality, Infrastruktur und Fan Engagement. Partner sind eine beispielhafte Auswahl, keine Empfehlung; vor einer Partnerwahl ist eine Due Diligence nötig.")}
+    <div class="opp-grid"><ol class="opps" id="opplist"></ol><div class="box"><svg id="matrix" viewBox="0 0 620 470" role="img" aria-label="Opportunity Matrix: Business Impact gegen Umsetzbarkeit"></svg></div></div></section>
+  <section id="road">${secHead("08","Handlungsempfehlungen","Roadmap 2027–2035","Reihenfolge nach Europa-Perspektive: US-getriebene Trends sind dort eingeordnet, wo sie in DACH realistisch umsetzbar sind.")}
+    <div class="road" id="roadmap"></div></section>
+  <section id="cases">${secHead("09","Umgesetzt mit New Spice","Use Cases aus der Praxis")}
+    <div id="caselist"></div></section>`;
+  // CSV
+  const csvbox=document.getElementById("csvbox"), msg=document.getElementById("csvmsg");
+  const reveal=()=>{csvbox.value=csv();csvbox.hidden=false;document.getElementById("csvshow").setAttribute("aria-expanded","true");csvbox.focus();csvbox.select();};
+  document.getElementById("csvcopy").addEventListener("click",()=>{
+    try{navigator.clipboard.writeText(csv()).then(()=>{msg.textContent=`CSV mit ${T.length} Trends kopiert (Semikolon, für Excel geeignet).`;},()=>{reveal();msg.textContent="Kopieren nicht erlaubt – Text ist markiert, bitte mit Strg/Cmd + C kopieren.";});}
+    catch(e){reveal();msg.textContent="Kopieren nicht erlaubt – Text ist markiert, bitte mit Strg/Cmd + C kopieren.";}
+  });
+  document.getElementById("csvshow").addEventListener("click",()=>{if(csvbox.hidden)reveal();else{csvbox.hidden=true;document.getElementById("csvshow").setAttribute("aria-expanded","false");}});
+  // Top 10
+  document.getElementById("top10").innerHTML=PREMIUM.TOP.map((id,i)=>{const t=byId[id],e=POS.EU[id];return `<article class="tcard" tabindex="0" data-id="${id}"><span class="rank">${i+1}</span><h3>${esc(t.n)}</h3><span class="sc">${fmt(e.total)}</span>
+    <div class="tags">${zp(e.zone)}<span class="tag">#${t.id} · ${e.tta} J.</span><span class="tag">${FOCUS[t.fo].n}</span><span class="tag">Signale: ${ORIG[t.orig]}</span></div>
+    <p><b style="color:var(--ink)">Warum priorisiert:</b> ${esc(PREMIUM.WHY[id])}</p><p><b style="color:var(--ink)">Empfehlung:</b> ${esc(t.rec)}</p></article>`;}).join("");
+  document.querySelectorAll(".tcard").forEach(c=>{c.addEventListener("click",()=>goTo(+c.dataset.id));c.addEventListener("keydown",e=>{if(e.key==="Enter")goTo(+c.dataset.id);});});
+  // Chancen
+  document.getElementById("opplist").innerHTML=PREMIUM.OPPS.map(o=>`<li><span class="oid">${o.id.slice(1)}</span><div><b style="font-size:16px">${esc(o.n)}</b> <span class="tags" style="display:inline-flex">${o.fo.map(f=>`<span class="tag">${FOCUS[f].n}</span>`).join("")}</span><span style="display:block;color:var(--muted);font-size:14px">${esc(o.d)}</span><div class="mono">Impact ${fmt(o.bi)} · Umsetzbarkeit ${fmt(o.f)} · Trends ${o.tr.map(x=>"#"+x).join(" ")}</div><div class="eyebrow" style="margin-top:8px">Lösungen &amp; Partner</div>${partnerHTML(PREMIUM.OP[o.id])}</div></li>`).join("");
+  drawMatrix();
+  // Roadmap
+  document.getElementById("roadmap").innerHTML=PREMIUM.ROAD.map(p=>`<div class="phase"><div><div class="yr">${p.y}</div><div class="eyebrow">${p.h}</div></div><ul>${p.items.map(([s,r])=>`<li>${esc(s)} <span class="refs">${r.map(x=>"#"+x).join(" ")}</span></li>`).join("")}</ul></div>`).join("");
+  // Cases
+  const cl=document.getElementById("caselist");
+  if(PREMIUM.CASES.length){
+    cl.innerHTML=`<div class="cases">${PREMIUM.CASES.map(c=>`<article class="box"><div class="eyebrow">${esc(c.client)} · ${esc(c.year)}</div><h3>${esc(c.title)}</h3><p>${esc(c.solution)}</p><p class="mono" style="font-size:12px">Ergebnis: ${esc(c.result)}</p><div class="tags">${c.trends.map(x=>`<span class="tag">#${x} ${esc(byId[x].n)}</span>`).join("")}</div></article>`).join("")}</div>`;
+  } else {
+    cl.innerHTML=`<div class="case-empty"><div><h3>Hier erscheinen umgesetzte New-Spice-Projekte</h3><p class="muted" style="margin-top:6px">Jeder Case wird mit den passenden Trends verknüpft und erscheint zusätzlich in deren Trendkarte.</p></div><div><div class="eyebrow">Pro Case</div><ul><li>Kunde oder Venue, Jahr</li><li>Bezug zu Trendnummern</li><li>Umgesetzte Lösung und Partner</li><li>Ergebnis oder KPI</li></ul></div></div>`;
+  }
+}
+const COLS=[["id","#"],["n","Trend"],["fo","Fokus"],["st","Unterthema"],["c","Cluster"],["orig","Herkunft"],["zone","Phase"],["total","Score"],["eut","Europa"],["glt","Global"],["bi","BI"],["cx","CX"],["sf","Fit"],["mr","Reife"],["ip","Innov."],["if","Umsetzb."],["tta","Horizont"],["ev","Evid."],["rec","Handlungsempfehlung"]];
+function keyv(t,k){const p=P_(t.id);return ({bi:p.sc[0],cx:p.sc[1],sf:p.sc[2],mr:p.sc[3],ip:p.sc[4],if:p.sc[5],total:p.total,eut:POS.EU[t.id].total,glt:POS.GL[t.id].total,tta:["0–2","3–5","6–10"].indexOf(p.tta),zone:ZK.indexOf(p.zone)})[k] ?? t[k];}
+function renderDB(rows){
+  const tb=document.getElementById("dbt"); if(!tb) return;
+  rows=rows.slice().sort((a,b)=>{const x=keyv(a,state.sort),y=keyv(b,state.sort);return (x>y?1:x<y?-1:a.id-b.id)*state.dir;});
+  tb.innerHTML=`<thead><tr>${COLS.map(([k,l])=>`<th data-k="${k}" ${state.sort===k?'aria-sort="'+(state.dir<0?"descending":"ascending")+'"':""} scope="col">${l}</th>`).join("")}</tr></thead>
+  <tbody>${rows.map(t=>{const p=P_(t.id);return `<tr tabindex="0" data-id="${t.id}"><td class="num">${t.id}</td><td><b>${esc(t.n)}</b></td><td>${FOCUS[t.fo].n}</td><td>${esc(t.st)}</td><td><span class="clsw" style="background:${cvar(t.c)}"></span>${t.c}</td><td>${ORIG[t.orig]}</td><td>${zp(p.zone)}</td><td class="num"><b>${fmt(p.total)}</b></td><td class="num">${fmt(POS.EU[t.id].total)}</td><td class="num">${fmt(POS.GL[t.id].total)}</td>${p.sc.map(v=>`<td class="num">${v}</td>`).join("")}<td class="mono">${p.tta}</td><td class="mono">${t.ev}${t.unc?" ?":""}</td><td style="min-width:280px">${esc(t.rec)}</td></tr>`;}).join("")}</tbody>`;
+  tb.querySelectorAll("th").forEach(th=>th.addEventListener("click",()=>{const k=th.dataset.k; if(state.sort===k) state.dir*=-1; else {state.sort=k; state.dir=(["n","c","rec","tta","zone","ev","fo","st","orig"].includes(k)?1:-1);} update();}));
+  tb.querySelectorAll("tbody tr").forEach(tr=>{tr.addEventListener("click",()=>goTo(+tr.dataset.id));tr.addEventListener("keydown",e=>{if(e.key==="Enter")goTo(+tr.dataset.id);});});
+}
+function csv(){
+  const q=v=>`"${String(v).replace(/"/g,'""')}"`;
+  const head=["Nr","Trend","Fokusfeld","Unterthema","Cluster","Signalherkunft","Phase Europa","Score Europa","Horizont Europa","Phase Global","Score Global","Horizont Global","Business Impact","CX Impact","Strategic Fit","Market Readiness","Innovation Potential","Feasibility","Evidenz","Unsicher","Europa-Einordnung","Relevanz Sport","Relevanz Hospitality","Relevanz Live Entertainment","Beschreibung","Anwendungsfälle","Best Practices","Signale","Chancen","Risiken","Handlungsempfehlung","Lösungen & Partner","Quellen"];
+  const rows=T.map(t=>{const e=POS.EU[t.id],g=POS.GL[t.id];return [t.id,t.n,FOCUS[t.fo].n,t.st,t.c+" "+CLUSTERS[t.c].n,ORIG[t.orig],ZONES[e.zone].n,fmt(e.total),e.tta,ZONES[g.zone].n,fmt(g.total),g.tta,...t.sc,t.ev,t.unc?"ja":"nein",t.eu?t.eu.note:"",...t.rel,t.d,t.use,t.bp,t.sig,t.opp,t.risk,t.rec,(TP[t.id]||[]).map(k=>P[k].n).join(", "),t.src.map(s=>SOURCES[s].u).join(" ")];});
+  return [head,...rows].map(r=>r.map(q).join(";")).join("\n");
+}
+function drawMatrix(){
+  const m=document.getElementById("matrix"), L=60,R=500,TOPY=20,B=410;
+  const sx=v=>L+(v-1)/4*(R-L), sy=v=>B-(v-1)/4*(B-TOPY);
+  const mk=(tag,a,txt)=>{const e=document.createElementNS(NS,tag);for(const k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;m.appendChild(e);return e;};
+  mk("rect",{x:sx(3),y:TOPY,width:R-sx(3),height:sy(3)-TOPY,fill:"var(--tier1)"});
+  mk("rect",{x:L,y:TOPY,width:R-L,height:B-TOPY,fill:"none",stroke:"var(--line)"});
+  mk("line",{x1:sx(3),x2:sx(3),y1:TOPY,y2:B,stroke:"var(--line)","stroke-dasharray":"4 4"});
+  mk("line",{x1:L,x2:R,y1:sy(3),y2:sy(3),stroke:"var(--line)","stroke-dasharray":"4 4"});
+  [1,2,3,4,5].forEach(v=>{mk("text",{x:sx(v),y:B+16,"text-anchor":"middle",class:"mx-axis"},v);mk("text",{x:L-8,y:sy(v)+4,"text-anchor":"end",class:"mx-axis"},v);});
+  mk("text",{x:(L+R)/2,y:B+38,"text-anchor":"middle",class:"mx-axis"},"Umsetzbarkeit →");
+  mk("text",{x:16,y:(TOPY+B)/2,"text-anchor":"middle",class:"mx-axis",transform:`rotate(-90 16 ${(TOPY+B)/2})`},"Business Impact →");
+  mk("text",{x:R-8,y:TOPY+14,"text-anchor":"end",class:"mx-q"},"Quick Wins");
+  mk("text",{x:L+8,y:TOPY+14,class:"mx-q"},"Strategische Wetten");
+  mk("text",{x:R-8,y:B-10,"text-anchor":"end",class:"mx-q"},"Nebenprojekte");
+  mk("text",{x:L+8,y:B-10,class:"mx-q"},"Zurückstellen");
+  PREMIUM.OPPS.forEach(o=>{const x=sx(o.f),y=sy(o.bi);
+    mk("circle",{cx:x,cy:y,r:13,fill:"var(--surface)",stroke:"var(--accent)","stroke-width":2});
+    mk("text",{x,y:y+4,"text-anchor":"middle",class:"mx-axis",style:"fill:var(--accent);font-weight:500"},o.id.slice(1));
+    mk("text",{x:x+18,y:y+4,class:"mx-axis",style:"fill:var(--ink)"},o.n.length>24?o.n.slice(0,23)+"…":o.n);
+  });
+}
+function renderPremiumDynamic(){ /* Datenbank folgt der Perspektive über update() */ }
+
+function update(){
+  const vis=T.filter(match), ids=new Set(vis.map(t=>t.id));
+  T.forEach(t=>dots[t.id].g.classList.toggle("dim",!ids.has(t.id)));
+  document.getElementById("count").textContent=`${vis.length} von ${T.length} Trends sichtbar`;
+  document.getElementById("perspnote").textContent = state.persp==="EU"
+    ? "Europa / DACH: Trends mit überwiegend US-Signalen sind für DSGVO, EU AI Act, Mitbestimmung und Fankultur neu bewertet. Gestrichelte Punkte liegen global in einer anderen Phase."
+    : "Global: Bewertung nach internationalem Marktstand, unabhängig vom europäischen Rechtsrahmen. Gestrichelte Punkte liegen in Europa in einer anderen Phase.";
+  renderLegend();
+  if(PREM) renderDB(vis);
+}
+if(PREM) renderPremium(); else renderPaywall();
+placeDots(); renderBoard(); renderFocus(); update(); select(state.sel); renderCmp();
+})();
+</script>
+
+</body></html>

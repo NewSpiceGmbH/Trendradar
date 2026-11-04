@@ -1,0 +1,314 @@
+{
+  "aws": {
+    "n": "AWS (DFL-Partner)",
+    "r": "GenAI- und Cloud-Partner der Bundesliga, u. a. Amazon Nova und Match Facts",
+    "s": [
+      "s13",
+      "s14"
+    ]
+  },
+  "twocircles": {
+    "n": "Two Circles / KORE",
+    "r": "Fan-Daten- und CRM-Plattform für Rechteinhaber; Two Circles übernahm KORE",
+    "s": [
+      "s66"
+    ]
+  },
+  "bonvoy": {
+    "n": "Marriott Bonvoy Moments",
+    "r": "Loyalty-Punkte gegen Event-Erlebnisse eintauschen",
+    "s": [],
+    "kb": true
+  },
+  "blocksport": {
+    "n": "Blocksport",
+    "r": "Plattform für Club-Superapps, u. a. Vitória SC",
+    "s": [
+      "s92"
+    ]
+  },
+  "fcbticket": {
+    "n": "FC Bayern München (Referenz)",
+    "r": "Ab 2026/27 nur noch digitale Tickets über App mit Wallet, Weitergabe und Zweitmarkt",
+    "s": [
+      "s74"
+    ]
+  },
+  "infobip": {
+    "n": "Infobip PitchMate",
+    "r": "KI-Fan-Companion für Fußballclubs",
+    "s": [
+      "s93"
+    ]
+  },
+  "plcomp": {
+    "n": "Premier League Companion",
+    "r": "KI-Assistent der Liga; Testberichte zeigen noch geringe Qualität",
+    "s": [
+      "s94"
+    ]
+  },
+  "apaleo": {
+    "n": "Apaleo",
+    "r": "Hotel-PMS aus München mit MCP-Server, über den KI-Agenten Hotelsysteme anbinden und Buchungen auslösen",
+    "s": [
+      "s59",
+      "s58",
+      "s72"
+    ]
+  },
+  "gaimode": {
+    "n": "Google AI Mode × Marriott",
+    "r": "Agentische Hotelbuchung direkt in der Suche",
+    "s": [
+      "s27"
+    ]
+  },
+  "wsc": {
+    "n": "WSC Sports",
+    "r": "KI-generierte Highlights; Kunden u. a. Borussia Dortmund, DFB (DFB-Pokal), Red Bull München",
+    "s": [
+      "s62",
+      "s63",
+      "s64"
+    ]
+  },
+  "dfbinno": {
+    "n": "DFB/DFL Projektgruppe Stadioninnovationen",
+    "r": "8 Piloten an 12 Standorten 2025/26: KI-Crowd-Management, digitales Parken, Wetterberatung, flexible Rollstuhlplätze",
+    "s": [
+      "s73"
+    ]
+  },
+  "simio": {
+    "n": "Simio",
+    "r": "Simulation und Digital Twins für Spieltagsabläufe",
+    "s": [
+      "s35"
+    ]
+  },
+  "miso": {
+    "n": "Miso Robotics (Flippy) × Levy",
+    "r": "KI-Küchenroboter für Frittierstationen, Pilot im Dodger Stadium",
+    "s": [
+      "s83"
+    ]
+  },
+  "delicious": {
+    "n": "Delicious Data",
+    "r": "Münchner Start-up für KI-Absatzprognosen in Gastronomie und Catering gegen Food Waste",
+    "s": [
+      "s84"
+    ]
+  },
+  "evolv": {
+    "n": "Evolv",
+    "r": "KI-gestütztes Waffen-Screening am Einlass, u. a. Club-WM 2025 und europäische Events",
+    "s": [
+      "s86",
+      "s87"
+    ]
+  },
+  "staige": {
+    "n": "Staige One",
+    "r": "KI-gestützter Videoschutz, u. a. Pilot mit der Polizei Berlin",
+    "s": [
+      "s85"
+    ]
+  },
+  "robin": {
+    "n": "Robin Radar",
+    "r": "Radar-basierte Drohnendetektion für Stadien und Großveranstaltungen",
+    "s": [
+      "s89"
+    ]
+  },
+  "duetto": {
+    "n": "Duetto + PredictHQ",
+    "r": "Hotel-Revenue-Management mit Event-Nachfragedaten (Konzerte, Spiele, Messen)",
+    "s": [
+      "s68"
+    ]
+  },
+  "ideas": {
+    "n": "IDeaS",
+    "r": "Revenue-Management-Software mit Strategien für Großevent-Nachfrage",
+    "s": [
+      "s69"
+    ]
+  },
+  "sportsbreaks": {
+    "n": "Sportsbreaks",
+    "r": "Ticket-Hotel-Pakete und Corporate Hospitality; offizieller Partner von Manchester United",
+    "s": [
+      "s60"
+    ]
+  },
+  "destination": {
+    "n": "Destination Sport",
+    "r": "Sportreise-Pakete; Mehrjahrespartner des Brentford FC",
+    "s": [
+      "s61"
+    ]
+  },
+  "socios": {
+    "n": "Socios / Chiliz",
+    "r": "Fan-Token-Plattform; Geschäftsmodell wird kritisch bewertet",
+    "s": [
+      "s95",
+      "s96"
+    ]
+  },
+  "wicket": {
+    "n": "Wicket",
+    "r": "Gesichtsbasierter Einlass und Bezahlung, u. a. bei der NFL und LAFC",
+    "s": [
+      "s19",
+      "s20"
+    ]
+  },
+  "clear": {
+    "n": "CLEAR",
+    "r": "Biometrische Identität für Einlass, u. a. im Intuit Dome",
+    "s": [
+      "s21"
+    ]
+  },
+  "jwo": {
+    "n": "Amazon Just Walk Out",
+    "r": "Checkout-freie Kioske; Tennessee Titans erstes NFL-Team mit vollständigem Einsatz",
+    "s": [
+      "s30"
+    ]
+  },
+  "zippin": {
+    "n": "Zippin",
+    "r": "Checkout-freie Stores in Stadien, u. a. fünf Stores im NRG Stadium",
+    "s": [
+      "s67"
+    ]
+  },
+  "sapgarden": {
+    "n": "SAP Garden (Referenz)",
+    "r": "Multi-Use-Arena in München für Profi- und Breitensport",
+    "s": [
+      "s22"
+    ]
+  },
+  "seatserve": {
+    "n": "SeatServe",
+    "r": "In-Seat-Bestellung und Lieferung an den Platz, im Einsatz an der Anfield Road (Liverpool FC)",
+    "s": [
+      "s81"
+    ]
+  },
+  "ebar": {
+    "n": "Ebar Beerwalls × Sodexo Live!",
+    "r": "Permanente Self-Serve-Bierwände, europäische Premiere beim Millwall FC",
+    "s": [
+      "s77"
+    ]
+  },
+  "pourmybeer": {
+    "n": "PourMyBeer",
+    "r": "Self-Pour-Zapfsysteme mit RFID-Abrechnung für Stadien",
+    "s": [
+      "s80",
+      "s79"
+    ]
+  },
+  "draftpicks": {
+    "n": "Draft Picks Perfect Pour",
+    "r": "Schanktechnik im Honda Center, ausgezeichnet als „Best New Technology“ 2026",
+    "s": [
+      "s78"
+    ]
+  },
+  "lbbw": {
+    "n": "LBBW × VfB Stuttgart",
+    "r": "Mobile Kartenterminals für bargeldloses Bezahlen in der MHP Arena (35 Terminals, 30 weitere geplant)",
+    "s": [
+      "s75"
+    ]
+  },
+  "cardcomplete": {
+    "n": "Mastercard × card complete",
+    "r": "Bargeldloses Bezahlsystem in der Raiffeisen Arena des LASK",
+    "s": [
+      "s100"
+    ]
+  },
+  "borro": {
+    "n": "Borro",
+    "r": "Digitales QR-Pfandsystem für Mehrwegbecher in Stadien; Referenz Club Brügge, Expansion in Europa",
+    "s": [
+      "s51",
+      "s52",
+      "s53"
+    ]
+  },
+  "vytal": {
+    "n": "Vytal",
+    "r": "Mehrweg-Poolsystem für Festivals und Großveranstaltungen",
+    "s": [
+      "s54"
+    ]
+  },
+  "cupconcept": {
+    "n": "Cup Concept",
+    "r": "Mehrwegbecher-Dienstleister (Verleih, Spülung, Logistik) für Stadien und Events in DACH",
+    "s": [
+      "s57"
+    ]
+  },
+  "faerch": {
+    "n": "Royal Unibrew × Færch",
+    "r": "Kreislauffähige Becher mit 97 % Rücklaufquote auf einem dänischen Festival",
+    "s": [
+      "s43"
+    ]
+  },
+  "fifpro": {
+    "n": "FIFPRO (Stakeholder)",
+    "r": "Spielergewerkschaft mit Forderungen zu Hitzeschutz und Anstoßzeiten",
+    "s": [
+      "s23",
+      "s24"
+    ]
+  },
+  "fifasensory": {
+    "n": "FIFA WM 2026 (Referenz)",
+    "r": "Erstes als „sensory inclusive“ ausgezeichnetes Turnier",
+    "s": [
+      "s97"
+    ]
+  },
+  "wembley": {
+    "n": "Wembley Stadium (Referenz)",
+    "r": "Zwei multifunktionale Sensory- und Inclusion-Rooms",
+    "s": [
+      "s98"
+    ]
+  },
+  "mancity": {
+    "n": "Manchester City (Referenz)",
+    "r": "Sensory Suite für einen barrierearmen Matchday",
+    "s": [
+      "s99"
+    ]
+  },
+  "jca": {
+    "n": "Johan Cruijff ArenA × Nissan (Referenz)",
+    "r": "3-MW-Speicher aus wiederverwendeten E-Auto-Batterien",
+    "s": [
+      "s90"
+    ]
+  },
+  "fgr": {
+    "n": "Forest Green Rovers / Zaha Hadid (Referenz)",
+    "r": "Geplantes Eco Park Stadium fast vollständig aus Holz",
+    "s": [
+      "s91"
+    ]
+  }
+}
