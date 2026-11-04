@@ -6,11 +6,13 @@ import type { RadarData, RadarTrend } from "@/lib/radar/types";
 import { ORIGIN_LABEL, clusterFg, clusterVar, fmt, moved, type Positions } from "@/lib/radar/view";
 
 const { cx: CX, cy: CY, sx: SX, rings: RINGS, segment: SEG } = ARENA;
-const pt = (r: number, a: number): [number, number] => [CX + r * SX * Math.cos((a * Math.PI) / 180), CY + r * Math.sin((a * Math.PI) / 180)];
+// Auf 2 Nachkommastellen runden: Server und Browser rechnen Winkelfunktionen minimal unterschiedlich (Hydration-Abgleich)
+const r2 = (v: number) => Math.round(v * 100) / 100;
+const pt = (r: number, a: number): [number, number] => [r2(CX + r * SX * Math.cos((a * Math.PI) / 180)), r2(CY + r * Math.sin((a * Math.PI) / 180))];
 
 function wedge(r0: number, r1: number, a0: number, a1: number) {
   const [x0, y0] = pt(r1, a0), [x1, y1] = pt(r1, a1), [x2, y2] = pt(r0, a1), [x3, y3] = pt(r0, a0);
-  return `M${x0},${y0} A${r1 * SX},${r1} 0 0 1 ${x1},${y1} L${x2},${y2} A${r0 * SX},${r0} 0 0 0 ${x3},${y3}Z`;
+  return `M${x0},${y0} A${r2(r1 * SX)},${r1} 0 0 1 ${x1},${y1} L${x2},${y2} A${r2(r0 * SX)},${r0} 0 0 0 ${x3},${y3}Z`;
 }
 
 /** Clustername auf zwei Zeilen: Umbruch am Leerzeichen, das der Mitte am nächsten liegt */
