@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
-import { Archivo, JetBrains_Mono, Source_Sans_3 } from "next/font/google";
+import { Archivo, DM_Sans } from "next/font/google";
 import "./globals.css";
 
 // next/font lädt die Schriften beim Build und liefert sie selbst aus – keine Anfragen an Google zur Laufzeit.
-const archivo = Archivo({ subsets: ["latin"], axes: ["wdth"], variable: "--font-archivo" });
-const sourceSans = Source_Sans_3({ subsets: ["latin"], weight: ["400", "600", "700"], variable: "--font-source-sans" });
-const jetbrains = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-jetbrains" });
+const archivo = Archivo({ subsets: ["latin"], weight: ["700", "800"], variable: "--font-archivo" });
+const dmSans = DM_Sans({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-dm-sans" });
 
 export const metadata: Metadata = {
   title: { default: "New Spice Trendradar", template: "%s · New Spice Trendradar" },
@@ -15,7 +14,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="de" className={`${archivo.variable} ${sourceSans.variable} ${jetbrains.variable} h-full antialiased`}>
+    <html lang="de" className={`${archivo.variable} ${dmSans.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

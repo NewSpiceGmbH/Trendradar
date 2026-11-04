@@ -5,8 +5,9 @@ recherchieren, bewerten und pflegen. Eine Redaktion bei New Spice prüft und gib
 Ergebnis als interaktiven Radar („Die Arena“).
 
 Der Ausgangspunkt ist der HTML-Prototyp „Future of Experiences Radar“ in `reference/prototype.html`.
-Er ist die **verbindliche Referenz für Inhalt, Begriffe und Design**. Nicht kopieren, sondern in
-Komponenten nachbauen; die Daten kommen aus der Datenbank.
+Er ist die **verbindliche Referenz für Inhalt, Begriffe, Aufbau und Interaktion**. Farben, Schriften und Formen
+kommen aus der New-Spice-CI (`docs/ci.md`). Nicht kopieren, sondern in Komponenten nachbauen; die Daten kommen
+aus der Datenbank.
 
 ## Stack
 
@@ -137,8 +138,15 @@ Details in `docs/agents.md`. Unverhandelbare Regeln:
 
 ## Design
 
-- Typografie wie im Prototyp: Archivo (Headlines), Source Sans 3 (Text), JetBrains Mono (Zahlen, Scores, IDs).
-- Farben und Abstände aus den CSS-Variablen des Prototyps als Tailwind-Theme übernehmen; Light- und Dark-Mode.
+- **CI in `docs/ci.md`** – Tokens in `app/globals.css`. Nur Tokens verwenden (`bg-surface`, `text-muted`,
+  `text-accent-ink` …), keine Hex-Werte in Komponenten.
+- Dunkel (Anthrazit) ist Standard, Hell (Creme) per `data-theme="light"`.
+- Typografie: Archivo ExtraBold (Überschriften, Zahlen, Scores – Utility `num`), DM Sans (Text, Eyebrows –
+  Utility `eyebrow`).
+- Genau ein Limetten-Block je Ansicht als Blickfang. Limette nie als Clusterfarbe.
+- Clusterfarben `--cA … --cG` mit Schriftfarbe `--cA-fg …`; geprüft für beide Modi. Bei Änderungen erneut
+  validieren (Farbfehlsichtigkeit benachbarter Segmente, Kontrast).
+- Ecken 16 px (Karten), 40 px (Pillen/Chips); Abstände 24–48 px.
 - Sprache der Oberfläche: Deutsch. Typografische Anführungszeichen („…“) und Dezimalkomma bei Scores (3,85).
 - Fachbegriffe des Prototyps beibehalten: Arena, Anstoß, Aufwärmen, Scouting, Cluster, Fokusfeld, Horizont.
 - Barrierefreiheit: Arena per Tastatur bedienbar, Tooltips auch per Fokus, Kontraste prüfen.
