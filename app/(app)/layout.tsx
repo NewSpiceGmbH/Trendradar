@@ -14,11 +14,10 @@ export default function AppLayout({ children }: LayoutProps<"/">) {
           </Link>
           <nav aria-label="Bereiche" className="hidden gap-5 text-sm md:flex">
             {[
-              ["/radar#arena", "Arena"],
-              ["/radar#fokus", "Fokus-Ansicht"],
-              ["/radar#datenbank", "Trenddatenbank"],
-              ["/radar#premium", "Premium"],
-              ["/radar#quellen", "Quellen"],
+              ["/radar", "Stadion"],
+              ["/radar/klassisch", "2D-Ansicht"],
+              ["/radar/klassisch#datenbank", "Trenddatenbank"],
+              ["/radar/klassisch#quellen", "Quellen"],
             ].map(([href, label]) => (
               <Link key={href} href={href} className="text-text no-underline hover:text-ink">
                 {label}

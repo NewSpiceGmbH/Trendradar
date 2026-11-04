@@ -123,3 +123,54 @@
   font-weight: 800;
   font-variant-numeric: tabular-nums;
 }
+
+/* ───────────── 3D-Stadion: Beschriftungen über der Szene ───────────── */
+.stadium-label {
+  white-space: nowrap;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: blur(6px);
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+  transform: translateY(-50%);
+}
+.stadium-label { transition: opacity 0.25s; }
+.stadium-label.is-hidden { opacity: 0; visibility: hidden; }
+.stadium-label .num { color: var(--muted); margin-right: 2px; }
+.stadium-label.is-teaser { display: flex; flex-direction: column; align-items: center; padding: 6px 12px; border-radius: 12px; }
+.stadium-label small { font-weight: 400; color: var(--muted); font-size: 11px; }
+
+.stadium-cluster {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
+  backdrop-filter: blur(6px);
+  padding: 3px 10px 3px 4px;
+  font-size: 12px;
+  color: var(--text);
+  transition: opacity 0.4s, border-color 0.2s;
+}
+.stadium-cluster .num {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--tint);
+  color: var(--bg);
+  font-size: 11px;
+}
+.stadium-cluster:hover, .stadium-cluster.is-active { border-color: var(--tint); color: var(--ink); }
+.stadium-cluster.is-dim { opacity: 0.35; }
+/* Handy: nur der Buchstabe, der Name steht im Panel */
+@media (max-width: 640px) {
+  .stadium-cluster { padding: 3px; }
+  .stadium-cluster-name { display: none; }
+}

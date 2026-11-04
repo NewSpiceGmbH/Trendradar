@@ -4,6 +4,8 @@ async function loginAs(page: Page, persona: RegExp) {
   await page.goto("/login");
   await page.getByRole("button", { name: persona }).click();
   await page.waitForURL("**/radar");
+  // Die bisherigen Klickpfade prüfen die 2D-Ansicht; das Stadion unter /radar ist WebGL
+  await page.goto("/radar/klassisch");
 }
 
 test("ohne Login geht es zur Anmeldung", async ({ page }) => {
