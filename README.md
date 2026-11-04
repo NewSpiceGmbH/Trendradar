@@ -30,6 +30,11 @@ Ohne Datenbank ausprobieren: `RADAR_FIXTURES=1 npm run dev` – Login über die 
 
 ## Vorschau (Vercel + Supabase-Branching)
 
+Einrichtung im Vercel-Projekt `trendradar` (Team New Spice):
+- Settings → Environments → Production → Branch Tracking: `main`. Jeder andere Branch bzw. Pull Request baut eine Preview.
+- Supabase-Integration ohne Präfix verbunden, „Supabase Preview Branch“ nur für Preview.
+- Funktionen laufen in Frankfurt (`vercel.json`: `fra1`).
+
 - Vercel-Umgebungsvariablen: `NEXT_PUBLIC_SUPABASE_URL` und `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (bzw. `…_ANON_KEY`)
   setzt die Supabase-Vercel-Integration. Zusätzlich **nur für „Preview“**: `DEMO_LOGIN=1`.
 - Supabase-Preview-Branches spielen `seed.sql` und `seed-demo.sql` ein (siehe `supabase/config.toml`). Damit gibt es
