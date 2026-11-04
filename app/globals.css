@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+/* Farben 1:1 aus reference/prototype.html. Hell als Standard, Dunkel über System oder data-theme. */
+:root {
+  --bg: #edf0ee; --surface: #ffffff; --sunk: #e2e7e4; --ink: #0f1f1a; --muted: #55645e; --line: #cfd8d3;
+  --accent: #e0532a; --on-accent: #ffffff; --pitch: #dce8e0; --pitch-line: #9db8a8;
+  --tier1: rgba(15, 31, 26, 0.075); --tier2: rgba(15, 31, 26, 0.04); --tier3: rgba(15, 31, 26, 0.015);
+  --dot-fg: #ffffff; --lock: #55645e;
+  --cA: #c23a4b; --cB: #2c66a8; --cC: #a8701a; --cD: #12806a; --cE: #7448a0; --cF: #4f8128; --cG: #b03a86;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0a1310; --surface: #111d19; --sunk: #182722; --ink: #e5ede9; --muted: #93a59d; --line: #253731;
+    --accent: #ff7547; --on-accent: #14100e; --pitch: #15291f; --pitch-line: #3e6b53;
+    --tier1: rgba(229, 237, 233, 0.08); --tier2: rgba(229, 237, 233, 0.045); --tier3: rgba(229, 237, 233, 0.018);
+    --dot-fg: #0a1310; --lock: #93a59d;
+    --cA: #ef7584; --cB: #74a6e8; --cC: #e0a84e; --cD: #45c4a4; --cE: #b28ce0; --cF: #93c462; --cG: #e27dbf;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #0a1310; --surface: #111d19; --sunk: #182722; --ink: #e5ede9; --muted: #93a59d; --line: #253731;
+  --accent: #ff7547; --on-accent: #14100e; --pitch: #15291f; --pitch-line: #3e6b53;
+  --tier1: rgba(229, 237, 233, 0.08); --tier2: rgba(229, 237, 233, 0.045); --tier3: rgba(229, 237, 233, 0.018);
+  --dot-fg: #0a1310; --lock: #93a59d;
+  --cA: #ef7584; --cB: #74a6e8; --cC: #e0a84e; --cD: #45c4a4; --cE: #b28ce0; --cF: #93c462; --cG: #e27dbf;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-sunk: var(--sunk);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+  --color-pitch: var(--pitch);
+  --color-pitch-line: var(--pitch-line);
+  --color-lock: var(--lock);
+  --color-cluster-a: var(--cA);
+  --color-cluster-b: var(--cB);
+  --color-cluster-c: var(--cC);
+  --color-cluster-d: var(--cD);
+  --color-cluster-e: var(--cE);
+  --color-cluster-f: var(--cF);
+  --color-cluster-g: var(--cG);
+
+  --font-display: var(--font-archivo), "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --font-sans: var(--font-source-sans), "Segoe UI", system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+
+@layer base {
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 15.5px;
+    line-height: 1.55;
+  }
+  h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; }
+  h1 { font-size: clamp(38px, 6.4vw, 78px); line-height: 0.92; font-weight: 800; font-stretch: 72%; text-transform: uppercase; letter-spacing: -0.005em; }
+  h2 { font-size: clamp(26px, 3.2vw, 38px); font-weight: 800; font-stretch: 78%; line-height: 1.02; }
+  h3 { font-size: 18px; font-weight: 700; font-stretch: 90%; }
+  a { color: var(--accent); }
+}
+
+@utility eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
