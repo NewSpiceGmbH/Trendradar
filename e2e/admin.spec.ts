@@ -13,7 +13,7 @@ test("Kunde: kein Zugang zum Backend", async ({ page }) => {
   await loginAs(page, /Kunde A · Member/);
   // Trenddatenbank und Quellen liegen im Backend: nicht in der Kundennavigation, Seiten gesperrt
   const nav = page.getByRole("navigation", { name: "Bereiche" });
-  await expect(nav.getByRole("link")).toHaveText([/Dashboard \(3D\)|3D/, /2D-Ansicht|2D/, /News-Ticker|News/]);
+  await expect(nav.getByRole("link")).toHaveText([/Dashboard \(3D\)|3D/, /2D-Ansicht|2D/, /News-Ticker|News/, /Projekte/]);
   await page.goto("/admin");
   await expect(page.getByRole("heading", { name: "Nur für die Redaktion" })).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Redaktion" })).toHaveCount(0);
@@ -31,6 +31,7 @@ test.describe("Redaktion", () => {
     const errors: string[] = [];
     page.on("pageerror", (e) => errors.push(e.message));
     await loginAs(page, /Redaktion/);
+    await page.waitForLoadState("networkidle"); // Stadion (WebGL) erst fertig laden lassen
     await page.getByRole("link", { name: "Redaktion", exact: true }).click();
     await expect(page.getByRole("heading", { name: "Cockpit" })).toBeVisible();
     // Lagebild: drei Bereiche mit ihren Meldungen
@@ -189,6 +190,75 @@ test.describe("Redaktion", () => {
     await expect(page.getByText("2.000 € im Monat")).toHaveCount(0);
     await page.goto("/admin/startups");
     await expect(page.getByRole("heading", { name: "Nur für die Redaktion" })).toBeVisible();
+  });
+
+  test("Projekte: Anfrage, kuratierte Shortlist, Rückmeldung, Abschluss mit Siegel, Einladung", async ({ page }) => {
+    test.slow();
+    // Kunde sieht nur Freigegebenes, nichts Internes
+    await loginAs(page, /Kunde A · Owner/);
+    await page.goto("/projekte");
+    await page.getByRole("link", { name: /Halbzeit-Gastro schneller/ }).click();
+    const shortlist = page.locator("li").filter({ has: page.getByRole("heading", { name: /QueueLess/ }) });
+    await expect(shortlist.getByText("2.000 € im Monat je 10 Stände")).toBeVisible();
+    await expect(page.getByRole("heading", { name: /TapFlow/ })).toBeVisible();
+    await expect(page.getByText("500 € je Stand und Monat")).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: /Pre-Order Pro/ })).toHaveCount(0);
+    await expect(page.getByText(/Rabatt/)).toHaveCount(0);
+    await expect(page.getByText("Kalkulation intern.xlsx")).toHaveCount(0);
+    await expect(page.getByText("Shortlist Halbzeit-Gastro.pdf")).toBeVisible();
+
+    // Rückmeldung und Nachricht
+    await shortlist.getByRole("textbox").fill("Gern ein Erstgespräch im Januar.");
+    await shortlist.getByRole("button", { name: "Interessant" }).click();
+    await expect(shortlist.getByRole("status")).toHaveText(/Danke/);
+    await page.getByRole("textbox", { name: "Nachricht" }).fill("Passt uns der 12. Januar?");
+    await page.getByRole("button", { name: "Senden" }).click();
+    await expect(page.getByText("Passt uns der 12. Januar?")).toBeVisible();
+
+    // neue Anfrage
+    await page.goto("/projekte");
+    await page.getByLabel("Worum geht es?").fill("Einlass am Nordtor beschleunigen");
+    await page.getByLabel("Was ist heute das Problem?").fill("Vor dem Anpfiff warten die Gäste bis zu 25 Minuten am Nordtor.");
+    await page.getByRole("button", { name: "Anfrage senden" }).click();
+    await expect(page.getByRole("heading", { name: "Einlass am Nordtor beschleunigen", level: 1 })).toBeVisible();
+    await expect(page.getByRole("list", { name: "Phase: Angefragt" })).toBeVisible();
+
+    // andere Organisation sieht nichts davon
+    await loginAs(page, /Kunde P · Premium/);
+    await page.goto("/projekte");
+    await expect(page.getByText(/Halbzeit-Gastro|Nordtor/)).toHaveCount(0);
+    await page.goto("/projekte/pr-1");
+    await expect(page.getByRole("heading", { name: /Halbzeit-Gastro/ })).toHaveCount(0);
+
+    // Redaktion: Anfrage sehen, Rückmeldung sehen, Auswahl festhalten, abschließen
+    await loginAs(page, /Redaktion/);
+    await page.goto("/admin/projekte");
+    await expect(page.getByRole("heading", { name: /Neue Anfragen/ })).toBeVisible();
+    await expect(page.getByRole("link", { name: /Einlass am Nordtor/ })).toBeVisible();
+    await page.goto("/admin/projekte/pr-1");
+    await expect(page.getByText("Gern ein Erstgespräch im Januar.")).toBeVisible();
+    await expect(page.getByText(/Intern: Bei QueueLess Rabatt/)).toBeVisible();
+    const entry = page.locator("li").filter({ has: page.getByRole("heading", { name: /QueueLess/ }) });
+    await entry.getByRole("combobox").selectOption("selected");
+    await expect(entry.getByRole("combobox")).toHaveValue("selected");
+    await page.getByRole("textbox", { name: "Ergebnis in einem Satz" }).fill("Wartezeit halbiert.");
+    await page.getByRole("button", { name: "Abschließen" }).click();
+    await expect(page.getByRole("status").filter({ hasText: "New Spice approved" })).toBeVisible();
+
+    // Kundenverwaltung: Einladung mit Link
+    await page.goto("/admin/kunden");
+    await page.getByRole("link", { name: /Kunde A/ }).click();
+    await page.getByLabel("Einladen").fill("neu@kunde-a.example");
+    await page.getByRole("button", { name: "Einladen" }).click();
+    await expect(page.getByText(/\/invite\/fixture-/)).toBeVisible();
+    await expect(page.getByText("neu@kunde-a.example")).toBeVisible();
+
+    // Kunde sieht Abschluss und Siegel
+    await loginAs(page, /Kunde A · Owner/);
+    await page.goto("/projekte/pr-1");
+    await expect(page.getByText("Erfolgreich abgeschlossen.")).toBeVisible();
+    await expect(page.getByText("New Spice approved").first()).toBeVisible();
+    await expect(page.getByText("Wartezeit halbiert.")).toBeVisible();
   });
 
   test("Liveticker eingeklappt: neue Meldungen fallen auf", async ({ page }) => {

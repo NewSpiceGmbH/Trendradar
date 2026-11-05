@@ -63,3 +63,14 @@ Backend unter `/admin/venture` (Challenges) und `/admin/startups` (qualifizierte
 - Der Agent schreibt nur Kandidaten (`startup_candidates`). In die Datenbank kommt ein Startup ausschließlich über
   `decide_candidate()` (Redaktion). Kontakt, Kosten und Pitchdeck liegen getrennt in `startup_private` (nur Redaktion).
 - Veröffentlichte Profile sehen Kunden im Trenddetail unter „Startups“. Budget und Not-Aus teilen sich Scouts und Venture-Agent.
+
+## Kunden und Projekte
+
+- `/admin/kunden`: Organisationen mit Laufzeit, Paket und Sitzplätzen; Einladungen als Link (14 Tage gültig).
+  Die eingeladene Person öffnet `/invite/<token>`, bekommt einen Magic-Link an genau diese Adresse und nimmt an.
+  E-Mail-Versand der Einladung selbst folgt mit eigenem SMTP-Dienst (Resend).
+- `/projekte` (Kunden): Projekt anfragen, Fortschritt, Shortlist mit Rückmeldung, Nachrichten, Dokumente.
+- `/admin/projekte` (Redaktion): Anfrage → Challenge für den Venture-Agenten → kuratierte Shortlist (einzeln freigeben,
+  Kosten/Pitchdeck optional) → Meilensteine → Abschluss. Bei Erfolg erhalten ausgewählte Startups „New Spice approved“.
+- Dokumente liegen im privaten Supabase-Bucket `project-files`; die Speicherregeln folgen den Einträgen in
+  `project_documents` (Migration 0010).

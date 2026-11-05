@@ -11,7 +11,7 @@ export default function AppLayout({ children }: LayoutProps<"/">) {
       <header className="glass sticky top-0 z-20 !border-x-0 !border-t-0 !shadow-none">
         <div className="mx-auto flex max-w-[1320px] items-center gap-3 px-4 py-3 sm:gap-6 sm:px-8">
           <Link href="/radar" className="flex shrink-0 items-center gap-3 text-ink no-underline" aria-label="New Spice Trendradar – zum Dashboard">
-            <Logo className="h-7 w-auto" />
+            <Logo className="h-6 w-auto sm:h-7" />
             <span className="hidden text-sm text-muted lg:inline">Trendradar</span>
           </Link>
           <Suspense fallback={<MainNav static />}>

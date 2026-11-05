@@ -23,7 +23,13 @@ export async function UserMenu() {
         </Link>
       )}
       <form action={logout}>
-        <button className="rounded-[var(--radius-pill)] border border-line px-3 py-1.5 text-sm text-ink hover:border-muted">Abmelden</button>
+        <button aria-label="Abmelden" title="Abmelden" className="rounded-[var(--radius-pill)] border border-line px-2.5 py-1.5 text-sm text-ink hover:border-muted sm:px-3">
+          <span className="hidden sm:inline">Abmelden</span>
+          {/* am Handy nur ein Symbol, damit die Navigation Platz hat */}
+          <svg aria-hidden viewBox="0 0 24 24" className="size-4 sm:hidden" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3" /><path d="M10 17l5-5-5-5" /><path d="M15 12H3" />
+          </svg>
+        </button>
       </form>
     </div>
   );

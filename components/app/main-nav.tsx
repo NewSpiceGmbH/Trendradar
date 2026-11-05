@@ -7,6 +7,7 @@ const ITEMS = [
   { href: "/radar", label: "Dashboard (3D)", short: "3D", active: (p: string) => p === "/radar" },
   { href: "/radar/klassisch", label: "2D-Ansicht", short: "2D", active: (p: string) => p.startsWith("/radar/klassisch") },
   { href: "/news", label: "News-Ticker", short: "News", active: (p: string) => p.startsWith("/news") },
+  { href: "/projekte", label: "Projekte", short: "Projekte", active: (p: string) => p.startsWith("/projekte") },
 ];
 
 /** Hauptnavigation für Kunden und Redaktion; Trenddatenbank und Quellen liegen im Backend */

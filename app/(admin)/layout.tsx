@@ -9,6 +9,7 @@ import { UserMenu } from "@/components/app/user-menu";
 import { getAdminRepo } from "@/lib/admin/repo";
 import { MigrationMissingError } from "@/lib/admin/types";
 import { getViewer } from "@/lib/auth/viewer";
+import { getProjectsRepo } from "@/lib/projects/store";
 import { getVentureRepo } from "@/lib/venture/store";
 
 /** Redaktions-Backend: nur für platform_role admin/editor. Maßgeblich bleibt RLS in der Datenbank. */
@@ -51,13 +52,15 @@ async function Shell({ children }: { children: ReactNode }) {
     );
   }
 
-  let pending = 0, fresh = 0, openCandidates = 0, migration: string | null = null;
+  let pending = 0, fresh = 0, openCandidates = 0, newRequests = 0, migration: string | null = null;
   try {
     const repo = await getAdminRepo();
     const [proposals, signals] = await Promise.all([repo.proposals(), repo.signals()]);
     pending = proposals.filter((p) => p.status === "pending").length;
     fresh = signals.filter((s) => s.status !== "dismissed" && !s.publishedAt).length;
     // Venture Clienting (Migration 0009) – fehlt sie noch, bleibt die Zahl leer
+    // Projekte (Migration 0010) – neue Anfragen; fehlt sie noch, bleibt die Zahl leer
+    newRequests = await getProjectsRepo(viewer).then((r) => r.projects()).then((ps) => ps.filter((x) => x.status === "requested").length).catch(() => 0);
     openCandidates = await getVentureRepo().then((r) => r.candidates()).then((cs) => cs.filter((c) => c.status === "pending").length).catch(() => 0);
   } catch (e) {
     if (e instanceof MigrationMissingError) migration = e.message;
@@ -74,6 +77,8 @@ async function Shell({ children }: { children: ReactNode }) {
     { href: "/admin/scouting", label: "Scouting" },
     { href: "/admin/venture", label: "Venture Clienting", count: openCandidates },
     { href: "/admin/startups", label: "Startup-Datenbank" },
+    { href: "/admin/projekte", label: "Projekte", count: newRequests },
+    { href: "/admin/kunden", label: "Kunden" },
     { href: "/admin/agents", label: "Agenten" },
     ...(viewer.platformRole === "admin" ? [{ href: "/admin/team", label: "Team" }] : []),
   ];

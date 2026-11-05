@@ -6,6 +6,8 @@ const port = 3210;
 export default defineConfig({
   testDir: "e2e",
   timeout: 30_000,
+  // Das Stadion rendert WebGL ohne GPU auf der CPU; parallel zu einem zweiten Browser reichen 5 s nicht immer
+  expect: { timeout: 10_000 },
   use: { baseURL: process.env.E2E_BASE_URL ?? `http://localhost:${port}`, trace: "retain-on-failure" },
   projects: [
     { name: "desktop", use: { ...devices["Desktop Chrome"] } },
