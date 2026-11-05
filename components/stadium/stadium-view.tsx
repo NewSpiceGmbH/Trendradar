@@ -16,7 +16,7 @@ import { AUDIENCE_LABEL, FILTER_LABEL, audienceOf, matchesAudience, registerAudi
 import { USE_CASE, hotspotShot, type UseCaseKey } from "@/lib/stadium/usecases";
 import { isFresh, newsByTrend } from "@/lib/stadium/ticker";
 import type { Palette, View } from "./scene";
-import { TickerPanel, TickerStrip } from "./ticker";
+import { TickerColumn, TickerPanel, TickerStrip } from "./ticker";
 import { TrendDetail } from "./trend-detail";
 
 const Scene = dynamic(() => import("./scene"), {
@@ -374,7 +374,9 @@ export default function StadiumView({ data, notice, editor = false }: { data: Ra
   if (sel) crumbs.push({ label: `#${sel.number} ${sel.name}` });
 
   return (
-    <div className="relative -mt-[57px] h-[100dvh] min-h-[600px] w-full overflow-hidden bg-bg">
+    <div className="relative -mt-[57px] flex h-[100dvh] min-h-[600px] w-full overflow-hidden bg-bg">
+      {/* Stadionplan; rechts daneben (ab Tablet quer) der Liveticker */}
+      <div className="relative min-w-0 flex-1 overflow-hidden">
       <div className="absolute inset-0">
         <Scene
           data={data}
@@ -487,7 +489,9 @@ export default function StadiumView({ data, notice, editor = false }: { data: Ra
             ))}
           </dl>
           <div className="pointer-events-none flex min-w-0 flex-col items-end gap-2">
-            <TickerStrip items={data.ticker} open={tickerOpen} onOpen={openTicker} editor={editor} />
+            <div className="contents lg:hidden">
+              <TickerStrip items={data.ticker} open={tickerOpen} onOpen={openTicker} editor={editor} />
+            </div>
             <p className="glass pointer-events-auto rounded-[var(--radius-pill)] px-4 py-1.5 text-sm text-muted">
               <span className="num text-ink">{found.size}</span> von {data.trends.length} entdeckt
               {!cluster && !place && !useCase && (
@@ -632,6 +636,11 @@ export default function StadiumView({ data, notice, editor = false }: { data: Ra
           ))}
         </ul>
       </nav>
+      </div>
+
+      <aside className="glass hidden w-[340px] shrink-0 flex-col !rounded-none !border-y-0 !border-r-0 pt-[57px] lg:flex xl:w-[380px]">
+        <TickerColumn data={data} onSelectTrend={selectTrend} onHover={setHovered} active={selected} editor={editor} />
+      </aside>
     </div>
   );
 }

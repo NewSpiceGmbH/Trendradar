@@ -30,3 +30,12 @@ export function dayLabel(iso: string, now: Date = new Date()): string {
 export const hostOf = (url: string) => {
   try { return new URL(url).hostname.replace(/^www\./, ""); } catch { return url; }
 };
+
+/** Meldungen auf die gewählten Themen (Cluster) beschränken; leere Auswahl = alle */
+export function filterByTopics(items: TickerItem[], clusterOf: (trend: number) => string | undefined, topics: ReadonlySet<string>): TickerItem[] {
+  if (!topics.size) return items;
+  return items.filter((i) => {
+    const c = clusterOf(i.trend);
+    return c != null && topics.has(c);
+  });
+}

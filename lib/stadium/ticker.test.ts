@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { TickerItem } from "@/lib/radar/types";
-import { dayLabel, hostOf, isFresh, newsByTrend } from "./ticker";
+import { dayLabel, filterByTopics, hostOf, isFresh, newsByTrend } from "./ticker";
 
 const item = (id: string, trend: number, publishedAt: string): TickerItem =>
   ({ id, trend, title: id, summary: null, url: "https://www.example.org/a", publisher: null, publishedOn: null, publishedAt });
@@ -23,5 +23,12 @@ describe("Liveticker", () => {
   it("kürzt die Quelle auf den Host", () => {
     expect(hostOf("https://www.stadionwelt.de/news/x")).toBe("stadionwelt.de");
     expect(hostOf("kein link")).toBe("kein link");
+  });
+  it("filtert nach Themen (Cluster)", () => {
+    const items = [item("a", 24, "2026-11-04T12:00:00Z"), item("b", 34, "2026-11-04T12:00:00Z")];
+    const cluster = (n: number) => ({ 24: "A", 34: "F" } as Record<number, string>)[n];
+    expect(filterByTopics(items, cluster, new Set()).map((x) => x.id)).toEqual(["a", "b"]);
+    expect(filterByTopics(items, cluster, new Set(["F"])).map((x) => x.id)).toEqual(["b"]);
+    expect(filterByTopics(items, cluster, new Set(["B"]))).toEqual([]);
   });
 });

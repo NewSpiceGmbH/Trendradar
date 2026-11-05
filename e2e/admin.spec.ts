@@ -82,17 +82,24 @@ test.describe("Redaktion", () => {
     await expect(page.getByText("Batteriespeicher")).toBeVisible();
   });
 
-  test("Liveticker im Stadion: Kunde sieht freigegebene Meldungen", async ({ page }) => {
+  test("Liveticker im Stadion: Kunde sieht freigegebene Meldungen, filtert nach Themen", async ({ page }) => {
     // Das Stadion ist WebGL; ohne GPU rendert der Testbrowser langsam – mehr Zeit geben
     test.slow();
     await loginAs(page, /Kunde A · Member/);
     await page.goto("/radar?v=journey");
-    await page.getByRole("button", { name: /Liveticker öffnen/ }).click();
-    const panel = page.locator("aside");
-    await expect(panel.getByRole("heading", { name: "Neu aus dem Scouting" })).toBeVisible();
-    await expect(panel.getByRole("link", { name: /Batteriespeicher/ })).toHaveAttribute("href", "https://example.org/beispiel/speicher");
-    await panel.getByRole("button", { name: /#34 Energiespeicher/ }).click();
-    await expect(page.locator("aside").getByRole("heading", { name: /Energiespeicher/ })).toBeVisible({ timeout: 20_000 });
+    const ticker = page.getByRole("region", { name: "Liveticker" });
+    await expect(ticker.getByRole("link", { name: /Batteriespeicher/ })).toHaveAttribute("href", "https://example.org/beispiel/speicher");
+
+    // Themenfilter: nur Fan & Guest Experience – die Speicher-Meldung (Cluster F) verschwindet
+    await ticker.getByRole("button", { name: "Themen wählen" }).click();
+    await ticker.getByRole("checkbox", { name: /Fan & Guest Experience/ }).check();
+    await expect(ticker.getByRole("link", { name: /Batteriespeicher/ })).toHaveCount(0);
+    await ticker.getByRole("checkbox", { name: /Sustainability/ }).check();
+    await expect(ticker.getByRole("link", { name: /Batteriespeicher/ })).toBeVisible();
+    await ticker.getByRole("button", { name: "Alle Themen" }).click();
+
+    await ticker.getByRole("button", { name: /#34 Energiespeicher/ }).click();
+    await expect(page.locator("main aside, aside").getByRole("heading", { name: /Energiespeicher/ }).first()).toBeVisible({ timeout: 20_000 });
     await page.getByRole("button", { name: "Mehr erfahren" }).click();
     // Hinter dem Panel rendert WebGL ohne GPU sehr langsam; Playwrights Stabilitätsprüfung wartet dann ewig
     await page.getByRole("tab", { name: /News/ }).dispatchEvent("click");
