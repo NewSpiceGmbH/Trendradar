@@ -59,7 +59,7 @@ function usePalette() {
 
 const pill = "glass rounded-[var(--radius-pill)] px-4 py-1.5 text-sm font-bold text-ink hover:brightness-110";
 
-export default function StadiumView({ data, notice }: { data: RadarData; notice?: ReactNode }) {
+export default function StadiumView({ data, notice, editor = false }: { data: RadarData; notice?: ReactNode; editor?: boolean }) {
   // Ort und Zielgruppe aus der Datenbank vor allen anderen Berechnungen übernehmen
   useMemo(() => {
     registerStages(data.trends);
@@ -487,7 +487,7 @@ export default function StadiumView({ data, notice }: { data: RadarData; notice?
             ))}
           </dl>
           <div className="pointer-events-none flex min-w-0 flex-col items-end gap-2">
-            <TickerStrip items={data.ticker} open={tickerOpen} onOpen={openTicker} />
+            <TickerStrip items={data.ticker} open={tickerOpen} onOpen={openTicker} editor={editor} />
             <p className="glass pointer-events-auto rounded-[var(--radius-pill)] px-4 py-1.5 text-sm text-muted">
               <span className="num text-ink">{found.size}</span> von {data.trends.length} entdeckt
               {!cluster && !place && !useCase && (

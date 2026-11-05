@@ -8,7 +8,7 @@ import { dayLabel, hostOf, isFresh } from "@/lib/stadium/ticker";
  * Laufzeile unten im Stadion: zeigt reihum die neuesten Meldungen, Klick öffnet den Liveticker.
  * Ohne Meldungen erscheint sie nicht.
  */
-export function TickerStrip({ items, open, onOpen }: { items: TickerItem[]; open: boolean; onOpen: () => void }) {
+export function TickerStrip({ items, open, onOpen, editor = false }: { items: TickerItem[]; open: boolean; onOpen: () => void; editor?: boolean }) {
   const latest = items.slice(0, 5);
   const [i, setI] = useState(0);
   useEffect(() => {
@@ -17,7 +17,15 @@ export function TickerStrip({ items, open, onOpen }: { items: TickerItem[]; open
     const id = window.setInterval(() => setI((n) => (n + 1) % latest.length), 6000);
     return () => window.clearInterval(id);
   }, [latest.length, open]);
-  if (!latest.length) return null;
+  if (!latest.length) {
+    // Kunden sehen ohne Meldungen nichts; die Redaktion bekommt einen Hinweis, wo der Ticker erscheint
+    if (!editor) return null;
+    return (
+      <a href="/admin/ticker" className="glass pointer-events-auto rounded-[var(--radius-pill)] px-4 py-1.5 text-sm text-muted no-underline hover:text-ink">
+        Liveticker: noch keine Meldung freigegeben – nur für die Redaktion sichtbar →
+      </a>
+    );
+  }
   const cur = latest[i % latest.length];
   const fresh = items.filter((x) => isFresh(x)).length;
   return (
