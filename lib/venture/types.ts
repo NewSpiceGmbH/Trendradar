@@ -1,3 +1,5 @@
+import type { Brief } from "./brief";
+
 /** Venture Clienting: Challenges, Kandidaten des Agenten, qualifizierte Startup-Datenbank (Migration 0009) */
 
 export type Maturity = "idea" | "prototype" | "pilot" | "market" | "scale";
@@ -78,6 +80,22 @@ export interface Challenge {
   model: string;
   effort: "low" | "medium" | "high";
   lastRunAt: string | null;
+  createdAt: string;
+  /** Problem-Briefing aus dem Deep Dive (ab Migration 0011; sonst null) */
+  brief?: Brief | null;
+  briefUpdatedAt?: string | null;
+}
+
+export interface DeepDiveSession {
+  id: string;
+  title: string;
+  heldOn: string | null;
+  source: "paste" | "upload";
+  fileName: string | null;
+  charCount: number | null;
+  status: "processing" | "done" | "failed";
+  summary: string | null;
+  error: string | null;
   createdAt: string;
 }
 

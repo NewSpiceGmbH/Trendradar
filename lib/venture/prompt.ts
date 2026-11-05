@@ -1,11 +1,12 @@
 import { trendList, type TrendRef } from "@/lib/agents/prompts/scout";
+import { briefForScouting } from "./brief";
 import { CRITERIA, MATURITY_LABEL, type Challenge } from "./types";
 
 /**
  * Prompt des Venture-Clienting-Agenten. Versioniert wie der Scout-Prompt; die Version steht in agent_runs.input.
  * Stabiler Teil (Rolle, Regeln, Kriterien, Trendliste) zuerst und gecacht, die Challenge danach.
  */
-export const VENTURE_PROMPT_VERSION = "venture-2026-11-05";
+export const VENTURE_PROMPT_VERSION = "venture-2026-11-05b";
 
 export const VENTURE_RULES = `Du bist Venture-Clienting-Analyst bei New Spice. New Spice berät Clubs, Arenen, Venues, Hotels und Veranstalter in Sport, Hospitality und Live Entertainment. Nach dem Venture-Clienting-Prinzip suchen wir für ein konkretes Problem eines Kunden Startups, die es schon heute lösen können – als Kunde des Startups, nicht als Investor.
 
@@ -61,6 +62,7 @@ export function buildChallengeBriefing(b: ChallengeBriefing): string {
     `\nMuss-Kriterien:\n${list(c.mustHaves)}`,
     c.exclusions.length ? `\nNicht in Frage kommen:\n${list(c.exclusions)}` : "",
     c.leads.length ? `\nHinweise aus dem Team (vorrangig prüfen):\n${list(c.leads)}` : "",
+    c.brief ? `\n${briefForScouting(c.brief)}` : "",
     b.known.length ? `\nBereits bekannt (nicht erneut melden):\n${list(b.known.map((k) => (k.domain ? `${k.name} (${k.domain})` : k.name)))}` : "",
     "",
     `Liefere höchstens ${c.maxCandidates} Kandidaten. Schließe mit report_startups ab.`,

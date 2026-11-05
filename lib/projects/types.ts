@@ -35,7 +35,7 @@ export interface Invitation {
 export type ProjectStatus = "requested" | "scoping" | "shortlist" | "pilot" | "evaluation" | "completed" | "cancelled";
 export const PROJECT_STATUS_LABEL: Record<ProjectStatus, string> = {
   requested: "Angefragt",
-  scoping: "Klärung",
+  scoping: "Problem Deep Dive",
   shortlist: "Shortlist",
   pilot: "Pilot",
   evaluation: "Auswertung",

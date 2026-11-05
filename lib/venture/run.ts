@@ -6,6 +6,8 @@ import { anthropicClient, closeStaleRuns } from "@/lib/agents/run";
 import { monthStart } from "@/lib/agents/schedule";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { runVentureAgent } from "./agent";
+import { DEEPDIVE_MODEL, runDeepDiveAgent } from "./deepdive";
+import type { TranscriptInput } from "./transcript";
 import { domainOf, guardRecommendation, totalOf } from "./scoring";
 import { mapChallenge } from "./store";
 
@@ -93,5 +95,50 @@ export async function runChallenge(challengeId: string, opts: { userId?: string 
     await db.from("agent_runs").update({ status: "failed", finished_at: new Date().toISOString(), error }).eq("id", runId);
     await db.from("challenges").update({ status: challenge.status === "draft" || challenge.status === "scouting" ? "draft" : challenge.status, last_run_at: now.toISOString() }).eq("id", challengeId);
     return { status: "failed", runId, error };
+  }
+}
+
+/**
+ * Ein Deep-Dive-Gespräch auswerten. Das Transkript kommt nur als Argument herein und wird nirgends gespeichert.
+ * Schreibt das konsolidierte Briefing (Entwurf für die Redaktion) an die Challenge, die Kurzfassung ans Gespräch
+ * und den Lauf ins Protokoll.
+ */
+export async function runDeepDive(sessionId: string, transcript: TranscriptInput, opts: { userId?: string | null; client?: Pick<Anthropic, "beta">; db?: SupabaseClient } = {}) {
+  const db = opts.db ?? createAdminClient();
+  const sess = await db.from("deep_dive_sessions").select("id, challenge_id, title, held_on").eq("id", sessionId).single();
+  if (sess.error) return { status: "failed" as const, error: sess.error.message };
+  const ch = await db.from("challenges").select("*").eq("id", sess.data.challenge_id).single();
+  if (ch.error) return { status: "failed" as const, error: ch.error.message };
+  const challenge = mapChallenge(ch.data as Record<string, unknown>);
+  const failSession = async (error: string, runId?: string) => {
+    await db.from("deep_dive_sessions").update({ status: "failed", error }).eq("id", sessionId);
+    if (runId) await db.from("agent_runs").update({ status: "failed", finished_at: new Date().toISOString(), error }).eq("id", runId);
+    return { status: "failed" as const, error };
+  };
+  if (!opts.client && !process.env.ANTHROPIC_API_KEY) return failSession("ANTHROPIC_API_KEY ist nicht hinterlegt.");
+
+  const { data: run, error: runErr } = await db.from("agent_runs").insert({
+    agent: "deepdive", status: "running", challenge_id: challenge.id, model: DEEPDIVE_MODEL, triggered_by: opts.userId ?? null,
+    input: { session: sess.data.title, kind: transcript.kind, chars: transcript.kind === "text" ? transcript.text.length : null },
+  }).select("id").single();
+  if (runErr) return failSession(runErr.message);
+  const runId = run.id as string;
+  await db.from("deep_dive_sessions").update({ run_id: runId }).eq("id", sessionId);
+
+  try {
+    const result = await runDeepDiveAgent(opts.client ?? anthropicClient(), {
+      challenge, brief: challenge.brief ?? null, transcript, session: { title: sess.data.title as string, heldOn: (sess.data.held_on as string | null) ?? null },
+    });
+    await db.from("challenges").update({ brief: result.brief, brief_updated_at: new Date().toISOString() }).eq("id", challenge.id);
+    await db.from("deep_dive_sessions").update({ status: "done", summary: result.sessionSummary, error: null }).eq("id", sessionId);
+    await db.from("agent_runs").update({
+      status: "succeeded", finished_at: new Date().toISOString(), model: result.model,
+      input_tokens: result.usage.input_tokens + (result.usage.cache_read_input_tokens ?? 0) + (result.usage.cache_creation_input_tokens ?? 0),
+      output_tokens: result.usage.output_tokens, cost_usd: result.costUsd,
+      output: { session: sess.data.title, turns: result.turns, promptVersion: result.promptVersion },
+    }).eq("id", runId);
+    return { status: "succeeded" as const, runId, costUsd: result.costUsd };
+  } catch (e) {
+    return failSession(e instanceof Error ? e.message : String(e), runId);
   }
 }

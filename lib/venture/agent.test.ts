@@ -74,3 +74,16 @@ describe("Venture-Agent", () => {
     await expect(runVentureAgent(client, { challenge, trends: [], known: [], today: new Date() })).rejects.toThrow(/abgelehnt/);
   });
 });
+
+describe("Venture-Agent mit Deep Dive", () => {
+  it("nimmt Suchhypothesen und offene Fragen aus dem Briefing mit", async () => {
+    const { EMPTY_BRIEF } = await import("./brief");
+    const text = buildChallengeBriefing({
+      challenge: { ...challenge, brief: { ...EMPTY_BRIEF, search_hypotheses: [{ approach: "Vorbestellung", keywords: ["mobile order"], analogies: ["Flughafen"] }], open_questions: ["Wer betreibt die Stände?"] } },
+      trends: [], known: [], today: new Date("2026-11-05"),
+    });
+    expect(text).toContain("Ergebnis des Problem Deep Dive");
+    expect(text).toContain("Vorbestellung – Suchbegriffe: mobile order – Analogien: Flughafen");
+    expect(text).toContain("Wer betreibt die Stände?");
+  });
+});

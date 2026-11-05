@@ -422,11 +422,11 @@ export function ProjectControl({ project, people }: { project: Project; people: 
         <div className="flex flex-col gap-1.5">
           <span className="eyebrow !text-muted">Startup-Suche</span>
           {project.challengeId ? (
-            <Link href={`/admin/venture/${project.challengeId}`}>Zur Challenge →</Link>
+            <Link href={`/admin/venture/${project.challengeId}#deep-dive`}>Deep Dive & Startup-Suche →</Link>
           ) : (
             <button type="button" disabled={busy} className={`${btn.ghost} self-start`}
               onClick={() => run(async () => { const r = await challengeFromProject(project.id); if (r.ok && r.challengeId) router.push(`/admin/venture/${r.challengeId}`); return r; })}>
-              Challenge aus der Anfrage anlegen
+              Deep Dive starten (Challenge anlegen)
             </button>
           )}
         </div>

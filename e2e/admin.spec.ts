@@ -192,6 +192,37 @@ test.describe("Redaktion", () => {
     await expect(page.getByRole("heading", { name: "Nur für die Redaktion" })).toBeVisible();
   });
 
+  test("Problem Deep Dive: Briefing prüfen, bearbeiten, als Scouting-Grundlage übernehmen", async ({ page }) => {
+    await loginAs(page, /Redaktion/);
+    await page.goto("/admin/venture/ch-1");
+    const dd = page.getByRole("region", { name: "Problem Deep Dive" });
+    await expect(dd.getByText(/Der Engpass ist das Bezahlen/).first()).toBeVisible();
+    await expect(dd.getByText("Kassen ohne Schlange (Bilderkennung am Tablett)")).toBeVisible();
+    await expect(dd.getByText(/Gastronomie nennt 12 Minuten/)).toBeVisible();
+    await expect(dd.getByText("Gespräch Betriebsleitung", { exact: true })).toBeVisible();
+
+    // bearbeiten
+    await dd.getByRole("button", { name: "Bearbeiten" }).click();
+    await dd.getByLabel("Zusammenfassung", { exact: true }).fill("Halbzeit: Der Engpass ist das Bezahlen. Ziel ist ein Pilot an vier Ständen.");
+    await dd.getByLabel("Suchhypothesen").fill("Kassen ohne Schlange | frictionless checkout | Kantine\nPfand am Automaten | reverse vending | Supermarkt");
+    await dd.getByRole("button", { name: "Briefing speichern" }).click();
+    await expect(dd.getByText("Halbzeit: Der Engpass ist das Bezahlen. Ziel ist ein Pilot an vier Ständen.")).toBeVisible();
+    await expect(dd.getByText("Pfand am Automaten")).toBeVisible();
+
+    // übernehmen: Problem der Challenge kommt aus dem Briefing
+    await dd.getByRole("button", { name: "Als Scouting-Grundlage übernehmen" }).click();
+    await expect(dd.getByRole("status").filter({ hasText: "übernommen" })).toBeVisible();
+    await page.reload();
+    await expect(page.locator("dl").first().getByText(/Ziel ist ein Pilot an vier Ständen/)).toBeVisible();
+
+    // neues Gespräch: im Testmodus ohne Auswertung, aber als Eintrag sichtbar
+    await dd.getByLabel("Titel").fill("Gespräch Caterer");
+    await dd.getByLabel(/Transkript oder Notion-KI/).fill("Caterer: Wir haben 40 Stände. ".repeat(20));
+    await dd.getByRole("button", { name: "Auswerten" }).click();
+    await expect(dd.getByRole("status").filter({ hasText: "Testmodus" })).toBeVisible();
+    await expect(dd.getByText("Gespräch Caterer", { exact: true })).toBeVisible();
+  });
+
   test("Projekte: Anfrage, kuratierte Shortlist, Rückmeldung, Abschluss mit Siegel, Einladung", async ({ page }) => {
     test.slow();
     // Kunde sieht nur Freigegebenes, nichts Internes

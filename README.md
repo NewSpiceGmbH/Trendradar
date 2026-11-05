@@ -74,3 +74,12 @@ Backend unter `/admin/venture` (Challenges) und `/admin/startups` (qualifizierte
   Kosten/Pitchdeck optional) → Meilensteine → Abschluss. Bei Erfolg erhalten ausgewählte Startups „New Spice approved“.
 - Dokumente liegen im privaten Supabase-Bucket `project-files`; die Speicherregeln folgen den Einträgen in
   `project_documents` (Migration 0010).
+
+## Problem Deep Dive
+
+An jeder Challenge (`/admin/venture/<id>`, Bereich „Problem Deep Dive“): Gesprächstranskripte – z. B. aus Notion KI –
+einfügen oder als Export hochladen (Markdown, Text, HTML, PDF bis 4 MB). Der Deep-Dive-Agent (`lib/venture/deepdive.ts`)
+führt sie mit dem bisherigen Stand zu einem Problem-Briefing zusammen (Problem, Ist-Ablauf, Ursachen, Schmerzpunkte mit
+Zahlen, Ziel und KPIs, Muss-/Wunsch-Kriterien, Rahmen, Suchhypothesen, offene Fragen, Widersprüche). Transkripte werden
+nicht gespeichert, Namen werden zu Rollen. „Als Scouting-Grundlage übernehmen“ füllt die Challenge; der Venture-Agent
+bekommt zusätzlich Suchhypothesen und offene Fragen.

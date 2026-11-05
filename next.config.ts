@@ -6,6 +6,8 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   cacheComponents: true,
   partialPrefetching: true,
+  // Deep Dive: Transkripte (Notion-Export als Text, Markdown oder PDF) per Server Action; Vercel erlaubt bis 4,5 MB
+  experimental: { serverActions: { bodySizeLimit: "4mb" } },
   turbopack: {
     rules: {
       "*.css": {

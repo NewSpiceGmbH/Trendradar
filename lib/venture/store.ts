@@ -5,8 +5,9 @@ import { connection } from "next/server";
 import { isFixtureMode } from "@/lib/auth/personas";
 import { createClient } from "@/lib/supabase/server";
 import { fixtureVenture } from "./fixture";
+import { readBrief, type Brief } from "./brief";
 import { domainOf } from "./scoring";
-import type { Candidate, CandidateStatus, Challenge, Startup, StartupPrivate } from "./types";
+import type { Candidate, CandidateStatus, Challenge, DeepDiveSession, Startup, StartupPrivate } from "./types";
 
 /** Daten fehlen, weil Migration 0009 noch nicht angewendet ist */
 export class VentureMissingError extends Error {
@@ -29,7 +30,7 @@ export interface VentureRun {
   found: number | null;
 }
 
-export type ChallengeInput = Omit<Challenge, "id" | "lastRunAt" | "createdAt">;
+export type ChallengeInput = Omit<Challenge, "id" | "lastRunAt" | "createdAt" | "brief" | "briefUpdatedAt">;
 export type StartupInput = Omit<Startup, "id" | "createdAt" | "updatedAt" | "domain" | "approved">;
 
 /** Zugriff auf Venture Clienting mit den Rechten der Redaktion (RLS gilt) oder im Testmodus auf einen Speicher im Prozess */
@@ -43,6 +44,11 @@ export interface VentureRepo {
   startup(id: string): Promise<{ startup: Startup; priv: StartupPrivate } | null>;
   saveStartup(id: string, s: StartupInput, priv: StartupPrivate): Promise<void>;
   runs(challengeId: string): Promise<VentureRun[]>;
+  // Problem Deep Dive (Migration 0011)
+  sessions(challengeId: string): Promise<DeepDiveSession[]>;
+  addSession(challengeId: string, s: Pick<DeepDiveSession, "title" | "heldOn" | "source" | "fileName" | "charCount">, userId: string): Promise<string>;
+  deleteSession(id: string): Promise<void>;
+  saveBrief(challengeId: string, brief: Brief): Promise<void>;
 }
 
 export async function getVentureRepo(): Promise<VentureRepo> {
@@ -72,6 +78,7 @@ export const mapChallenge = (r: Row): Challenge => ({
   status: r.status as Challenge["status"], maxCandidates: r.max_candidates as number, maxSearches: r.max_searches as number,
   maxCostUsd: Number(r.max_cost_usd), model: r.model as string, effort: r.effort as Challenge["effort"],
   lastRunAt: r.last_run_at as string | null, createdAt: r.created_at as string,
+  brief: readBrief(r.brief), briefUpdatedAt: (r.brief_updated_at as string | null) ?? null,
 });
 
 export const challengeRow = (c: ChallengeInput) => ({
@@ -169,10 +176,34 @@ export function supabaseVenture(db: SupabaseClient): VentureRepo {
       });
       if (p.error) throw new Error(friendly(p.error.message));
     },
+    async sessions(challengeId) {
+      const { data, error } = await db.from("deep_dive_sessions").select("*").eq("challenge_id", challengeId).order("created_at");
+      if (error) {
+        if (/does not exist|could not find the table/i.test(error.message)) return []; // vor Migration 0011
+        fail(error, "deep_dive_sessions");
+      }
+      return (data ?? []).map((r) => ({
+        id: r.id, title: r.title, heldOn: r.held_on, source: r.source, fileName: r.file_name, charCount: r.char_count,
+        status: r.status, summary: r.summary, error: r.error, createdAt: r.created_at,
+      }));
+    },
+    async addSession(challengeId, s, userId) {
+      const r = await db.from("deep_dive_sessions").insert({
+        challenge_id: challengeId, title: s.title, held_on: s.heldOn, source: s.source, file_name: s.fileName, char_count: s.charCount, created_by: userId,
+      }).select("id").single();
+      if (r.error && /does not exist|could not find the table/i.test(r.error.message)) throw new Error("Der Deep Dive ist noch nicht eingerichtet (Migration 0011 fehlt).");
+      return ok(r, "deep_dive_sessions").id as string;
+    },
+    async deleteSession(id) {
+      ok(await db.from("deep_dive_sessions").delete().eq("id", id), "deep_dive_sessions");
+    },
+    async saveBrief(challengeId, brief) {
+      ok(await db.from("challenges").update({ brief, brief_updated_at: new Date().toISOString() }).eq("id", challengeId).select("id").single(), "challenges");
+    },
     async runs(challengeId) {
       const rows = ok(
         await db.from("agent_runs").select("id, status, started_at, finished_at, cost_usd, searches, error, output")
-          .eq("challenge_id", challengeId).order("started_at", { ascending: false }).limit(20),
+          .eq("challenge_id", challengeId).eq("agent", "venture").order("started_at", { ascending: false }).limit(20),
         "agent_runs",
       );
       return rows.map((r) => {

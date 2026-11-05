@@ -6,7 +6,9 @@ import { redirect } from "next/navigation";
 import type { ActionResult } from "@/lib/admin/actions";
 import { isFixtureMode } from "@/lib/auth/personas";
 import { getViewer } from "@/lib/auth/viewer";
-import { runChallenge } from "./run";
+import { challengeFieldsFromBrief, briefSchema, type Brief } from "./brief";
+import { runChallenge, runDeepDive } from "./run";
+import { cleanText, fromFile, MAX_TRANSCRIPT_CHARS, MAX_UPLOAD_BYTES, type TranscriptInput } from "./transcript";
 import { domainOf } from "./scoring";
 import { getVentureRepo, type ChallengeInput, type StartupInput } from "./store";
 import type { CandidateStatus, StartupPrivate } from "./types";
@@ -90,6 +92,94 @@ export async function saveStartup(id: string, s: StartupInput, priv: StartupPriv
     revalidatePath("/admin", "layout");
     revalidatePath("/radar");
     return { ok: true, message: s.published ? "Gespeichert und im Radar veröffentlicht." : "Gespeichert." };
+  } catch (e) {
+    return fail(e);
+  }
+}
+
+// ───────────────────────── Problem Deep Dive ─────────────────────────
+
+/**
+ * Gespräch hinzufügen: Text einfügen oder Datei (Notion-Export) hochladen. Das Transkript geht nur an den Agenten
+ * und wird nicht gespeichert – gespeichert werden Titel, Datum, Kurzfassung und das konsolidierte Briefing.
+ */
+export async function addDeepDive(challengeId: string, form: FormData): Promise<ActionResult> {
+  try {
+    const v = await guard();
+    const title = String(form.get("title") ?? "").trim();
+    const heldOn = String(form.get("heldOn") ?? "").trim() || null;
+    const pasted = cleanText(String(form.get("text") ?? ""));
+    const file = form.get("file");
+    if (!title) return { ok: false, error: "Bitte dem Gespräch einen Titel geben, z. B. „Gespräch mit der Gastronomie“." };
+    let transcript: TranscriptInput;
+    let fileName: string | null = null;
+    if (file instanceof File && file.size > 0) {
+      if (file.size > MAX_UPLOAD_BYTES) return { ok: false, error: "Die Datei ist größer als 4 MB. Bitte als Text exportieren oder einfügen." };
+      transcript = fromFile(file.name, file.type, new Uint8Array(await file.arrayBuffer()));
+      fileName = file.name;
+    } else if (pasted.length >= 200) {
+      transcript = { kind: "text", text: pasted };
+    } else {
+      return { ok: false, error: "Bitte das Transkript einfügen (mindestens ein paar Absätze) oder eine Datei hochladen." };
+    }
+    if (transcript.kind === "text" && transcript.text.length > MAX_TRANSCRIPT_CHARS) return { ok: false, error: "Das Transkript ist sehr lang. Bitte in mehrere Gespräche aufteilen." };
+    if (transcript.kind === "text" && transcript.text.length < 200) return { ok: false, error: "In der Datei steht kaum Text." };
+    if (isFixtureMode()) {
+      await (await getVentureRepo()).addSession(challengeId, { title, heldOn, source: fileName ? "upload" : "paste", fileName, charCount: transcript.kind === "text" ? transcript.text.length : null }, v.id);
+      revalidatePath("/admin", "layout");
+      return { ok: false, error: "Im Testmodus wird nicht ausgewertet (kein API-Schlüssel). Das Beispiel-Briefing zeigt das Ergebnis." };
+    }
+    if (!process.env.ANTHROPIC_API_KEY) return { ok: false, error: "ANTHROPIC_API_KEY ist in Vercel noch nicht hinterlegt." };
+    const sessionId = await (await getVentureRepo()).addSession(challengeId, {
+      title, heldOn, source: fileName ? "upload" : "paste", fileName, charCount: transcript.kind === "text" ? transcript.text.length : null,
+    }, v.id);
+    after(async () => {
+      const r = await runDeepDive(sessionId, transcript, { userId: v.id });
+      console.log(`Deep Dive ${sessionId}: ${r.status}${"error" in r ? ` – ${r.error}` : ""}`);
+    });
+    revalidatePath("/admin", "layout");
+    return { ok: true, message: "Wird ausgewertet – meist 1–3 Minuten. Danach Seite neu laden: Das Briefing ist dann aktualisiert." };
+  } catch (e) {
+    return fail(e);
+  }
+}
+
+export async function deleteDeepDive(id: string): Promise<ActionResult> {
+  try {
+    await guard();
+    await (await getVentureRepo()).deleteSession(id);
+    revalidatePath("/admin", "layout");
+    return { ok: true, message: "Gespräch entfernt. Das Briefing bleibt, wie es ist." };
+  } catch (e) {
+    return fail(e);
+  }
+}
+
+export async function saveBrief(challengeId: string, brief: Brief): Promise<ActionResult> {
+  try {
+    await guard();
+    const parsed = briefSchema.safeParse(brief);
+    if (!parsed.success) return { ok: false, error: "Das Briefing ist unvollständig oder zu lang." };
+    await (await getVentureRepo()).saveBrief(challengeId, parsed.data);
+    revalidatePath("/admin", "layout");
+    return { ok: true, message: "Briefing gespeichert." };
+  } catch (e) {
+    return fail(e);
+  }
+}
+
+/** Briefing als Scouting-Grundlage in die Challenge übernehmen (Problem, Ziel, Kontext, Muss-Kriterien, Ausschlüsse, Rahmen) */
+export async function applyBrief(challengeId: string): Promise<ActionResult> {
+  try {
+    const v = await guard();
+    const repo = await getVentureRepo();
+    const c = await repo.challenge(challengeId);
+    if (!c?.brief) return { ok: false, error: "Es gibt noch kein Briefing." };
+    const { id: _i, lastRunAt: _l, createdAt: _c, brief, briefUpdatedAt: _b, ...input } = c;
+    void _i; void _l; void _c; void _b;
+    await repo.saveChallenge(challengeId, { ...input, ...challengeFieldsFromBrief(brief) }, v.id);
+    revalidatePath("/admin", "layout");
+    return { ok: true, message: "In die Challenge übernommen. Der Venture-Agent nutzt jetzt das ganze Briefing – inklusive Suchhypothesen und offener Fragen." };
   } catch (e) {
     return fail(e);
   }

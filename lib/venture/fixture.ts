@@ -2,7 +2,8 @@ import "server-only";
 
 import { domainOf, totalOf } from "./scoring";
 import type { ChallengeInput, StartupInput, VentureRepo, VentureRun } from "./store";
-import { CRITERIA, EMPTY_PRIVATE, type Candidate, type Challenge, type CriterionKey, type Startup, type StartupPrivate } from "./types";
+import { EMPTY_BRIEF, type Brief } from "./brief";
+import { CRITERIA, EMPTY_PRIVATE, type Candidate, type Challenge, type CriterionKey, type DeepDiveSession, type Startup, type StartupPrivate } from "./types";
 
 /**
  * Venture Clienting im lokalen Testmodus (RADAR_FIXTURES=1): eine Beispiel-Challenge mit vorbewerteten Kandidaten.
@@ -14,6 +15,7 @@ interface Store {
   startups: Startup[];
   priv: Map<string, StartupPrivate>;
   runs: (VentureRun & { challengeId: string })[];
+  sessions: (DeepDiveSession & { challengeId: string })[];
   seq: number;
 }
 
@@ -31,7 +33,34 @@ function init(): Store {
     audience: "public", journeyStages: ["stadion"], trendNumbers: [24, 25, 26], regions: ["DACH", "EU"], minMaturity: "pilot",
     mustHaves: ["DSGVO-konform", "Anbindung an bestehendes Kassensystem", "Betrieb bei 50.000 Gästen"], exclusions: [], leads: [],
     timeframe: "Pilot in der Rückrunde 2027", budget: "Pilot bis 50.000 €", maxCandidates: 8, maxSearches: 15, maxCostUsd: 3,
-    model: "claude-opus-5-5", effort: "high",
+    model: "claude-opus-5-5", effort: "high", briefUpdatedAt: ago(26),
+    brief: {
+      ...EMPTY_BRIEF,
+      summary: "In der Halbzeitpause bilden sich an den 40 Ständen Schlangen; viele Gäste geben auf. Der Engpass ist das Bezahlen, nicht das Zapfen.",
+      problem: "Im Schnitt 12 Minuten Wartezeit in der Halbzeit, an den Ständen hinter den Kurven bis zu 18 Minuten.",
+      current_process: "Bestellen, Zapfen und Bezahlen an derselben Kasse; eine Kraft je Kasse; Pfand wird am selben Stand zurückgegeben.",
+      context: "Bundesliga-Stadion, 50.000 Plätze, 40 Verkaufsstände, Catering durch einen Dienstleister.",
+      root_causes: ["Bezahlvorgang dauert zu lang (Karte, Bargeld, Pfand)", "Alle wollen in denselben 15 Minuten"],
+      pain_points: [
+        { text: "Gäste brechen das Anstehen ab", evidence: "geschätzt jeder fünfte Gast", from: "Gespräch Gastronomie" },
+        { text: "Personal fehlt an Spieltagen", evidence: null, from: "Gespräch Betriebsleitung" },
+      ],
+      stakeholders: [{ role: "Leitung Gastronomie", interest: "Umsatz je Gast" }, { role: "Betriebsleitung", interest: "Sicherheit auf den Umläufen" }],
+      goal: "Wartezeit in der Halbzeit deutlich senken, ohne mehr Personal.",
+      success_criteria: ["Wartezeit unter 4 Minuten", "Umsatz pro Gast in der Halbzeit +10 %"],
+      must_haves: ["DSGVO-konform", "Anbindung an bestehendes Kassensystem", "Betrieb bei 50.000 Gästen"],
+      nice_to_haves: ["Pfandrückgabe integriert"],
+      exclusions: ["Komplett neue Kasseninfrastruktur"],
+      constraints: [{ topic: "budget", text: "Pilot bis 50.000 €" }, { topic: "zeit", text: "Pilot in der Rückrunde" }],
+      existing_systems: ["Kassensystem des Caterers", "Club-App"],
+      search_hypotheses: [
+        { approach: "Kassen ohne Schlange (Bilderkennung am Tablett)", keywords: ["frictionless checkout", "computer vision kasse"], analogies: ["Kantine", "Supermarkt"] },
+        { approach: "Vorbestellung mit Abholzeitfenster", keywords: ["mobile order pickup", "click and collect stadium"], analogies: ["Schnellrestaurant", "Flughafen"] },
+      ],
+      open_questions: ["Wer entscheidet beim Caterer über neue Kassentechnik?", "Gibt es Daten zu Wartezeiten je Stand?"],
+      contradictions: ["Gastronomie nennt 12 Minuten, Betriebsleitung eher 8 Minuten"],
+      timeframe: "Pilot in der Rückrunde 2027", budget: "Pilot bis 50.000 €",
+    } as Brief,
   };
   const sc = (vals: number[], why: string[]) =>
     CRITERIA.map((c, i) => ({ criterion: c.key as CriterionKey, score: vals[i], rationale: why[i] ?? "Beispielbegründung.", source_url: null }));
@@ -63,6 +92,12 @@ function init(): Store {
   ];
   return {
     challenges: [challenge], candidates, startups: [], priv: new Map(), seq: 1,
+    sessions: [
+      { id: "dd-1", challengeId: challenge.id, title: "Gespräch Gastronomie", heldOn: ago(40).slice(0, 10), source: "paste", fileName: null, charCount: 21_400, status: "done", error: null, createdAt: ago(40),
+        summary: "Beispiel: Der Engpass ist das Bezahlen; geschätzt jeder fünfte Gast bricht ab. Budget für einen Piloten vorhanden." },
+      { id: "dd-2", challengeId: challenge.id, title: "Gespräch Betriebsleitung", heldOn: ago(26).slice(0, 10), source: "upload", fileName: "Notion-Export.md", charCount: 14_900, status: "done", error: null, createdAt: ago(26),
+        summary: "Beispiel: Sicherheit auf den Umläufen ist Bedingung; Personal ist knapp; Wartezeit wird eher auf 8 Minuten geschätzt." },
+    ],
     runs: [{ id: "run-1", challengeId: challenge.id, status: "succeeded", startedAt: ago(2.1), finishedAt: ago(2), costUsd: 1.84, searches: 12, error: null,
       strategy: "Beispiel: Kassen ohne Schlange, Vorbestellung, Selbstzapfen; Analogien aus Kantinen und Handel.", notes: "Beispiel für den Testmodus.", found: 4 }],
   };
@@ -129,6 +164,21 @@ export function fixtureVenture(): VentureRepo {
       store().priv.set(id, structuredClone(priv));
     },
     async runs(challengeId) { return structuredClone(store().runs.filter((r) => r.challengeId === challengeId)); },
+    async sessions(challengeId) {
+      return structuredClone(store().sessions.filter((s) => s.challengeId === challengeId).map(({ challengeId: _c, ...s }) => { void _c; return s; }));
+    },
+    async addSession(challengeId, s) {
+      const id = `dd-${++store().seq}`;
+      // Testmodus: keine Auswertung – der Eintrag zeigt, wo das Ergebnis erscheinen würde
+      store().sessions.push({ ...s, id, challengeId, status: "failed", summary: null, error: "Im Testmodus wird nicht ausgewertet (kein API-Schlüssel).", createdAt: new Date().toISOString() });
+      return id;
+    },
+    async deleteSession(id) { store().sessions = store().sessions.filter((s) => s.id !== id); },
+    async saveBrief(challengeId, brief) {
+      const c = store().challenges.find((x) => x.id === challengeId);
+      if (!c) throw new Error("Challenge nicht gefunden.");
+      Object.assign(c, { brief: structuredClone(brief), briefUpdatedAt: new Date().toISOString() });
+    },
   };
 }
 

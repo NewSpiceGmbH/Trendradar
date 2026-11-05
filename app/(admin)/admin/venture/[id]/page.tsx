@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Badge, Card, Empty, PageHead, btn, timeAgo } from "@/components/admin/ui";
+import { DeepDivePanel } from "@/components/admin/deep-dive";
 import { CandidateCard, RunChallengeButton } from "@/components/admin/venture";
 import { STAGE_OPTIONS } from "@/lib/admin/labels";
 import { getVentureRepo } from "@/lib/venture/store";
@@ -32,7 +33,7 @@ async function ChallengeView({ params, searchParams }: { params: PageProps<"/adm
   const { id } = await params;
   const q = await searchParams;
   const repo = await getVentureRepo();
-  const [c, candidates, runs] = await Promise.all([repo.challenge(id), repo.candidates(id), repo.runs(id)]);
+  const [c, candidates, runs, sessions] = await Promise.all([repo.challenge(id), repo.candidates(id), repo.runs(id), repo.sessions(id)]);
   if (!c) notFound();
   const group = GROUPS.find((g) => g.key === q.zeige) ?? GROUPS[0];
   const list = candidates.filter(group.test);
@@ -96,6 +97,8 @@ async function ChallengeView({ params, searchParams }: { params: PageProps<"/adm
           )}
         </Card>
       </div>
+
+      <DeepDivePanel challengeId={id} sessions={sessions} brief={c.brief ?? null} briefUpdatedAt={c.briefUpdatedAt ?? null} />
 
       <section aria-labelledby="kandidaten" className="flex flex-col gap-4">
         <div className="flex flex-wrap items-end justify-between gap-3">
