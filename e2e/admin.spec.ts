@@ -81,3 +81,37 @@ test.describe("Redaktion", () => {
     await expect(page.getByText("Batteriespeicher")).toBeVisible();
   });
 });
+
+test.describe("Scouting", () => {
+  test.describe.configure({ mode: "serial" });
+  test.skip(({ isMobile }) => isMobile, "Ändert den gemeinsamen Testzustand – nur einmal am Desktop");
+
+  test("Kader, Scout bearbeiten, Quelle andocken, Tipp einreichen", async ({ page }) => {
+    await loginAs(page, /Redaktion/);
+    await page.goto("/admin/scouting");
+    await expect(page.getByRole("heading", { name: "Food & Beverage" })).toBeVisible();
+    await expect(page.getByText("Testmodus: Scouts lassen sich konfigurieren, aber nicht starten.")).toBeVisible();
+
+    await page.getByRole("article").filter({ hasText: "Food & Beverage" }).getByRole("link", { name: "Bearbeiten" }).click();
+    await page.getByLabel("Nicht melden").fill("Werbung, Gewinnspiele");
+    await page.getByRole("button", { name: "Speichern" }).click();
+    await expect(page.getByRole("status")).toHaveText("Gespeichert.");
+
+    await page.goto("/admin/scouting/quellen");
+    await page.getByRole("button", { name: "Quelle andocken" }).click();
+    await page.getByLabel("Name", { exact: true }).fill("Test-Feed");
+    await page.getByLabel("Typ").selectOption("rss");
+    await page.getByLabel("Adresse", { exact: true }).fill("https://example.org/feed");
+    await page.getByLabel(/Zugangsdaten/).fill("sk-geheim");
+    await page.getByRole("button", { name: "Speichern" }).click();
+    await expect(page.locator("form").getByRole("alert")).toContainText("Zugangsdaten nie direkt eintragen");
+    await page.getByLabel(/Zugangsdaten/).fill("");
+    await page.getByRole("button", { name: "Speichern" }).click();
+    await expect(page.getByText("Test-Feed")).toBeVisible();
+
+    await page.goto("/admin/scouting");
+    await page.getByLabel("Link").fill("https://www.linkedin.com/posts/beispiel-pfand");
+    await page.getByRole("button", { name: "Tipp einreichen" }).click();
+    await expect(page.getByText("https://www.linkedin.com/posts/beispiel-pfand")).toBeVisible();
+  });
+});

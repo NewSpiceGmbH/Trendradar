@@ -1,7 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/proxy";
 
-const PUBLIC = ["/login", "/auth", "/invite", "/legal"];
+// /api/scouting: zeitgesteuerte Aufrufe von Vercel ohne Sitzung – die Routen prüfen CRON_SECRET selbst
+const PUBLIC = ["/login", "/auth", "/invite", "/legal", "/api/scouting"];
 const isPublic = (path: string) => PUBLIC.some((p) => path === p || path.startsWith(p + "/"));
 
 // Erneuert die Supabase-Sitzung und schickt nicht eingeloggte Besucher zum Login. Das ist nur die

@@ -167,10 +167,28 @@ export function supabaseRepo(db: SupabaseClient): AdminRepo {
           .order("found_at", { ascending: false }).limit(300),
         "signals",
       );
-      return rows.map((s) => ({
+      const list: Signal[] = rows.map((s) => ({
         id: s.id, title: s.title, summary: s.summary, url: s.url, publisher: s.publisher, publishedOn: s.published_on,
         status: s.status, trendId: s.trend_id, foundAt: s.found_at, publishedAt: s.published_at,
       }));
+      // Scouting-Angaben (Migration 0007) – fehlen die Spalten noch, bleibt es bei den Grunddaten
+      const extra = await db.from("signals")
+        .select("id, kind, evidence, relevance, press_release, scouts ( name ), signal_media ( id, kind, url, embed_url, title, credit, license, rights, approved )")
+        .in("id", list.map((s) => s.id));
+      if (!extra.error) {
+        const byId = new Map((extra.data as unknown as Record<string, unknown>[]).map((r) => [r.id as string, r]));
+        for (const s of list) {
+          const r = byId.get(s.id) as (Record<string, unknown> & { scouts: { name: string } | null; signal_media: Record<string, unknown>[] }) | undefined;
+          if (!r) continue;
+          Object.assign(s, {
+            kind: r.kind, evidence: r.evidence, relevance: r.relevance, pressRelease: r.press_release, scoutName: r.scouts?.name ?? null,
+            media: (r.signal_media ?? []).map((m) => ({
+              id: m.id, kind: m.kind, url: m.url, embedUrl: m.embed_url, title: m.title, credit: m.credit, license: m.license, rights: m.rights, approved: m.approved,
+            })),
+          });
+        }
+      }
+      return list;
     },
     async runs() {
       const rows = ok(
@@ -178,10 +196,19 @@ export function supabaseRepo(db: SupabaseClient): AdminRepo {
           .order("started_at", { ascending: false }).limit(50),
         "agent_runs",
       );
-      return rows.map((r) => ({
+      const list: AgentRun[] = rows.map((r) => ({
         id: r.id, agent: r.agent, status: r.status, model: r.model, inputTokens: r.input_tokens, outputTokens: r.output_tokens,
         error: r.error, startedAt: r.started_at, finishedAt: r.finished_at,
       }));
+      const extra = await db.from("agent_runs").select("id, searches, cost_usd, scouts ( name )").in("id", list.map((r) => r.id));
+      if (!extra.error) {
+        const byId = new Map((extra.data as unknown as { id: string; searches: number | null; cost_usd: string | null; scouts: { name: string } | null }[]).map((r) => [r.id, r]));
+        for (const r of list) {
+          const x = byId.get(r.id);
+          if (x) Object.assign(r, { searches: x.searches, costUsd: x.cost_usd == null ? null : Number(x.cost_usd), scoutName: x.scouts?.name ?? null });
+        }
+      }
+      return list;
     },
     async team() {
       const rows = (await rpc("team_members", {})) as { id: string; email: string; display_name: string | null; platform_role: "admin" | "editor" }[];

@@ -95,7 +95,26 @@ export interface Signal {
   trendId: number | null;
   foundAt: string;
   publishedAt: string | null;
+  /** ab Migration 0007 (Scouting) */
+  kind?: string | null;
+  evidence?: "A" | "B" | "C" | null;
+  relevance?: number | null;
+  pressRelease?: boolean;
+  scoutName?: string | null;
+  media?: SignalMedia[];
   example?: boolean;
+}
+
+export interface SignalMedia {
+  id: string;
+  kind: "video" | "image";
+  url: string;
+  embedUrl: string | null;
+  title: string | null;
+  credit: string | null;
+  license: string | null;
+  rights: "embed" | "press" | "cc" | "own" | "unclear";
+  approved: boolean;
 }
 
 export interface Version {
@@ -118,6 +137,10 @@ export interface AgentRun {
   error: string | null;
   startedAt: string;
   finishedAt: string | null;
+  /** ab Migration 0007 */
+  scoutName?: string | null;
+  searches?: number | null;
+  costUsd?: number | null;
 }
 
 export interface TeamMember {

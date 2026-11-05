@@ -65,6 +65,7 @@ async function Shell({ children }: { children: ReactNode }) {
     { href: "/admin/review", label: "Review-Queue", count: pending },
     { href: "/admin/ticker", label: "Liveticker", count: fresh },
     { href: "/admin/trends", label: "Trends" },
+    { href: "/admin/scouting", label: "Scouting" },
     { href: "/admin/agents", label: "Agenten" },
     ...(viewer.platformRole === "admin" ? [{ href: "/admin/team", label: "Team" }] : []),
   ];
