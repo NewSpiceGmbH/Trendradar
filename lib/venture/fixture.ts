@@ -174,6 +174,12 @@ export function fixtureVenture(): VentureRepo {
       return id;
     },
     async deleteSession(id) { store().sessions = store().sessions.filter((s) => s.id !== id); },
+    async resetSession(id) {
+      const s = store().sessions.find((x) => x.id === id);
+      if (!s) throw new Error("Gespräch nicht gefunden.");
+      Object.assign(s, { status: "failed", error: "Im Testmodus wird Notion nicht gelesen." });
+      return { sourceUrl: s.sourceUrl ?? null };
+    },
     async saveBrief(challengeId, brief) {
       const c = store().challenges.find((x) => x.id === challengeId);
       if (!c) throw new Error("Challenge nicht gefunden.");

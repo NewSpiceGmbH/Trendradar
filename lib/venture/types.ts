@@ -90,7 +90,9 @@ export interface DeepDiveSession {
   id: string;
   title: string;
   heldOn: string | null;
-  source: "paste" | "upload";
+  source: "paste" | "upload" | "notion";
+  /** Link auf die Notion-Seite (bei source = notion) */
+  sourceUrl?: string | null;
   fileName: string | null;
   charCount: number | null;
   status: "processing" | "done" | "failed";

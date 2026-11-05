@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition, type ReactNode } from "react";
-import { addDeepDive, applyBrief, deleteDeepDive, saveBrief } from "@/lib/venture/actions";
+import { addDeepDive, addNotionLinks, applyBrief, deleteDeepDive, rereadNotion, saveBrief } from "@/lib/venture/actions";
 import {
   CONSTRAINT_LABEL, EMPTY_BRIEF, constraintFrom, constraintLines, hypoFrom, hypoLines, linesOf, listFrom, painFrom, painLines, stakeFrom, stakeLines,
   type Brief,
@@ -24,18 +24,49 @@ export function DeepDivePanel({ challengeId, sessions, brief, briefUpdatedAt }: 
       <div>
         <h2 id="deep-dive" className="!text-2xl">Problem Deep Dive</h2>
         <p className="text-sm text-muted">
-          Gespräche mit dem Kunden – z. B. von Notion KI transkribiert – hier einfügen. Ein Agent führt alles zu einem Problem-Briefing zusammen.
-          Die Transkripte werden nur ausgewertet, nicht gespeichert; Namen werden zu Rollen.
+          Link zur Notion-Meeting-Notiz einfügen – der Agent liest Zusammenfassung und Notizen selbst und führt alle Gespräche zu einem
+          Problem-Briefing zusammen. Gespeichert wird nur der Link, nicht der Inhalt; Namen werden zu Rollen.
         </p>
       </div>
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
         <BriefView challengeId={challengeId} brief={brief} updatedAt={briefUpdatedAt} />
         <div className="flex flex-col gap-6">
-          <AddSession challengeId={challengeId} />
+          <AddNotion challengeId={challengeId} />
           <Sessions items={sessions} />
         </div>
       </div>
     </section>
+  );
+}
+
+function AddNotion({ challengeId }: { challengeId: string }) {
+  const router = useRouter();
+  const [links, setLinks] = useState("");
+  const [msg, setMsg] = useState<Msg>(null);
+  const [busy, start] = useTransition();
+  const read = () =>
+    start(async () => {
+      const r = await addNotionLinks(challengeId, links);
+      setMsg(r.ok ? { ok: true, text: r.message ?? "Gestartet." } : { ok: false, text: r.error });
+      if (r.ok) setLinks("");
+      router.refresh();
+    });
+  return (
+    <Card>
+      <h3 className="!text-lg">Meeting-Notiz aus Notion</h3>
+      <div className="mt-3 flex flex-col gap-3">
+        <label htmlFor="dd-notion" className="sr-only">Notion-Link</label>
+        <textarea id="dd-notion" rows={2} value={links} onChange={(e) => setLinks(e.target.value)} className={input}
+          placeholder="https://www.notion.so/… (mehrere: einer pro Zeile)" />
+        <button type="button" onClick={read} disabled={busy || !links.trim()} className={btn.primary}>{busy ? "Wird übergeben …" : "Einlesen"}</button>
+        <p className="text-xs text-muted">In Notion: ••• → Link kopieren. Die Seite muss mit der Integration „Trendradar“ geteilt sein (••• → Verbindungen).</p>
+        <Note m={msg} />
+      </div>
+      <details className="mt-4 border-t border-line pt-3">
+        <summary className="cursor-pointer text-sm font-bold text-ink">Ohne Notion: Text einfügen oder Datei hochladen</summary>
+        <div className="mt-3"><AddSession challengeId={challengeId} /></div>
+      </details>
+    </Card>
   );
 }
 
@@ -55,9 +86,8 @@ function AddSession({ challengeId }: { challengeId: string }) {
       router.refresh();
     });
   return (
-    <Card>
-      <h3 className="!text-lg">Gespräch hinzufügen</h3>
-      <form ref={formRef} action={submit} className="mt-3 flex flex-col gap-3">
+    <div>
+      <form ref={formRef} action={submit} className="flex flex-col gap-3">
         <div className="flex flex-col gap-1.5"><Label htmlFor="dd-title">Titel</Label><input id="dd-title" name="title" className={input} placeholder="z. B. Gespräch mit der Gastronomie" /></div>
         <div className="flex flex-col gap-1.5"><Label htmlFor="dd-date">Datum</Label><input id="dd-date" name="heldOn" type="date" className={input} /></div>
         <div className="glass inline-flex self-start rounded-[var(--radius-pill)] p-0.5" role="group" aria-label="Quelle">
@@ -83,7 +113,7 @@ function AddSession({ challengeId }: { challengeId: string }) {
         <button disabled={busy} className={btn.primary}>{busy ? "Wird übergeben …" : "Auswerten"}</button>
         <Note m={msg} />
       </form>
-    </Card>
+    </div>
   );
 }
 
@@ -103,11 +133,17 @@ function Sessions({ items }: { items: DeepDiveSession[] }) {
               </Badge>
             </div>
             <span className="text-xs text-muted">
-              {[s.heldOn && new Date(s.heldOn).toLocaleDateString("de-DE"), s.fileName ?? (s.source === "paste" ? "eingefügt" : null), s.charCount && `${Math.round(s.charCount / 1000)} Tsd. Zeichen`, timeAgo(s.createdAt)].filter(Boolean).join(" · ")}
+              {[s.heldOn && new Date(s.heldOn).toLocaleDateString("de-DE"), s.source === "notion" ? "Notion" : s.fileName ?? (s.source === "paste" ? "eingefügt" : null), s.charCount && `${Math.round(s.charCount / 1000)} Tsd. Zeichen`, timeAgo(s.createdAt)].filter(Boolean).join(" · ")}
             </span>
             {s.summary && <p>{s.summary}</p>}
             {s.error && <p className="text-xs text-[var(--cA)]">{s.error}</p>}
-            <button type="button" disabled={busy} onClick={() => start(async () => { await deleteDeepDive(s.id); router.refresh(); })} className="self-start text-xs text-muted hover:text-ink">Entfernen</button>
+            <span className="flex flex-wrap gap-3 text-xs">
+              {s.sourceUrl && <a href={s.sourceUrl} target="_blank" rel="noopener noreferrer">In Notion öffnen ↗</a>}
+              {s.source === "notion" && s.status !== "processing" && (
+                <button type="button" disabled={busy} onClick={() => start(async () => { await rereadNotion(s.id); router.refresh(); })} className="text-muted hover:text-ink">Neu einlesen</button>
+              )}
+              <button type="button" disabled={busy} onClick={() => start(async () => { await deleteDeepDive(s.id); router.refresh(); })} className="text-muted hover:text-ink">Entfernen</button>
+            </span>
           </li>
         ))}
         {!items.length && <li className="py-3 text-muted">Noch kein Gespräch.</li>}

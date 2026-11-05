@@ -215,7 +215,17 @@ test.describe("Redaktion", () => {
     await page.reload();
     await expect(page.locator("dl").first().getByText(/Ziel ist ein Pilot an vier Ständen/)).toBeVisible();
 
-    // neues Gespräch: im Testmodus ohne Auswertung, aber als Eintrag sichtbar
+    // Notion-Link: im Testmodus nicht gelesen, aber als Gespräch mit Link sichtbar
+    await dd.getByLabel("Notion-Link").fill("https://www.notion.so/newspice/Meeting-Caterer-1234567890abcdef1234567890abcdef");
+    await dd.getByRole("button", { name: "Einlesen", exact: true }).click();
+    await expect(dd.getByRole("status").filter({ hasText: "Notion nicht gelesen" })).toBeVisible();
+    await expect(dd.getByRole("link", { name: /In Notion öffnen/ })).toHaveAttribute("href", /notion\.so/);
+    await dd.getByLabel("Notion-Link").fill("https://example.org/keine-notion-seite");
+    await dd.getByRole("button", { name: "Einlesen", exact: true }).click();
+    await expect(dd.getByRole("status").filter({ hasText: "Link auf eine Notion-Seite" })).toBeVisible();
+
+    // ohne Notion: Text einfügen (eingeklappt)
+    await dd.getByText("Ohne Notion: Text einfügen oder Datei hochladen").click();
     await dd.getByLabel("Titel").fill("Gespräch Caterer");
     await dd.getByLabel(/Transkript oder Notion-KI/).fill("Caterer: Wir haben 40 Stände. ".repeat(20));
     await dd.getByRole("button", { name: "Auswerten" }).click();

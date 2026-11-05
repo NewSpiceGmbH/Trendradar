@@ -8,6 +8,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { runVentureAgent } from "./agent";
 import { DEEPDIVE_MODEL, runDeepDiveAgent } from "./deepdive";
 import type { TranscriptInput } from "./transcript";
+import { readNotionPage } from "@/lib/notion";
 import { domainOf, guardRecommendation, totalOf } from "./scoring";
 import { mapChallenge } from "./store";
 
@@ -142,3 +143,39 @@ export async function runDeepDive(sessionId: string, transcript: TranscriptInput
     return failSession(e instanceof Error ? e.message : String(e), runId);
   }
 }
+
+/**
+ * Gespräche aus Notion nacheinander einlesen und auswerten – nacheinander, damit jedes Gespräch auf dem Briefing
+ * des vorigen aufbaut. Titel und Datum übernimmt das Gespräch aus der Notion-Seite.
+ */
+export async function runNotionSessions(sessionIds: string[], opts: { userId?: string | null; db?: SupabaseClient; readPage?: typeof readNotionPage } = {}) {
+  const db = opts.db ?? createAdminClient();
+  const read = opts.readPage ?? readNotionPage;
+  const out: { id: string; status: string; error?: string }[] = [];
+  for (const id of sessionIds) {
+    const { data: s } = await db.from("deep_dive_sessions").select("id, title, held_on, source_url").eq("id", id).single();
+    if (!s?.source_url) { out.push({ id, status: "failed", error: "Kein Link" }); continue; }
+    try {
+      const page = await read(s.source_url as string);
+      if (page.text.length < 200) {
+        throw new Error(page.unsupported
+          ? "Notion gibt den Inhalt dieser Seite nicht heraus (z. B. KI-Meeting-Blöcke). Bitte die Zusammenfassung als normalen Text in die Seite kopieren – oder hier einfügen."
+          : "Auf der Notion-Seite steht kaum Text.");
+      }
+      await db.from("deep_dive_sessions").update({
+        title: s.title === NOTION_PLACEHOLDER ? page.title : s.title,
+        held_on: s.held_on ?? page.createdTime?.slice(0, 10) ?? null,
+        char_count: page.text.length,
+      }).eq("id", id);
+      const r = await runDeepDive(id, { kind: "text", text: page.text }, { userId: opts.userId });
+      out.push({ id, status: r.status, ...("error" in r ? { error: r.error } : {}) });
+    } catch (e) {
+      const error = e instanceof Error ? e.message : String(e);
+      await db.from("deep_dive_sessions").update({ status: "failed", error }).eq("id", id);
+      out.push({ id, status: "failed", error });
+    }
+  }
+  return out;
+}
+
+export const NOTION_PLACEHOLDER = "Notion-Seite wird gelesen …";

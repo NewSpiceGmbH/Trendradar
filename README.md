@@ -77,8 +77,9 @@ Backend unter `/admin/venture` (Challenges) und `/admin/startups` (qualifizierte
 
 ## Problem Deep Dive
 
-An jeder Challenge (`/admin/venture/<id>`, Bereich „Problem Deep Dive“): Gesprächstranskripte – z. B. aus Notion KI –
-einfügen oder als Export hochladen (Markdown, Text, HTML, PDF bis 4 MB). Der Deep-Dive-Agent (`lib/venture/deepdive.ts`)
+An jeder Challenge (`/admin/venture/<id>`, Bereich „Problem Deep Dive“): Link auf die Notion-Meeting-Notiz einfügen –
+der Agent liest die Seite über die Notion-API (`lib/notion.ts`, Secret `NOTION_TOKEN`, Seite mit der Integration teilen).
+Ohne Notion: Gesprächstranskripte einfügen oder als Export hochladen (Markdown, Text, HTML, PDF bis 4 MB). Der Deep-Dive-Agent (`lib/venture/deepdive.ts`)
 führt sie mit dem bisherigen Stand zu einem Problem-Briefing zusammen (Problem, Ist-Ablauf, Ursachen, Schmerzpunkte mit
 Zahlen, Ziel und KPIs, Muss-/Wunsch-Kriterien, Rahmen, Suchhypothesen, offene Fragen, Widersprüche). Transkripte werden
 nicht gespeichert, Namen werden zu Rollen. „Als Scouting-Grundlage übernehmen“ füllt die Challenge; der Venture-Agent

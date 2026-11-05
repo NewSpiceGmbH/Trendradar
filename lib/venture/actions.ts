@@ -7,7 +7,8 @@ import type { ActionResult } from "@/lib/admin/actions";
 import { isFixtureMode } from "@/lib/auth/personas";
 import { getViewer } from "@/lib/auth/viewer";
 import { challengeFieldsFromBrief, briefSchema, type Brief } from "./brief";
-import { runChallenge, runDeepDive } from "./run";
+import { notionLinks, notionPageId } from "@/lib/notion";
+import { NOTION_PLACEHOLDER, runChallenge, runDeepDive, runNotionSessions } from "./run";
 import { cleanText, fromFile, MAX_TRANSCRIPT_CHARS, MAX_UPLOAD_BYTES, type TranscriptInput } from "./transcript";
 import { domainOf } from "./scoring";
 import { getVentureRepo, type ChallengeInput, type StartupInput } from "./store";
@@ -180,6 +181,50 @@ export async function applyBrief(challengeId: string): Promise<ActionResult> {
     await repo.saveChallenge(challengeId, { ...input, ...challengeFieldsFromBrief(brief) }, v.id);
     revalidatePath("/admin", "layout");
     return { ok: true, message: "In die Challenge übernommen. Der Venture-Agent nutzt jetzt das ganze Briefing – inklusive Suchhypothesen und offener Fragen." };
+  } catch (e) {
+    return fail(e);
+  }
+}
+
+/** Notion-Links (Meeting-Notizen) als Gespräche hinzufügen; der Agent liest die Seiten selbst */
+export async function addNotionLinks(challengeId: string, text: string): Promise<ActionResult> {
+  try {
+    const v = await guard();
+    const links = notionLinks(text).filter((l) => notionPageId(l));
+    if (!links.length) return { ok: false, error: "Bitte einen Link auf eine Notion-Seite einfügen (in Notion: ••• → Link kopieren)." };
+    if (links.length > 10) return { ok: false, error: "Bitte höchstens 10 Seiten auf einmal." };
+    const repo = await getVentureRepo();
+    if (isFixtureMode()) {
+      for (const l of links) await repo.addSession(challengeId, { title: "Notion-Seite", heldOn: null, source: "notion", sourceUrl: l, fileName: null, charCount: null }, v.id);
+      revalidatePath("/admin", "layout");
+      return { ok: false, error: "Im Testmodus wird Notion nicht gelesen. Das Beispiel-Briefing zeigt das Ergebnis." };
+    }
+    if (!process.env.NOTION_TOKEN) return { ok: false, error: "Notion ist noch nicht verbunden: In Vercel fehlt das Secret NOTION_TOKEN (Notion-Integration)." };
+    if (!process.env.ANTHROPIC_API_KEY) return { ok: false, error: "ANTHROPIC_API_KEY ist in Vercel noch nicht hinterlegt." };
+    const ids: string[] = [];
+    for (const l of links) ids.push(await repo.addSession(challengeId, { title: NOTION_PLACEHOLDER, heldOn: null, source: "notion", sourceUrl: l, fileName: null, charCount: null }, v.id));
+    after(async () => {
+      const r = await runNotionSessions(ids, { userId: v.id });
+      console.log(`Deep Dive Notion: ${r.map((x) => `${x.id} ${x.status}${x.error ? ` – ${x.error}` : ""}`).join("; ")}`);
+    });
+    revalidatePath("/admin", "layout");
+    return { ok: true, message: `${links.length === 1 ? "Die Seite wird" : `${links.length} Seiten werden`} gelesen und ausgewertet – meist 1–3 Minuten je Seite. Danach Seite neu laden.` };
+  } catch (e) {
+    return fail(e);
+  }
+}
+
+/** Notion-Gespräch erneut einlesen, z. B. wenn die Meeting-Notiz ergänzt wurde */
+export async function rereadNotion(sessionId: string): Promise<ActionResult> {
+  try {
+    const v = await guard();
+    const { sourceUrl } = await (await getVentureRepo()).resetSession(sessionId);
+    if (isFixtureMode()) return { ok: false, error: "Im Testmodus wird Notion nicht gelesen." };
+    if (!sourceUrl) return { ok: false, error: "Dieses Gespräch hat keinen Notion-Link." };
+    if (!process.env.NOTION_TOKEN) return { ok: false, error: "Notion ist noch nicht verbunden (NOTION_TOKEN fehlt)." };
+    after(async () => { await runNotionSessions([sessionId], { userId: v.id }); });
+    revalidatePath("/admin", "layout");
+    return { ok: true, message: "Wird neu eingelesen." };
   } catch (e) {
     return fail(e);
   }

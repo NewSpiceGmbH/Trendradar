@@ -46,7 +46,9 @@ export interface VentureRepo {
   runs(challengeId: string): Promise<VentureRun[]>;
   // Problem Deep Dive (Migration 0011)
   sessions(challengeId: string): Promise<DeepDiveSession[]>;
-  addSession(challengeId: string, s: Pick<DeepDiveSession, "title" | "heldOn" | "source" | "fileName" | "charCount">, userId: string): Promise<string>;
+  addSession(challengeId: string, s: Pick<DeepDiveSession, "title" | "heldOn" | "source" | "sourceUrl" | "fileName" | "charCount">, userId: string): Promise<string>;
+  /** Notion-Gespräch erneut einlesen (Status zurück auf „wird ausgewertet“) */
+  resetSession(id: string): Promise<{ sourceUrl: string | null }>;
   deleteSession(id: string): Promise<void>;
   saveBrief(challengeId: string, brief: Brief): Promise<void>;
 }
@@ -183,16 +185,21 @@ export function supabaseVenture(db: SupabaseClient): VentureRepo {
         fail(error, "deep_dive_sessions");
       }
       return (data ?? []).map((r) => ({
-        id: r.id, title: r.title, heldOn: r.held_on, source: r.source, fileName: r.file_name, charCount: r.char_count,
+        id: r.id, title: r.title, heldOn: r.held_on, source: r.source, sourceUrl: r.source_url ?? null, fileName: r.file_name, charCount: r.char_count,
         status: r.status, summary: r.summary, error: r.error, createdAt: r.created_at,
       }));
     },
     async addSession(challengeId, s, userId) {
       const r = await db.from("deep_dive_sessions").insert({
         challenge_id: challengeId, title: s.title, held_on: s.heldOn, source: s.source, file_name: s.fileName, char_count: s.charCount, created_by: userId,
+        ...(s.sourceUrl ? { source_url: s.sourceUrl } : {}),
       }).select("id").single();
       if (r.error && /does not exist|could not find the table/i.test(r.error.message)) throw new Error("Der Deep Dive ist noch nicht eingerichtet (Migration 0011 fehlt).");
       return ok(r, "deep_dive_sessions").id as string;
+    },
+    async resetSession(id) {
+      const r = ok(await db.from("deep_dive_sessions").update({ status: "processing", error: null }).eq("id", id).select("source_url").single(), "deep_dive_sessions") as { source_url: string | null };
+      return { sourceUrl: r.source_url };
     },
     async deleteSession(id) {
       ok(await db.from("deep_dive_sessions").delete().eq("id", id), "deep_dive_sessions");
