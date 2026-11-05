@@ -50,6 +50,7 @@ export function mapScout(r: Record<string, unknown> & { scout_channels?: { chann
     maxCostUsd: Number(r.max_cost_usd), maxSignals: r.max_signals as number, deliverMedia: r.deliver_media as boolean,
     minEvidence: r.min_evidence as Scout["minEvidence"], model: r.model as string, effort: r.effort as Scout["effort"],
     active: r.active as boolean, lastRunAt: r.last_run_at as string | null,
+    ...(r.lane ? { lane: r.lane as Scout["lane"] } : {}),
     channelIds: (r.scout_channels ?? []).map((c) => c.channel_id),
   };
 }
@@ -69,6 +70,8 @@ const scoutRow = (s: Omit<Scout, "id" | "lastRunAt" | "key">) => ({
   languages: s.languages, watch_trends: s.watchTrends, cadence: s.cadence, run_hour: s.runHour, run_weekday: s.runWeekday,
   max_searches: s.maxSearches, max_cost_usd: s.maxCostUsd, max_signals: s.maxSignals, deliver_media: s.deliverMedia,
   min_evidence: s.minEvidence, model: s.model, effort: s.effort, active: s.active,
+  // Bereich erst ab Migration 0008; vorher nicht mitschicken, sonst scheitert das Speichern
+  ...(s.lane ? { lane: s.lane } : {}),
 });
 
 const channelRow = (c: Omit<Channel, "id" | "key">) => ({

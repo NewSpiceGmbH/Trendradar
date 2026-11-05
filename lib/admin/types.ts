@@ -101,6 +101,8 @@ export interface Signal {
   relevance?: number | null;
   pressRelease?: boolean;
   scoutName?: string | null;
+  /** Bereich im Lagebild (ab Migration 0008) */
+  lane?: "sport_hospitality" | "startup_tech" | "cross_industry" | null;
   media?: SignalMedia[];
   example?: boolean;
 }

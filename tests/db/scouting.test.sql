@@ -74,11 +74,11 @@ insert into signal_media (signal_id, kind, url, embed_url, rights, approved) val
   ('61000000-0000-0000-0000-000000000002', 'image', 'https://example.org/bild2.jpg', null, 'press', true);
 
 -- ───────────────────────── Startdaten ─────────────────────────
-select t.eq((select count(*)::int from scouts), 7, 'Startkader: 7 Scouts');
+select t.eq((select count(*)::int from scouts where lane = 'sport_hospitality'), 7, 'Startkader: 7 Scouts für Sport & Hospitality');
 select t.eq((select count(*)::int from scouts where active), 0, 'Startkader: alle inaktiv bis zum API-Schlüssel');
 select t.eq((select count(*)::int from source_channels where key in ('stadionwelt', 'linkedin', 'websuche')), 3, 'Startquellen: Stadionwelt, LinkedIn, Websuche');
 select t.eq((select count(*)::int from source_channels where not verified), (select count(*)::int from source_channels), 'Startquellen: alle als ungeprüft markiert');
-select t.eq((select count(*)::int from scout_channels sc join source_channels c on c.id = sc.channel_id where c.key = 'linkedin'), 7, 'LinkedIn für alle Scouts');
+select t.eq((select count(*)::int from scout_channels sc join source_channels c on c.id = sc.channel_id where c.key = 'linkedin'), (select count(*)::int from scouts), 'LinkedIn für alle Scouts');
 select t.eq((select monthly_budget_usd from scouting_settings), 200.00::numeric, 'Monatsbudget 200 $');
 
 -- ───────────────────────── Regeln in der Datenbank ─────────────────────────

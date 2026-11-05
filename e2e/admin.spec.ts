@@ -33,6 +33,15 @@ test.describe("Redaktion", () => {
     await loginAs(page, /Redaktion/);
     await page.getByRole("link", { name: "Redaktion", exact: true }).click();
     await expect(page.getByRole("heading", { name: "Cockpit" })).toBeVisible();
+    // Lagebild: drei Bereiche mit ihren Meldungen
+    for (const lane of ["Sport & Hospitality", "Startups & Technologie", "Cross-Industry"]) {
+      await expect(page.getByRole("heading", { name: lane, exact: true })).toBeVisible();
+    }
+    await expect(page.getByRole("link", { name: /Flughafen testet Boarding/ })).toBeVisible();
+    await page.goto("/admin/ticker?lane=startup_tech");
+    await expect(page.getByText(/Münchner Startup/)).toBeVisible();
+    await expect(page.getByText(/Flughafen testet Boarding/)).toHaveCount(0);
+    await page.goto("/admin");
 
     await page.getByRole("navigation", { name: "Redaktion" }).getByRole("link", { name: /Review-Queue/ }).click();
     await expect(page.getByText("Scouting → Aufwärmen")).toBeVisible();
@@ -129,6 +138,7 @@ test.describe("Redaktion", () => {
   });
 
   test("Liveticker eingeklappt: neue Meldungen fallen auf", async ({ page }) => {
+    test.slow(); // Stadion ist WebGL, ohne GPU langsam
     await loginAs(page, /Kunde A · Member/);
     // eingeklappt, aber noch nie hineingeschaut: Meldungen der letzten 7 Tage gelten als neu
     await page.addInitScript(() => window.localStorage.setItem("trendradar.ticker-eingeklappt", "1"));
@@ -137,7 +147,7 @@ test.describe("Redaktion", () => {
     const strip = page.getByRole("button", { name: /Liveticker öffnen, \d+ neue Meldungen/ });
     await expect(strip).toContainText("Neu ·");
     await strip.click();
-    await expect(page.getByRole("region", { name: "Liveticker" })).toBeVisible();
+    await expect(page.getByRole("region", { name: "Liveticker" })).toBeVisible({ timeout: 20_000 });
   });
 });
 

@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { saveScout } from "@/lib/agents/actions";
-import { CHANNEL_LABEL, CHANNEL_READY, MODEL_OPTIONS, REGION_LABEL, VERTICAL_LABEL, type Channel, type Region, type Scout, type Vertical } from "@/lib/agents/types";
+import { CHANNEL_LABEL, CHANNEL_READY, LANE_LABEL, MODEL_OPTIONS, REGION_LABEL, VERTICAL_LABEL, type Channel, type Lane, type Region, type Scout, type Vertical } from "@/lib/agents/types";
 import { STAGE_OPTIONS } from "@/lib/admin/labels";
 import { Card, btn, input } from "./ui";
 
@@ -96,6 +96,9 @@ export function ScoutEditor({ scoutId, initial, channels, clusters, trends }: {
         <Card>
           <h2 className="!text-xl">Revier</h2>
           <div className="mt-4 flex flex-col gap-4">
+            {d.lane && (
+              <Toggles label="Bereich im Lagebild" options={LANE_LABEL} value={[d.lane]} onChange={(v) => set("lane", (v.at(-1) ?? d.lane) as Lane)} />
+            )}
             <Toggles label="Branchen" options={VERTICAL_LABEL} value={d.verticals} onChange={(v) => set("verticals", v as Vertical[])} />
             <Toggles label="Regionen" options={REGION_LABEL} value={d.regions} onChange={(v) => set("regions", v as Region[])} />
             <Toggles label="Cluster" options={Object.fromEntries(clusters.map((c) => [c.code, `${c.code} · ${c.name}`]))} value={d.clusters} onChange={(v) => set("clusters", v)} />

@@ -4,6 +4,20 @@ export type Vertical = "SPORT" | "HOSPITALITY" | "LIVE";
 export type Region = "DACH" | "EU" | "US" | "GLOBAL";
 export type ChannelKind = "web_search" | "website" | "rss" | "youtube" | "linkedin" | "newsletter" | "upload" | "api" | "mcp";
 
+/** Bereich im Lagebild (Migration 0008) */
+export type Lane = "sport_hospitality" | "startup_tech" | "cross_industry";
+export const LANES: Lane[] = ["sport_hospitality", "startup_tech", "cross_industry"];
+export const LANE_LABEL: Record<Lane, string> = {
+  sport_hospitality: "Sport & Hospitality",
+  startup_tech: "Startups & Technologie",
+  cross_industry: "Cross-Industry",
+};
+export const LANE_BLURB: Record<Lane, string> = {
+  sport_hospitality: "Clubs, Ligen, Arenen, Hotels und Events – unser Kernmarkt.",
+  startup_tech: "Neue Startups, Finanzierungsrunden und Technologien, die für Venues und Hotels taugen.",
+  cross_industry: "Flughäfen, Bahnhöfe, Handel, Freizeitparks, Messen: überall mit vielen Menschen und Transaktionen.",
+};
+
 export interface Scout {
   id: string;
   key: string | null;
@@ -33,6 +47,8 @@ export interface Scout {
   active: boolean;
   lastRunAt: string | null;
   channelIds: string[];
+  /** fehlt, solange Migration 0008 nicht angewendet ist */
+  lane?: Lane;
 }
 
 export interface Channel {

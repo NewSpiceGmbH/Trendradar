@@ -188,6 +188,12 @@ export function supabaseRepo(db: SupabaseClient): AdminRepo {
           });
         }
       }
+      // Bereich (Migration 0008) – eigene Abfrage, damit 0007-Angaben auch ohne 0008 ankommen
+      const lanes = await db.from("signals").select("id, lane").in("id", list.map((s) => s.id));
+      if (!lanes.error) {
+        const byId = new Map((lanes.data ?? []).map((r) => [r.id as string, r.lane as Signal["lane"]]));
+        for (const s of list) s.lane = byId.get(s.id) ?? null;
+      }
       return list;
     },
     async runs() {

@@ -117,6 +117,8 @@ export async function runScout(scoutId: string, opts: { userId?: string | null; 
         title: f.title, summary: f.summary, url: f.url, publisher: f.publisher, published_on: f.published_on, status: "new",
         trend_id: suggested.length ? trendId.get(suggested[0]) : null, run_id: runId, scout_id: s.id,
         kind: f.kind, evidence: f.evidence, relevance: f.relevance, press_release: f.press_release, suggested_trends: suggested,
+        // Bereich des Scouts fürs Lagebild (Spalte ab Migration 0008; vorher hat der Scout keinen Bereich)
+        ...(s.lane ? { lane: s.lane } : {}),
       }, { onConflict: "url", ignoreDuplicates: true }).select("id").maybeSingle();
       if (error) throw new Error(`signals: ${error.message}`);
       if (!sig) continue; // schon vorhanden

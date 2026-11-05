@@ -3,7 +3,11 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { Badge, Card, Empty, ExampleTag, PageHead, timeAgo } from "@/components/admin/ui";
 import { KIND_LABEL, positionOf } from "@/lib/admin/patch";
+import { laneBoard } from "@/lib/admin/lagebild";
 import { getAdminRepo } from "@/lib/admin/repo";
+import type { AdminTrend, Signal } from "@/lib/admin/types";
+import { getScoutingRepo } from "@/lib/agents/store";
+import { LANES, LANE_BLURB, LANE_LABEL, type Lane, type Scout } from "@/lib/agents/types";
 import { ZONE_KEYS } from "@/lib/scoring";
 
 export const metadata: Metadata = { title: "Cockpit · Redaktion" };
@@ -21,6 +25,9 @@ export default function CockpitPage() {
 async function Cockpit() {
   const repo = await getAdminRepo();
   const [proposals, signals, trends, runs, lookups] = await Promise.all([repo.proposals(), repo.signals(), repo.trends(), repo.runs(), repo.lookups()]);
+  // Scouts je Bereich; fehlt das Scouting (vor Migration 0007), bleibt die Zahl leer
+  const scouts: Scout[] = await (await getScoutingRepo()).scouts().catch(() => []);
+  const now = new Date();
   const pending = proposals.filter((p) => p.status === "pending");
   const openSignals = signals.filter((s) => s.status !== "dismissed" && !s.publishedAt);
   const published = trends.filter((t) => t.fields.status === "published");
@@ -42,7 +49,8 @@ async function Cockpit() {
   return (
     <>
       <PageHead eyebrow="Redaktion" title="Cockpit">
-        Was die Agenten geliefert haben und was auf Freigabe wartet. Veröffentlicht wird nur, was ihr freigebt.
+        Das Lagebild: was in Sport und Hospitality passiert, was die Startup- und Technologiewelt bewegt und was sich an Orten mit
+        hoher Frequenz abzeichnet. Darunter, was auf eure Freigabe wartet.
       </PageHead>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -58,6 +66,21 @@ async function Cockpit() {
           </Link>
         ))}
       </div>
+
+      <section aria-labelledby="lagebild" className="flex flex-col gap-4">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 id="lagebild" className="!text-2xl">Lagebild</h2>
+            <p className="text-sm text-muted">Die wichtigsten Meldungen der letzten 14 Tage je Bereich, nach Relevanz. Freigeben im Liveticker.</p>
+          </div>
+          <Link href="/admin/scouting" className="text-sm">Scouts steuern →</Link>
+        </div>
+        <div className="grid gap-4 xl:grid-cols-3">
+          {LANES.map((l) => (
+            <LaneCard key={l} lane={l} board={laneBoard(signals, l, now)} trends={byNumber} scouts={scouts.filter((sc) => (sc.lane ?? "sport_hospitality") === l)} />
+          ))}
+        </div>
+      </section>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <Card>
@@ -121,5 +144,64 @@ async function Cockpit() {
         </div>
       </div>
     </>
+  );
+}
+
+const REL = { 1: "Relevanz niedrig", 2: "Relevanz mittel", 3: "Relevanz hoch" } as const;
+
+function LaneCard({
+  lane, board, trends, scouts,
+}: {
+  lane: Lane; board: ReturnType<typeof laneBoard>; trends: Map<number, AdminTrend>; scouts: Scout[];
+}) {
+  const active = scouts.filter((s) => s.active).length;
+  return (
+    <Card className="flex flex-col gap-4">
+      <header className="flex flex-col gap-1">
+        <div className="flex items-baseline justify-between gap-3">
+          <h3 className="!text-lg">{LANE_LABEL[lane]}</h3>
+          <span className="text-xs text-muted"><span className="num text-ink">{board.fresh}</span> neu in 7 Tagen</span>
+        </div>
+        <p className="text-sm text-muted">{LANE_BLURB[lane]}</p>
+        <p className="text-xs text-muted">
+          {scouts.length ? `${active} von ${scouts.length} Scouts im Einsatz: ${scouts.map((s) => s.name).join(", ")}` : "Noch kein Scout für diesen Bereich"}
+        </p>
+      </header>
+      {board.items.length ? (
+        <ul className="flex flex-col divide-y divide-line">
+          {board.items.map((s) => <LaneItem key={s.id} s={s} trend={s.trendId ? trends.get(s.trendId) ?? null : null} />)}
+        </ul>
+      ) : (
+        <Empty>
+          Noch keine Meldungen.{" "}
+          {scouts.length ? (active ? "Die Scouts liefern beim nächsten Lauf." : "Scout unter Scouting einsetzen oder einen Lauf starten.") : "Unter Scouting einen Scout für diesen Bereich anlegen."}
+        </Empty>
+      )}
+      <div className="mt-auto flex items-center justify-between gap-3 text-sm">
+        <span className="text-xs text-muted">{board.open} ohne Freigabe · {board.total} gesamt</span>
+        <Link href={`/admin/ticker?lane=${lane}`}>Alle im Liveticker →</Link>
+      </div>
+    </Card>
+  );
+}
+
+function LaneItem({ s, trend }: { s: Signal; trend: AdminTrend | null }) {
+  const rel = s.relevance as 1 | 2 | 3 | null | undefined;
+  return (
+    <li className="flex flex-col gap-1 py-3">
+      <a href={s.url} target="_blank" rel="noopener noreferrer" className="font-bold leading-snug text-ink no-underline hover:underline">
+        {s.title}
+        <span aria-hidden className="ml-1 text-muted">↗</span>
+      </a>
+      <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted">
+        {rel ? (
+          <span aria-label={REL[rel]} title={REL[rel]} className="tracking-[0.2em] text-ink">{"●".repeat(rel)}<span className="text-line">{"●".repeat(3 - rel)}</span></span>
+        ) : null}
+        {s.publisher && <span>{s.publisher}</span>}
+        <span>{timeAgo(s.foundAt)}</span>
+        {s.publishedAt ? <Badge>Im Ticker</Badge> : trend ? <Badge tone="muted">#{trend.fields.number}</Badge> : <Badge tone="muted">neu</Badge>}
+        {s.example && <ExampleTag />}
+      </p>
+    </li>
   );
 }
