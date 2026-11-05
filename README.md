@@ -42,4 +42,14 @@ Einrichtung im Vercel-Projekt `trendradar` (Team New Spice):
 - Inhalte und Demo-Zugänge kommen per Migration (0004/0005) in die Datenbank, auch ohne Supabase-Branching. Damit gibt es
   fünf Demo-Zugänge (Redaktion, Owner, Member, Premium, abgelaufen; Passwort `trendradar-demo`).
 - In Produktion: kein `DEMO_LOGIN`, keine Demo-Konten. Login nur per Magic-Link für eingeladene Adressen.
+
+## Scouting (Agenten)
+
+Backend unter `/admin/scouting`. Für echte Läufe in Vercel (Production und Preview, als Secret):
+- `ANTHROPIC_API_KEY` – Claude-API (Modell je Scout einstellbar, Standard Claude Opus 5.5)
+- `CRON_SECRET` – schützt den Zeitplan (`vercel.json`: stündlich `/api/scouting/cron`; Vercel ruft Zeitpläne nur in Produktion auf, in Vorschauen per „Lauf starten“)
+- `SUPABASE_SECRET_KEY` bzw. `SUPABASE_SERVICE_ROLE_KEY` – setzt die Supabase-Integration; damit schreiben die Scouts Meldungen
+- optional `YOUTUBE_API_KEY` für Quellen vom Typ YouTube
+
+Neue Variablen wirken erst mit dem nächsten Deployment.
 Nach Änderungen an `seed/*.json`: `npm run seed:build && npx supabase db reset`.
