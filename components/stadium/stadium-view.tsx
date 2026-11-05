@@ -148,26 +148,49 @@ export default function StadiumView({ data }: { data: RadarData }) {
     });
   }, []);
 
+  /**
+   * Klick auf eine Kachel während der Tour: Tour an der aktuellen Station verlassen und den Zustand der Station
+   * (Ansicht, Ort, Szene, Perspektive) übernehmen, damit die angeklickte Kachel im richtigen Kontext aufgeht.
+   */
+  const leaveTour = useCallback((): { view: View; useCase: UseCaseKey | null } | null => {
+    if (!st) return null;
+    const s = st.shot;
+    const ctx = {
+      view: (s.kind === "journey" || s.kind === "place" ? "journey" : "radar") as View,
+      useCase: s.kind === "scene" ? s.useCase : null,
+    };
+    setStation(null);
+    store.set(TOUR_SEEN, "1");
+    setPersp(activePersp);
+    setView(ctx.view);
+    setUseCase(ctx.useCase);
+    setPlace(s.kind === "place" ? s.place : null);
+    setCluster(null);
+    setSelected(null);
+    return ctx;
+  }, [st, activePersp]);
+
   const selectTrend = useCallback(
     (n: number) => {
-      if (touring) return;
+      const ctx = leaveTour() ?? { view, useCase };
       setSelected(n);
-      if (useCase) { discover(n); return; }
-      if (view === "radar") setCluster(byNumber.get(n)!.cluster);
-      else setPlace(stageOf(n));
       discover(n);
+      if (ctx.useCase) return;
+      if (ctx.view === "radar") setCluster(byNumber.get(n)!.cluster);
+      else setPlace(stageOf(n));
     },
-    [touring, view, byNumber, discover, useCase],
+    [leaveTour, view, byNumber, discover, useCase],
   );
   const selectCluster = useCallback((c: ClusterCode) => {
-    if (touring) return;
+    leaveTour();
     setView("radar");
     setPlace(null);
+    setUseCase(null);
     setCluster(c);
     setSelected(null);
-  }, [touring]);
+  }, [leaveTour]);
   const selectPlace = useCallback((k: StageKey) => {
-    if (touring) return;
+    leaveTour();
     if (k === "stadion" && place === "stadion") {
       // zweiter Klick auf das Stadion: hinein in den Radar
       setView("radar");
@@ -179,20 +202,20 @@ export default function StadiumView({ data }: { data: RadarData }) {
     setCluster(null);
     setPlace(k);
     setSelected(null);
-  }, [touring, place]);
+  }, [leaveTour, place]);
   const enterStadium = useCallback(() => {
-    if (touring) return;
+    leaveTour();
     setView("radar");
     setPlace(null);
     setCluster(null);
     setSelected(null);
-  }, [touring]);
+  }, [leaveTour]);
   const openUseCase = useCallback((k: UseCaseKey, trend?: number) => {
-    if (touring) return;
+    leaveTour();
     setUseCase(k);
     setSelected(trend ?? null);
     if (trend) discover(trend);
-  }, [touring, discover]);
+  }, [leaveTour, discover]);
   const closeUseCase = () => {
     setUseCase(null);
     setSelected(null);
