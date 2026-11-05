@@ -100,7 +100,7 @@ export async function runScout(scoutId: string, opts: { userId?: string | null; 
   const runId = run.id as string;
 
   try {
-    const client = opts.client ?? new Anthropic();
+    const client = opts.client ?? anthropicClient();
     const result = await runScoutAgent(client, {
       scout: s, channels: ctx.channels, trends: ctx.trends, candidates, tips: ctx.tips, knownUrls: ctx.knownUrls, since, today: now,
     });
@@ -150,6 +150,15 @@ export async function runScout(scoutId: string, opts: { userId?: string | null; 
     await db.from("scouts").update({ last_run_at: now.toISOString() }).eq("id", s.id);
     return { status: "failed", runId, error };
   }
+}
+
+/**
+ * Claude-Client. Schlüssel ohne Workspace-Bindung brauchen den Header `anthropic-workspace-id`
+ * (optional per `ANTHROPIC_WORKSPACE_ID`); Schlüssel aus einem Workspace funktionieren ohne.
+ */
+export function anthropicClient(env: Record<string, string | undefined> = process.env) {
+  const workspace = env.ANTHROPIC_WORKSPACE_ID?.trim();
+  return new Anthropic({ defaultHeaders: workspace ? { "anthropic-workspace-id": workspace } : undefined });
 }
 
 /** Alle Scouts, die laut Zeitplan jetzt dran sind */

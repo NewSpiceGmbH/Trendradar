@@ -47,7 +47,8 @@ Nach Änderungen an `seed/*.json`: `npm run seed:build && npx supabase db reset`
 ## Scouting (Agenten)
 
 Backend unter `/admin/scouting`. Für echte Läufe in Vercel (Production und Preview, als Secret):
-- `ANTHROPIC_API_KEY` – Claude-API (Modell je Scout einstellbar, Standard Claude Opus 5.5)
+- `ANTHROPIC_API_KEY` – Claude-API (Modell je Scout einstellbar, Standard Claude Opus 5.5). Schlüssel in einem Workspace anlegen; sonst zusätzlich
+  `ANTHROPIC_WORKSPACE_ID` (Config, `wrkspc_…`) setzen
 - `CRON_SECRET` – schützt den Zeitplan (`vercel.json`: stündlich `/api/scouting/cron`; Vercel ruft Zeitpläne nur in Produktion auf, in Vorschauen per „Lauf starten“)
 - `SUPABASE_SECRET_KEY` bzw. `SUPABASE_SERVICE_ROLE_KEY` – setzt die Supabase-Integration; damit schreiben die Scouts Meldungen
 - optional `YOUTUBE_API_KEY` für Quellen vom Typ YouTube
