@@ -161,7 +161,8 @@ export function TickerColumn({
   data, onSelectTrend, onHover, active, editor = false, onCollapse,
 }: {
   data: RadarData; onSelectTrend: (n: number) => void; onHover: (n: number | null) => void; active: number | null; editor?: boolean;
-  onCollapse: () => void;
+  /** fehlt auf der eigenen News-Seite (dort gibt es nichts einzuklappen) */
+  onCollapse?: () => void;
 }) {
   const clusterOf = useMemo(() => {
     const m = new Map(data.trends.map((t) => [t.number, t.cluster as string]));
@@ -188,7 +189,7 @@ export function TickerColumn({
           </p>
           <span className="flex items-center gap-2">
             {fresh > 0 && <span className="text-xs text-muted"><span className="num text-ink">{fresh}</span> neu in 7 Tagen</span>}
-            <button
+            {onCollapse && <button
               type="button"
               onClick={onCollapse}
               aria-label="Liveticker einklappen"
@@ -196,7 +197,7 @@ export function TickerColumn({
               className="grid size-7 place-items-center rounded-full border border-line text-ink hover:bg-sunk"
             >
               <span aria-hidden>»</span>
-            </button>
+            </button>}
           </span>
         </div>
         <div className="flex flex-wrap items-center gap-1.5">

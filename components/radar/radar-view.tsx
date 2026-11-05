@@ -7,7 +7,7 @@ import type { RadarData } from "@/lib/radar/types";
 import { positions } from "@/lib/radar/view";
 import { Arena } from "./arena";
 import { Toolbar, emptyFilters, matches, type Filters } from "./filters";
-import { Board, Compare, FocusMatrix, Legend, Method, Paywall, PremiumArea, Sources, TrendTable } from "./sections";
+import { Board, Compare, FocusMatrix, Legend, Method, Paywall, PremiumArea } from "./sections";
 import { TrendCard } from "./trend-card";
 import { Button, SectionHead } from "./ui";
 
@@ -125,24 +125,11 @@ export function RadarView({ data }: { data: RadarData }) {
         <FocusMatrix data={data} pos={pos} persp={persp} onSelect={goTo} />
       </section>
 
-      <section id="datenbank" className="flex scroll-mt-20 flex-col gap-8">
-        <SectionHead no={next()} eyebrow="Trenddatenbank" title={`Alle ${data.trends.length} Trends`}>
-          Spaltenkopf sortiert, Zeile öffnet die Trendkarte.
-        </SectionHead>
-        <TrendTable data={data} pos={pos} persp={persp} visible={visible} onSelect={goTo} />
-      </section>
-
       <section id="premium" className="flex scroll-mt-20 flex-col gap-8">
         <SectionHead no={next()} eyebrow="Premium" title="Vom Trend zur Entscheidung" />
         {data.premium ? <PremiumArea data={data} pos={pos} onSelect={goTo} /> : <Paywall />}
       </section>
 
-      <section id="quellen" className="flex scroll-mt-20 flex-col gap-8">
-        <SectionHead no={next()} eyebrow="Quellenverzeichnis" title="Quellen">
-          Eigene Zusammenfassungen mit Link auf die Quelle; Zahlen vor Verwendung im Original prüfen. „o. D.“ = Veröffentlichungsdatum nicht erfasst.
-        </SectionHead>
-        <Sources data={data} />
-      </section>
     </div>
   );
 }

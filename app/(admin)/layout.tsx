@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { Suspense, type ReactNode } from "react";
 import { AdminNav } from "@/components/admin/nav";
 import { MigrationNotice } from "@/components/admin/ui";
+import { Logo } from "@/components/app/logo";
 import { ThemeToggle } from "@/components/app/theme-toggle";
 import { UserMenu } from "@/components/app/user-menu";
 import { getAdminRepo } from "@/lib/admin/repo";
@@ -15,11 +16,11 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     <div className="admin-backdrop flex min-h-dvh flex-col">
       <header className="glass sticky top-0 z-20 !border-x-0 !border-t-0 !shadow-none">
         <div className="mx-auto flex max-w-[1440px] items-center gap-6 px-4 py-3 sm:px-8">
-          <Link href="/admin" className="flex items-baseline gap-2 text-ink no-underline">
-            <span className="font-display text-lg font-extrabold tracking-tight">New Spice</span>
+          <Link href="/admin" className="flex items-center gap-3 text-ink no-underline" aria-label="New Spice Redaktion – Cockpit">
+            <Logo className="h-7 w-auto" />
             <span className="text-sm text-muted">Redaktion</span>
           </Link>
-          <Link href="/radar" className="text-sm text-text no-underline hover:text-ink">Zum Stadion →</Link>
+          <Link href="/radar" className="text-sm text-text no-underline hover:text-ink">Zum Dashboard →</Link>
           <div className="ml-auto flex items-center gap-3">
             <ThemeToggle />
             <Suspense fallback={<span className="text-sm text-muted">…</span>}>
@@ -65,6 +66,8 @@ async function Shell({ children }: { children: ReactNode }) {
     { href: "/admin/review", label: "Review-Queue", count: pending },
     { href: "/admin/ticker", label: "Liveticker", count: fresh },
     { href: "/admin/trends", label: "Trends" },
+    { href: "/admin/datenbank", label: "Trenddatenbank" },
+    { href: "/admin/quellenverzeichnis", label: "Quellenverzeichnis" },
     { href: "/admin/scouting", label: "Scouting" },
     { href: "/admin/agents", label: "Agenten" },
     ...(viewer.platformRole === "admin" ? [{ href: "/admin/team", label: "Team" }] : []),

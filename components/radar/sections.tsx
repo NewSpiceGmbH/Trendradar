@@ -235,7 +235,7 @@ export function TrendTable({ data, pos, persp, visible, onSelect }: { data: Rada
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center gap-3">
         <Button onClick={download}>CSV herunterladen</Button>
-        <span className="text-sm text-muted" role="status">{msg || `${rows.length} von ${data.trends.length} Trends · Filter und Perspektive aus der Arena gelten auch hier.`}</span>
+        <span className="text-sm text-muted" role="status">{msg || `${rows.length} von ${data.trends.length} Trends`}</span>
       </div>
       <div className="overflow-x-auto rounded-[var(--radius-card)] border border-line">
         <table className="w-full min-w-[980px] text-sm">

@@ -1,7 +1,6 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { CLUSTER_KEYS, ZONE_KEYS, type ClusterCode, type Perspective } from "@/lib/scoring";
 import type { RadarData } from "@/lib/radar/types";
@@ -437,27 +436,10 @@ export default function StadiumView({ data, notice, editor = false }: { data: Ra
       {/* kurzer Übergang beim Betreten und Verlassen einer Szene */}
       <div key={activeView === "scene" ? `scene-${activeUseCase}` : "world"} className="stadium-fade pointer-events-none absolute inset-0 bg-bg" aria-hidden />
 
-      {/* Kopf: Titel und Pfad */}
-      <div className="pointer-events-none absolute inset-x-0 top-[57px] flex flex-wrap items-start justify-between gap-4 p-4 sm:p-8">
-        <div className="pointer-events-auto flex max-w-xl flex-col gap-2">
-          {!touring && notice}
-          <p className="eyebrow">Trendradar 2027–2035</p>
-          <h1 className="!text-[clamp(28px,3.4vw,44px)]">Future of Experiences</h1>
-          {!touring && (
-            <nav aria-label="Pfad" className="flex flex-wrap items-center gap-1.5 text-sm text-muted">
-              {crumbs.map((c, i) => (
-                <span key={i} className="flex items-center gap-1.5">
-                  {i > 0 && <span aria-hidden>›</span>}
-                  {c.onClick && i < crumbs.length - 1 ? (
-                    <button type="button" onClick={c.onClick} className="hover:text-ink">{c.label}</button>
-                  ) : (
-                    <span className="text-ink">{c.label}</span>
-                  )}
-                </span>
-              ))}
-            </nav>
-          )}
-        </div>
+      {/* Kopf: nur die Navigationsleiste (Ansicht, Zielgruppe, Perspektive, Tour) und der Pfad */}
+      <h1 className="sr-only">Trendradar – Dashboard</h1>
+      <div className="pointer-events-none absolute inset-x-0 top-[57px] flex flex-col items-start gap-3 p-4 sm:p-6">
+        {!touring && notice && <div className="pointer-events-auto">{notice}</div>}
         {!touring && (
           <div className="pointer-events-auto flex flex-wrap items-center gap-2">
             <span className="glass inline-flex rounded-[var(--radius-pill)] p-0.5" role="group" aria-label="Ansicht">
@@ -500,8 +482,21 @@ export default function StadiumView({ data, notice, editor = false }: { data: Ra
               ))}
             </span>
             <button type="button" onClick={startTour} className={pill}>Tour starten</button>
-            <Link href="/radar/klassisch" className={`${pill} no-underline`}>2D-Ansicht</Link>
           </div>
+        )}
+        {!touring && crumbs.length > 1 && (
+          <nav aria-label="Pfad" className="glass pointer-events-auto flex flex-wrap items-center gap-1.5 rounded-[var(--radius-pill)] px-3 py-1 text-sm text-muted">
+            {crumbs.map((c, i) => (
+              <span key={i} className="flex items-center gap-1.5">
+                {i > 0 && <span aria-hidden>›</span>}
+                {c.onClick && i < crumbs.length - 1 ? (
+                  <button type="button" onClick={c.onClick} className="hover:text-ink">{c.label}</button>
+                ) : (
+                  <span className="text-ink">{c.label}</span>
+                )}
+              </span>
+            ))}
+          </nav>
         )}
       </div>
 

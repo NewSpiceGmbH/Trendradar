@@ -11,9 +11,16 @@ async function loginAs(page: Page, persona: RegExp) {
 
 test("Kunde: kein Zugang zum Backend", async ({ page }) => {
   await loginAs(page, /Kunde A · Member/);
+  // Trenddatenbank und Quellen liegen im Backend: nicht in der Kundennavigation, Seiten gesperrt
+  const nav = page.getByRole("navigation", { name: "Bereiche" });
+  await expect(nav.getByRole("link")).toHaveText([/Dashboard \(3D\)|3D/, /2D-Ansicht|2D/, /News-Ticker|News/]);
   await page.goto("/admin");
   await expect(page.getByRole("heading", { name: "Nur für die Redaktion" })).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Redaktion" })).toHaveCount(0);
+  await page.goto("/admin/datenbank");
+  await expect(page.getByRole("heading", { name: "Nur für die Redaktion" })).toBeVisible();
+  await page.goto("/radar/klassisch");
+  await expect(page.locator("#datenbank, #quellen")).toHaveCount(0);
 });
 
 test.describe("Redaktion", () => {
@@ -111,6 +118,16 @@ test.describe("Redaktion", () => {
     await page.getByRole("tab", { name: /News/ }).dispatchEvent("click");
     await expect(page.getByRole("tabpanel").getByRole("link", { name: /Batteriespeicher/ })).toBeVisible({ timeout: 20_000 });
   });
+  test("Backend: Trenddatenbank und Quellenverzeichnis", async ({ page }) => {
+    await loginAs(page, /Redaktion/);
+    await page.goto("/admin/datenbank");
+    await expect(page.getByRole("heading", { name: "Trenddatenbank" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "CSV herunterladen" })).toBeVisible();
+    await page.goto("/admin/quellenverzeichnis");
+    await expect(page.getByRole("heading", { name: "Quellenverzeichnis" })).toBeVisible();
+    await expect(page.getByRole("link").filter({ hasText: /./ }).first()).toBeVisible();
+  });
+
   test("Liveticker eingeklappt: neue Meldungen fallen auf", async ({ page }) => {
     await loginAs(page, /Kunde A · Member/);
     // eingeklappt, aber noch nie hineingeschaut: Meldungen der letzten 7 Tage gelten als neu

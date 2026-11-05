@@ -3,6 +3,7 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { demoLogin } from "@/lib/auth/actions";
 import { PERSONAS, demoLoginDiagnosis, isDemoLogin } from "@/lib/auth/personas";
+import { Logo } from "@/components/app/logo";
 import { MagicLinkForm } from "./magic-link-form";
 
 export const metadata: Metadata = { title: "Anmelden" };
@@ -11,7 +12,7 @@ export default function LoginPage({ searchParams }: PageProps<"/login">) {
   return (
     <main className="mx-auto grid w-full max-w-5xl flex-1 content-center gap-10 px-4 py-16 sm:px-8 md:grid-cols-2">
       <div className="flex flex-col gap-5">
-        <p className="eyebrow">New Spice · Future of Experiences</p>
+        <Logo className="h-12 w-auto self-start text-ink" />
         <h1>Trendradar</h1>
         <p className="max-w-prose text-lg">
           44 Trends für Sport, Hospitality und Live Entertainment – bewertet, eingeordnet und mit Europa-Perspektive.
