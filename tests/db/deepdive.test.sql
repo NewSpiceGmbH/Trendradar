@@ -71,10 +71,17 @@ insert into deep_dive_sessions (id, challenge_id, title, source, char_count, run
   ('d1100000-0000-0000-0000-000000000011', 'c1100000-0000-0000-0000-000000000011', 'Gespräch Betriebsleitung', 'paste', 18000, 'a1100000-0000-0000-0000-0000000000a1', t.uid('editor'));
 update deep_dive_sessions set status = 'done', summary = 'Engpass ist die Kasse, nicht das Zapfen.' where id = 'd1100000-0000-0000-0000-000000000011';
 update challenges set brief = '{"summary": "Kasse ist der Engpass."}', brief_updated_at = now() where id = 'c1100000-0000-0000-0000-000000000011';
-select t.eq((select count(*)::int from deep_dive_sessions), 1, 'Redaktion: legt Gespräche an');
+select t.eq((select count(*)::int from deep_dive_sessions where source = 'paste'), 1, 'Redaktion: legt Gespräche an');
 select t.eq((select brief ->> 'summary' from challenges where id = 'c1100000-0000-0000-0000-000000000011'), 'Kasse ist der Engpass.', 'Redaktion: speichert das Briefing');
 select t.throws($$insert into deep_dive_sessions (challenge_id, title, source) values ('c1100000-0000-0000-0000-000000000011', 'x', 'notion')$$, 'Nur bekannte Quellen', 'check');
 select t.throws($$insert into deep_dive_sessions (challenge_id, title, source) values ('c1100000-0000-0000-0000-000000000011', '  ', 'paste')$$, 'Gespräch braucht einen Titel', 'check');
+insert into deep_dive_sessions (challenge_id, title, source, source_url) values
+  ('c1100000-0000-0000-0000-000000000011', 'Meeting-Notiz', 'notion', 'https://www.notion.so/newspice/Meeting-1234567890abcdef1234567890abcdef');
+select t.eq((select count(*)::int from deep_dive_sessions where source = 'notion'), 1, 'Redaktion: Gespräch als Notion-Link');
+select t.throws($$insert into deep_dive_sessions (challenge_id, title, source) values ('c1100000-0000-0000-0000-000000000011', 'ohne Link', 'notion')$$,
+  'Notion-Gespräch braucht einen Link', 'deep_dive_sessions_notion_url');
+select t.throws($$insert into deep_dive_sessions (challenge_id, title, source, source_url) values ('c1100000-0000-0000-0000-000000000011', 'x', 'notion', 'javascript:alert(1)')$$,
+  'Nur https-Links', 'check');
 reset role;
 
 -- ───────────────────────── Kunden ─────────────────────────
