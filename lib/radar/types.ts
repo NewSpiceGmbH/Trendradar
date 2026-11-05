@@ -75,6 +75,19 @@ export interface TickerItem {
   publishedAt: string;
 }
 
+/** Veröffentlichtes Startup-Profil aus der qualifizierten Datenbank (Venture Clienting) */
+export interface RadarStartup {
+  id: string;
+  name: string;
+  website: string | null;
+  tagline: string | null;
+  solution: string | null;
+  stage: "idea" | "prototype" | "pilot" | "market" | "scale" | null;
+  country: string | null;
+  approved: boolean;
+  trendNumbers: number[];
+}
+
 export interface RadarData {
   trends: RadarTrend[];
   clusters: { code: ClusterCode; name: string }[];
@@ -88,6 +101,8 @@ export interface RadarData {
   cases: RadarCase[];
   /** Liveticker, neueste zuerst */
   ticker: TickerItem[];
+  /** veröffentlichte Startup-Profile (leer vor Migration 0009) */
+  startups: RadarStartup[];
   /** true, wenn der Nutzer Premium-Inhalte sehen darf */
   premium: boolean;
 }

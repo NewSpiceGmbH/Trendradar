@@ -5,32 +5,10 @@ import { useState, useTransition } from "react";
 import { saveScout } from "@/lib/agents/actions";
 import { CHANNEL_LABEL, CHANNEL_READY, LANE_LABEL, MODEL_OPTIONS, REGION_LABEL, VERTICAL_LABEL, type Channel, type Lane, type Region, type Scout, type Vertical } from "@/lib/agents/types";
 import { STAGE_OPTIONS } from "@/lib/admin/labels";
+import { Label, Toggles } from "./form";
 import { Card, btn, input } from "./ui";
 
 type Draft = Omit<Scout, "id" | "lastRunAt" | "key">;
-
-const Label = ({ htmlFor, children }: { htmlFor?: string; children: React.ReactNode }) => (
-  <label htmlFor={htmlFor} className="eyebrow !text-muted">{children}</label>
-);
-
-function Toggles<T extends string>({ options, value, onChange, label }: { options: Record<T, string>; value: T[]; onChange: (v: T[]) => void; label: string }) {
-  return (
-    <div className="flex flex-col gap-1.5" role="group" aria-label={label}>
-      <Label>{label}</Label>
-      <div className="flex flex-wrap gap-1.5">
-        {(Object.entries(options) as [T, string][]).map(([k, l]) => {
-          const on = value.includes(k);
-          return (
-            <button key={k} type="button" aria-pressed={on} onClick={() => onChange(on ? value.filter((x) => x !== k) : [...value, k])}
-              className={`rounded-[var(--radius-pill)] px-3 py-1 text-sm ${on ? "bg-ink font-bold text-bg" : "border border-line text-text hover:text-ink"}`}>
-              {l}
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
 
 const words = (s: string) => s.split(/[,;\n]/).map((x) => x.trim()).filter(Boolean);
 

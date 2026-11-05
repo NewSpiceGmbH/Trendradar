@@ -156,7 +156,7 @@ export async function runScout(scoutId: string, opts: { userId?: string | null; 
 }
 
 /** Läufe, die die Plattform abgebrochen hat (Zeitlimit), als fehlgeschlagen abschließen */
-async function closeStaleRuns(db: SupabaseClient) {
+export async function closeStaleRuns(db: SupabaseClient) {
   const cutoff = new Date(Date.now() - STALE_AFTER_MIN * 60_000).toISOString();
   await db.from("agent_runs").update({ status: "failed", finished_at: new Date().toISOString(), error: STALE_ERROR })
     .eq("status", "running").lt("started_at", cutoff);

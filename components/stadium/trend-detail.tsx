@@ -112,7 +112,9 @@ function Block({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-type Tab = "anwendung" | "markt" | "news" | "partner" | "quellen" | "empfehlung";
+const STARTUP_STAGE = { idea: "Idee", prototype: "Prototyp", pilot: "Pilot läuft", market: "Kunden im Einsatz", scale: "Skaliert" } as const;
+
+type Tab = "anwendung" | "markt" | "news" | "startups" | "partner" | "quellen" | "empfehlung";
 
 interface Props {
   data: RadarData;
@@ -143,12 +145,14 @@ export function TrendDetail({ data, trend: t, pos, persp, onClose, onOpen, onOpe
     .slice(0, 4);
   const scenes = USE_CASES.flatMap((u) => u.hotspots.filter((h) => h.trend === t.number).map((h) => ({ u, h })));
   const news = data.ticker.filter((n) => n.trend === t.number);
+  const startups = data.startups.filter((s) => s.trendNumbers.includes(t.number));
   const allSources = [...t.sourceIds, ...(t.eu?.sourceIds ?? []).filter((s) => !t.sourceIds.includes(s))];
 
   const tabs: { key: Tab; label: string; show: boolean }[] = [
     { key: "anwendung", label: "Anwendung", show: !!(t.useCases || t.bestPractice) },
     { key: "markt", label: "Markt", show: !!(t.signals || t.opportunities || t.risks) },
     { key: "news", label: `News (${news.length})`, show: news.length > 0 },
+    { key: "startups", label: `Startups (${startups.length})`, show: startups.length > 0 },
     { key: "partner", label: "Partner", show: t.partnerKeys.length > 0 },
     { key: "quellen", label: `Quellen (${allSources.length})`, show: true },
     { key: "empfehlung", label: "Empfehlung", show: true },
@@ -285,6 +289,32 @@ export function TrendDetail({ data, trend: t, pos, persp, onClose, onOpen, onOpe
               <>
                 <p className="text-muted">Aktuelle Meldungen aus dem Liveticker – von unseren Scouts gefunden, von der Redaktion geprüft.</p>
                 <NewsList data={data} items={news} showTrend={false} />
+              </>
+            )}
+            {active === "startups" && (
+              <>
+                <p className="text-muted">Startups aus der New-Spice-Datenbank, die zu diesem Trend passen – vorab recherchiert und von der Redaktion geprüft.</p>
+                <ul className="grid gap-3 sm:grid-cols-2">
+                  {startups.map((s) => (
+                    <li key={s.id} className="flex flex-col gap-1.5 rounded-xl border border-line p-3">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <b className="text-ink">{s.name}</b>
+                        {s.approved && <span className="rounded-[var(--radius-pill)] bg-ink px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-bg">New Spice approved</span>}
+                      </div>
+                      {(s.tagline || s.solution) && <span>{s.tagline ?? s.solution}</span>}
+                      <span className="text-xs text-muted">
+                        {[s.stage && STARTUP_STAGE[s.stage], s.country].filter(Boolean).join(" · ")}
+                        {s.website && (
+                          <>
+                            {s.stage || s.country ? " · " : ""}
+                            <a href={s.website} target="_blank" rel="noopener noreferrer">Website ↗</a>
+                          </>
+                        )}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="text-xs text-muted">Interesse an einem Piloten? Ihre Ansprechperson bei New Spice stellt eine kuratierte Auswahl mit Konditionen zusammen.</p>
               </>
             )}
             {active === "partner" && (

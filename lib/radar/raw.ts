@@ -46,6 +46,8 @@ export interface RawRadar {
   partners: { key: string; name: string; role: string | null; knowledge_base: boolean; partner_sources: { source_id: string }[] }[];
   /** freigegebene Meldungen (signals mit published_at); fehlt vor Migration 0006 */
   ticker?: { id: string; trend_id: number | null; title: string; summary: string | null; url: string; publisher: string | null; published_on: string | null; published_at: string | null }[];
+  /** veröffentlichte Startups (Migration 0009); fehlt vorher */
+  startups?: { id: string; name: string; website: string | null; tagline: string | null; solution: string | null; stage: string | null; country: string | null; approved: boolean; trend_numbers: number[] }[];
   cases: { id: string; client: string; year: string | null; title: string; solution: string | null; result: string | null; case_trends: { trend_id: number }[] }[];
   premium: boolean;
 }
@@ -148,6 +150,12 @@ export function mapRadar(raw: RawRadar): RadarData {
         id: s.id, trend: numberById.get(s.trend_id!)!, title: s.title, summary: s.summary, url: s.url,
         publisher: s.publisher, publishedOn: s.published_on, publishedAt: s.published_at!,
       })),
+    startups: (raw.startups ?? [])
+      .map((s) => ({
+        id: s.id, name: s.name, website: s.website, tagline: s.tagline, solution: s.solution, stage: s.stage as RadarData["startups"][number]["stage"],
+        country: s.country, approved: s.approved, trendNumbers: (s.trend_numbers ?? []).filter((n) => numberById.size === 0 || [...numberById.values()].includes(n)),
+      }))
+      .sort((a, b) => Number(b.approved) - Number(a.approved) || a.name.localeCompare(b.name)),
     premium: raw.premium,
   };
 }

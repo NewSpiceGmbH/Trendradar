@@ -137,6 +137,60 @@ test.describe("Redaktion", () => {
     await expect(page.getByRole("link").filter({ hasText: /./ }).first()).toBeVisible();
   });
 
+  test("Venture Clienting: Challenge, Vorevaluierung, Entscheidung, Profil im Radar", async ({ page }) => {
+    test.slow(); // am Ende das Stadion (WebGL)
+    await loginAs(page, /Redaktion/);
+    await page.goto("/admin/venture");
+    await page.getByRole("link", { name: /Wartezeit am Bierstand/ }).click();
+    await expect(page.getByRole("heading", { name: /Wartezeit am Bierstand/, level: 1 })).toBeVisible();
+    await expect(page.getByText(/Suchstrategie:/)).toBeVisible();
+
+    // Shortlist-Kandidat: Bewertung je Kriterium sichtbar, aufnehmen
+    const queueless = page.getByRole("listitem").filter({ has: page.getByRole("heading", { name: /QueueLess/ }) });
+    await expect(queueless.getByText("Problem-Fit")).toBeVisible();
+    await expect(queueless.getByText("4,10")).toBeVisible(); // 5·0,25 + 4·0,2 + 4·0,15 + 4·0,15 + 4·0,1 + 3·0,1 + 3·0,05
+    await queueless.getByRole("button", { name: "In die Datenbank" }).click();
+    await expect(page.getByRole("status").filter({ hasText: "aufgenommen" })).toBeVisible();
+
+    // Ablehnen nur mit Begründung
+    const crowd = page.getByRole("listitem").filter({ has: page.getByRole("heading", { name: /CrowdSense/ }) });
+    await crowd.getByRole("button", { name: "Ablehnen" }).click();
+    await crowd.getByRole("button", { name: "Ablehnung speichern" }).click();
+    await expect(crowd.getByRole("status")).toHaveText(/Begründung/);
+    await crowd.getByRole("textbox", { name: /Begründung/ }).fill("Nur Anzeige, löst das Problem nicht.");
+    await crowd.getByRole("button", { name: "Ablehnung speichern" }).click();
+    await page.goto("/admin/venture/ch-1?zeige=abgelehnt");
+    await expect(page.getByRole("heading", { name: /CrowdSense/ })).toBeVisible();
+
+    // Profil ergänzen und im Radar veröffentlichen
+    await page.goto("/admin/startups");
+    await page.getByRole("link", { name: /QueueLess/ }).click();
+    await page.getByLabel("In einem Satz").fill("Kasse ohne Schlange für Stadien und Arenen.");
+    await page.getByLabel("Kosten / Preismodell").fill("2.000 € im Monat");
+    await page.getByRole("button", { name: "Im Radar veröffentlichen" }).click();
+    await expect(page.getByRole("status").filter({ hasText: "veröffentlicht" })).toBeVisible();
+
+    // neue Challenge anlegen; im Testmodus gibt es keine echten Läufe
+    await page.goto("/admin/venture/neu");
+    await page.getByLabel("Titel").fill("Einlass beschleunigen");
+    await page.getByLabel(/Problem – was ist heute/).fill("Vor dem Anpfiff stauen sich die Gäste 25 Minuten an den Drehkreuzen.");
+    await page.getByRole("button", { name: "Challenge anlegen" }).click();
+    await expect(page.getByRole("heading", { name: "Einlass beschleunigen", level: 1 })).toBeVisible();
+    await page.getByRole("button", { name: "Startups suchen" }).click();
+    await expect(page.getByRole("status").filter({ hasText: "Testmodus" })).toBeVisible();
+
+    // Kunde sieht das veröffentlichte Kurzprofil beim Trend – ohne Kosten
+    await loginAs(page, /Kunde A · Member/);
+    await page.goto("/radar?t=24&d=1");
+    await page.getByRole("tab", { name: /Startups/ }).dispatchEvent("click");
+    const panel = page.getByRole("tabpanel");
+    await expect(panel.getByText(/QueueLess/)).toBeVisible({ timeout: 20_000 });
+    await expect(panel.getByText("Kasse ohne Schlange für Stadien und Arenen.")).toBeVisible();
+    await expect(page.getByText("2.000 € im Monat")).toHaveCount(0);
+    await page.goto("/admin/startups");
+    await expect(page.getByRole("heading", { name: "Nur für die Redaktion" })).toBeVisible();
+  });
+
   test("Liveticker eingeklappt: neue Meldungen fallen auf", async ({ page }) => {
     test.slow(); // Stadion ist WebGL, ohne GPU langsam
     await loginAs(page, /Kunde A · Member/);

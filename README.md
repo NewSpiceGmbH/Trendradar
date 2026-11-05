@@ -54,3 +54,12 @@ Backend unter `/admin/scouting`. Für echte Läufe in Vercel (Production und Pre
 - optional `YOUTUBE_API_KEY` für Quellen vom Typ YouTube
 
 Neue Variablen wirken erst mit dem nächsten Deployment.
+
+## Venture Clienting
+
+Backend unter `/admin/venture` (Challenges) und `/admin/startups` (qualifizierte Startup-Datenbank).
+- Eine Challenge beschreibt ein konkretes Problem (Ist, Ziel, Muss-Kriterien, Rahmen). „Startups suchen“ startet den
+  Venture-Agenten (`lib/venture/`): Suchstrategie, Recherche, Vorevaluierung nach 7 gewichteten Kriterien, Empfehlung.
+- Der Agent schreibt nur Kandidaten (`startup_candidates`). In die Datenbank kommt ein Startup ausschließlich über
+  `decide_candidate()` (Redaktion). Kontakt, Kosten und Pitchdeck liegen getrennt in `startup_private` (nur Redaktion).
+- Veröffentlichte Profile sehen Kunden im Trenddetail unter „Startups“. Budget und Not-Aus teilen sich Scouts und Venture-Agent.

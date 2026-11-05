@@ -62,6 +62,14 @@ export async function loadRadar(supabase: SupabaseClient, opts: { premium: boole
     .order("published_at", { ascending: false })
     .limit(60);
 
+  // Startups: RLS gibt Kunden nur veröffentlichte Profile; die Redaktion sieht alle, deshalb ausdrücklich filtern.
+  // Vor Migration 0009 gibt es die Tabelle nicht – dann bleibt die Liste leer.
+  const startups = await supabase
+    .from("startups")
+    .select("id, name, website, tagline, solution, stage, country, approved, trend_numbers")
+    .eq("published", true)
+    .eq("status", "qualified");
+
   const raw: RawRadar = {
     trends: trendRows,
     clusters: must(clusters, "clusters"),
@@ -75,6 +83,7 @@ export async function loadRadar(supabase: SupabaseClient, opts: { premium: boole
     partners: must(partners, "partners") as unknown as RawRadar["partners"],
     cases: must(cases, "cases") as unknown as RawRadar["cases"],
     ticker: ticker.error ? [] : (ticker.data as RawRadar["ticker"]),
+    startups: startups.error ? [] : (startups.data as RawRadar["startups"]),
     premium: opts.premium,
   };
   return mapRadar(raw);
