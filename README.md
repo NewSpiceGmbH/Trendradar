@@ -42,6 +42,7 @@ Einrichtung im Vercel-Projekt `trendradar` (Team New Spice):
 - Inhalte und Demo-Zugänge kommen per Migration (0004/0005) in die Datenbank, auch ohne Supabase-Branching. Damit gibt es
   fünf Demo-Zugänge (Redaktion, Owner, Member, Premium, abgelaufen; Passwort `trendradar-demo`).
 - In Produktion: kein `DEMO_LOGIN`, keine Demo-Konten. Login nur per Magic-Link für eingeladene Adressen.
+Nach Änderungen an `seed/*.json`: `npm run seed:build && npx supabase db reset`.
 
 ## Scouting (Agenten)
 
@@ -52,4 +53,3 @@ Backend unter `/admin/scouting`. Für echte Läufe in Vercel (Production und Pre
 - optional `YOUTUBE_API_KEY` für Quellen vom Typ YouTube
 
 Neue Variablen wirken erst mit dem nächsten Deployment.
-Nach Änderungen an `seed/*.json`: `npm run seed:build && npx supabase db reset`.
