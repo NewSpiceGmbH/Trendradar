@@ -10,9 +10,9 @@ import {
   JOURNEY_OVERVIEW, OVERVIEW, PITCH_SHOT, STADIUM_OUTSIDE, ZONE_PLACE, clusterShot, dotPosition, groupShot, placeShot, spotShot,
   type CameraShot,
 } from "@/lib/stadium/geometry";
-import { STAGE, STAGES, journeySpot, stageOf, type StageKey } from "@/lib/stadium/journey";
+import { STAGE, STAGES, journeySpot, registerStages, stageOf, type StageKey } from "@/lib/stadium/journey";
 import { buildTour, firstSentence } from "@/lib/stadium/tour";
-import { AUDIENCE_LABEL, FILTER_LABEL, audienceOf, matchesAudience, type AudienceFilter } from "@/lib/stadium/audience";
+import { AUDIENCE_LABEL, FILTER_LABEL, audienceOf, matchesAudience, registerAudience, type AudienceFilter } from "@/lib/stadium/audience";
 import { USE_CASE, hotspotShot, type UseCaseKey } from "@/lib/stadium/usecases";
 import type { Palette, View } from "./scene";
 import { TrendDetail } from "./trend-detail";
@@ -58,6 +58,11 @@ function usePalette() {
 const pill = "glass rounded-[var(--radius-pill)] px-4 py-1.5 text-sm font-bold text-ink hover:brightness-110";
 
 export default function StadiumView({ data }: { data: RadarData }) {
+  // Ort und Zielgruppe aus der Datenbank vor allen anderen Berechnungen übernehmen
+  useMemo(() => {
+    registerStages(data.trends);
+    registerAudience(data.trends);
+  }, [data]);
   const pos = useMemo(() => positions(data), [data]);
   const tour = useMemo(() => buildTour(data, pos), [data, pos]);
   const palette = usePalette();

@@ -43,8 +43,17 @@ export async function loadRadar(supabase: SupabaseClient, opts: { premium: boole
         : Promise.resolve({ data: [], error: null }),
     ]);
 
+  // Ort und Zielgruppe gibt es erst ab Migration 0006. Fehlen die Spalten noch, bleibt es bei den Startwerten im Code.
+  const extra = await supabase.from("trends").select("id, journey_stage, audience").eq("status", "published");
+  const extraById = new Map((extra.error ? [] : (extra.data ?? [])).map((r) => [r.id as number, r]));
+  const trendRows = (must(trends, "trends") as unknown as RawRadar["trends"]).map((t) => ({
+    ...t,
+    journey_stage: (extraById.get(t.id)?.journey_stage as string | undefined) ?? null,
+    audience: (extraById.get(t.id)?.audience as string | undefined) ?? null,
+  }));
+
   const raw: RawRadar = {
-    trends: must(trends, "trends") as unknown as RawRadar["trends"],
+    trends: trendRows,
     clusters: must(clusters, "clusters"),
     focus_fields: must(focus, "focus_fields"),
     subtopics: must(subtopics, "subtopics"),

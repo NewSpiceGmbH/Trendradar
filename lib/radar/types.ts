@@ -37,6 +37,9 @@ export interface RadarTrend {
   evidence: Evidence;
   uncertain: boolean;
   mandatory: boolean;
+  /** Ort der Customer Journey und Zielgruppe aus der Datenbank (null = Startwert aus lib/stadium) */
+  journey: "zuhause" | "anreise" | "region" | "einlass" | "stadion" | "kulissen" | null;
+  audience: "vip" | "public" | "both" | null;
   /** Relevanz 1–3 je Branche in der Reihenfolge von RadarData.industries */
   relevance: number[];
   global: { horizon: Horizon; scores: Scores };

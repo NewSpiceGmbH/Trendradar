@@ -41,7 +41,14 @@ const DEFAULT_STAGE: Record<number, StageKey> = {
   8: "kulissen", 20: "kulissen", 31: "kulissen", 34: "kulissen", 35: "kulissen", 36: "kulissen", 40: "kulissen", 41: "kulissen",
 };
 
-export const stageOf = (n: number): StageKey => DEFAULT_STAGE[n] ?? "stadion";
+// Werte aus der Datenbank (trends.journey_stage) haben Vorrang vor dem Startwert oben
+const fromData = new Map<number, StageKey>();
+export function registerStages(trends: { number: number; journey: StageKey | null }[]) {
+  fromData.clear();
+  for (const t of trends) if (t.journey) fromData.set(t.number, t.journey);
+}
+
+export const stageOf = (n: number): StageKey => fromData.get(n) ?? DEFAULT_STAGE[n] ?? "stadion";
 
 /**
  * Position eines Trends über seinem Ort: auf einem Kreis um den Ortsmittelpunkt, nach Score sortiert.

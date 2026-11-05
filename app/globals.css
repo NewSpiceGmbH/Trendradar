@@ -261,3 +261,13 @@ button.stadium-anchor { pointer-events: auto; }
 @keyframes stadium-fade { from { opacity: 1; } to { opacity: 0; } }
 .stadium-fade { opacity: 0; animation: stadium-fade 0.6s ease-out; }
 @media (prefers-reduced-motion: reduce) { .stadium-fade { animation: none; } }
+
+/* Redaktions-Backend: dezenter Verlauf, damit Glasflächen Tiefe haben (nur Tokens) */
+.admin-backdrop {
+  background:
+    radial-gradient(60rem 40rem at 10% -10%, color-mix(in srgb, var(--cD) 16%, transparent), transparent 60%),
+    radial-gradient(50rem 36rem at 95% 0%, color-mix(in srgb, var(--cE) 14%, transparent), transparent 60%),
+    radial-gradient(40rem 30rem at 60% 110%, color-mix(in srgb, var(--cC) 12%, transparent), transparent 60%),
+    var(--bg);
+  background-attachment: fixed;
+}

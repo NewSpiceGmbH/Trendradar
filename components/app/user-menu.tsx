@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { logout } from "@/lib/auth/actions";
 import { getViewer } from "@/lib/auth/viewer";
 
@@ -16,6 +17,11 @@ export async function UserMenu() {
         <span className="text-sm font-bold text-ink">{v.name}</span>
         <span className="text-xs text-muted">{role}</span>
       </div>
+      {v.isEditor && (
+        <Link href="/admin" className="rounded-[var(--radius-pill)] border border-line px-3 py-1.5 text-sm font-bold text-ink no-underline hover:border-muted">
+          Redaktion
+        </Link>
+      )}
       <form action={logout}>
         <button className="rounded-[var(--radius-pill)] border border-line px-3 py-1.5 text-sm text-ink hover:border-muted">Abmelden</button>
       </form>

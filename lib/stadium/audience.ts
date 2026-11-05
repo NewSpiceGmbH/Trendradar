@@ -11,7 +11,16 @@ export const FILTER_LABEL: Record<AudienceFilter, string> = { all: "Alle", vip: 
 const VIP = [6, 9, 13, 16, 22, 33];
 const PUBLIC = [3, 17, 19, 24, 25, 26, 28, 29, 30, 32, 44];
 
+// Werte aus der Datenbank (trends.audience) haben Vorrang vor dem Startwert oben
+const fromData = new Map<number, Audience>();
+export function registerAudience(trends: { number: number; audience: Audience | null }[]) {
+  fromData.clear();
+  for (const t of trends) if (t.audience) fromData.set(t.number, t.audience);
+}
+
 export function audienceOf(n: number): Audience {
+  const d = fromData.get(n);
+  if (d) return d;
   if (VIP.includes(n)) return "vip";
   if (PUBLIC.includes(n)) return "public";
   return "both";

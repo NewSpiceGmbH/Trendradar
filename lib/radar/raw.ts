@@ -21,6 +21,9 @@ export interface RawTrend {
   evidence: string;
   uncertain: boolean;
   mandatory: boolean;
+  /** ab Migration 0006; fehlt vorher (dann gilt die Zuordnung aus lib/stadium) */
+  journey_stage?: string | null;
+  audience?: string | null;
   subtopics: { name: string } | null;
   trend_perspectives: { perspective: Persp; horizon: string | null; note: string | null }[];
   trend_scores: { perspective: Persp; criterion: number; score: number }[];
@@ -80,6 +83,8 @@ export function mapRadar(raw: RawRadar): RadarData {
         evidence: t.evidence as RadarTrend["evidence"],
         uncertain: t.uncertain,
         mandatory: t.mandatory,
+        journey: (t.journey_stage ?? null) as RadarTrend["journey"],
+        audience: (t.audience ?? null) as RadarTrend["audience"],
         relevance: industries.map((i) => rel.get(i.code) ?? 0),
         global: { horizon: (g?.horizon ?? "3–5") as Horizon, scores: gScores as unknown as Scores },
         eu: hasEu
