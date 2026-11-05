@@ -39,3 +39,13 @@ export function filterByTopics(items: TickerItem[], clusterOf: (trend: number) =
     return c != null && topics.has(c);
   });
 }
+
+/**
+ * Meldungen, die der Nutzer noch nicht gesehen hat: neuer als der letzte Blick in den Ticker.
+ * Beim ersten Besuch (noch kein Zeitpunkt) gelten die Meldungen der letzten 7 Tage als neu.
+ */
+export function unseenItems(items: TickerItem[], lastSeen: string | null, now: Date = new Date()): TickerItem[] {
+  if (!lastSeen) return items.filter((i) => isFresh(i, now));
+  const t = new Date(lastSeen).getTime();
+  return items.filter((i) => new Date(i.publishedAt).getTime() > t);
+}

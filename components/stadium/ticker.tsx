@@ -5,11 +5,14 @@ import type { RadarData, TickerItem } from "@/lib/radar/types";
 import { dayLabel, filterByTopics, hostOf, isFresh } from "@/lib/stadium/ticker";
 
 /**
- * Laufzeile unten im Stadion: zeigt reihum die neuesten Meldungen, Klick öffnet den Liveticker.
- * Ohne Meldungen erscheint sie nicht.
+ * Eingeklappter Liveticker unten rechts im Stadion.
+ * Ruhig, solange es nichts Neues gibt (kleine Pille); mit ungesehenen Meldungen auffällig:
+ * „Neu · n“ mit Puls und den neuen Schlagzeilen im Wechsel. Klick öffnet den Ticker.
  */
-export function TickerStrip({ items, open, onOpen, editor = false }: { items: TickerItem[]; open: boolean; onOpen: () => void; editor?: boolean }) {
-  const latest = items.slice(0, 5);
+export function TickerStrip({
+  items, unseen, open, onOpen, editor = false,
+}: { items: TickerItem[]; unseen: TickerItem[]; open: boolean; onOpen: () => void; editor?: boolean }) {
+  const latest = unseen.slice(0, 5);
   const [i, setI] = useState(0);
   useEffect(() => {
     if (latest.length < 2 || open) return;
@@ -17,7 +20,7 @@ export function TickerStrip({ items, open, onOpen, editor = false }: { items: Ti
     const id = window.setInterval(() => setI((n) => (n + 1) % latest.length), 6000);
     return () => window.clearInterval(id);
   }, [latest.length, open]);
-  if (!latest.length) {
+  if (!items.length) {
     // Kunden sehen ohne Meldungen nichts; die Redaktion bekommt einen Hinweis, wo der Ticker erscheint
     if (!editor) return null;
     return (
@@ -26,19 +29,33 @@ export function TickerStrip({ items, open, onOpen, editor = false }: { items: Ti
       </a>
     );
   }
+  if (!latest.length) {
+    return (
+      <button
+        type="button"
+        onClick={onOpen}
+        aria-expanded={open}
+        aria-label={`Liveticker öffnen, ${items.length} Meldungen, keine neuen`}
+        className="glass pointer-events-auto flex items-center gap-2 rounded-[var(--radius-pill)] px-4 py-1.5 text-sm font-bold text-ink hover:brightness-110"
+      >
+        <span className="size-1.5 rounded-full bg-ink" aria-hidden />
+        Liveticker
+      </button>
+    );
+  }
   const cur = latest[i % latest.length];
-  const fresh = items.filter((x) => isFresh(x)).length;
   return (
     <button
       type="button"
       onClick={onOpen}
       aria-expanded={open}
-      aria-label={`Liveticker öffnen, ${items.length} Meldungen`}
-      className="glass pointer-events-auto flex min-w-0 max-w-full items-center gap-3 rounded-[var(--radius-pill)] py-1.5 pl-2 pr-4 text-left text-sm hover:brightness-110 sm:max-w-[520px]"
+      aria-label={`Liveticker öffnen, ${unseen.length} neue Meldungen`}
+      className="stadium-ticker-new glass-strong pointer-events-auto flex min-w-0 max-w-full items-center gap-3 rounded-[var(--radius-pill)] py-1.5 pl-2 pr-4 text-left text-sm hover:brightness-110 sm:max-w-[520px]"
     >
-      <span className="flex shrink-0 items-center gap-1.5 rounded-[var(--radius-pill)] bg-ink px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-bg">
+      <span className="relative flex shrink-0 items-center gap-1.5 rounded-[var(--radius-pill)] bg-ink px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-bg">
+        <span className="stadium-ping absolute inset-0 rounded-[var(--radius-pill)]" aria-hidden />
         <span className="stadium-live size-1.5 rounded-full bg-bg" aria-hidden />
-        Live{fresh ? ` · ${fresh}` : ""}
+        Neu · {unseen.length}
       </span>
       <span key={cur.id} className="stadium-ticker-in min-w-0 truncate text-ink">
         <span className="text-muted">{dayLabel(cur.publishedAt)} · </span>
@@ -141,9 +158,10 @@ function useTopics(valid: string[]) {
  * Filter nach Themen; Hover hebt den Trend im Stadion hervor, Klick fliegt hin.
  */
 export function TickerColumn({
-  data, onSelectTrend, onHover, active, editor = false,
+  data, onSelectTrend, onHover, active, editor = false, onCollapse,
 }: {
   data: RadarData; onSelectTrend: (n: number) => void; onHover: (n: number | null) => void; active: number | null; editor?: boolean;
+  onCollapse: () => void;
 }) {
   const clusterOf = useMemo(() => {
     const m = new Map(data.trends.map((t) => [t.number, t.cluster as string]));
@@ -168,7 +186,18 @@ export function TickerColumn({
             <span className="stadium-live size-2 rounded-full bg-ink" aria-hidden />
             Liveticker
           </p>
-          {fresh > 0 && <span className="text-xs text-muted"><span className="num text-ink">{fresh}</span> neu in 7 Tagen</span>}
+          <span className="flex items-center gap-2">
+            {fresh > 0 && <span className="text-xs text-muted"><span className="num text-ink">{fresh}</span> neu in 7 Tagen</span>}
+            <button
+              type="button"
+              onClick={onCollapse}
+              aria-label="Liveticker einklappen"
+              title="Einklappen – neue Meldungen erscheinen dann unten im Stadion"
+              className="grid size-7 place-items-center rounded-full border border-line text-ink hover:bg-sunk"
+            >
+              <span aria-hidden>»</span>
+            </button>
+          </span>
         </div>
         <div className="flex flex-wrap items-center gap-1.5">
           <button

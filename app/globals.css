@@ -264,7 +264,11 @@ button.stadium-anchor { pointer-events: auto; }
 .stadium-live { animation: stadium-live 1.6s ease-in-out infinite; }
 @keyframes stadium-ticker-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 .stadium-ticker-in { display: inline-block; animation: stadium-ticker-in 0.4s ease-out; }
-@media (prefers-reduced-motion: reduce) { .stadium-fade, .stadium-live, .stadium-ticker-in { animation: none; } }
+@keyframes stadium-ping { from { box-shadow: 0 0 0 0 var(--ink); opacity: 0.6; } to { box-shadow: 0 0 0 10px var(--ink); opacity: 0; } }
+.stadium-ping { animation: stadium-ping 1.8s ease-out infinite; }
+@keyframes stadium-ticker-new { from { opacity: 0; transform: translateY(16px) scale(0.96); } to { opacity: 1; transform: none; } }
+.stadium-ticker-new { animation: stadium-ticker-new 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+@media (prefers-reduced-motion: reduce) { .stadium-fade, .stadium-live, .stadium-ticker-in, .stadium-ping, .stadium-ticker-new { animation: none; } }
 
 /* Redaktions-Backend: dezenter Verlauf, damit Glasflächen Tiefe haben (nur Tokens) */
 .admin-backdrop {

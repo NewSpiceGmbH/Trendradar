@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { TickerItem } from "@/lib/radar/types";
-import { dayLabel, filterByTopics, hostOf, isFresh, newsByTrend } from "./ticker";
+import { dayLabel, filterByTopics, hostOf, isFresh, newsByTrend, unseenItems } from "./ticker";
 
 const item = (id: string, trend: number, publishedAt: string): TickerItem =>
   ({ id, trend, title: id, summary: null, url: "https://www.example.org/a", publisher: null, publishedOn: null, publishedAt });
@@ -30,5 +30,11 @@ describe("Liveticker", () => {
     expect(filterByTopics(items, cluster, new Set()).map((x) => x.id)).toEqual(["a", "b"]);
     expect(filterByTopics(items, cluster, new Set(["F"])).map((x) => x.id)).toEqual(["b"]);
     expect(filterByTopics(items, cluster, new Set(["B"]))).toEqual([]);
+  });
+  it("erkennt ungesehene Meldungen", () => {
+    const a = item("a", 24, "2026-11-05T08:00:00Z"), b = item("b", 24, "2026-11-03T08:00:00Z"), c = item("c", 24, "2026-09-01T08:00:00Z");
+    expect(unseenItems([a, b, c], null, now).map((x) => x.id)).toEqual(["a", "b"]);
+    expect(unseenItems([a, b, c], "2026-11-04T00:00:00Z", now).map((x) => x.id)).toEqual(["a"]);
+    expect(unseenItems([a, b, c], "2026-11-05T08:00:00Z", now)).toEqual([]);
   });
 });

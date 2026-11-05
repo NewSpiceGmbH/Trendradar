@@ -14,7 +14,7 @@ import { STAGE, STAGES, journeySpot, registerStages, stageOf, type StageKey } fr
 import { buildTour, firstSentence } from "@/lib/stadium/tour";
 import { AUDIENCE_LABEL, FILTER_LABEL, audienceOf, matchesAudience, registerAudience, type AudienceFilter } from "@/lib/stadium/audience";
 import { USE_CASE, hotspotShot, type UseCaseKey } from "@/lib/stadium/usecases";
-import { isFresh, newsByTrend } from "@/lib/stadium/ticker";
+import { newsByTrend, unseenItems } from "@/lib/stadium/ticker";
 import type { Palette, View } from "./scene";
 import { TickerColumn, TickerPanel, TickerStrip } from "./ticker";
 import { TrendDetail } from "./trend-detail";
@@ -26,6 +26,10 @@ const Scene = dynamic(() => import("./scene"), {
 
 const TOUR_SEEN = "trendradar.tour-gesehen";
 const FOUND = "trendradar.entdeckt";
+const TICKER_COLLAPSED = "trendradar.ticker-eingeklappt";
+const TICKER_SEEN = "trendradar.ticker-gesehen";
+/** ab hier steht der Ticker als Spalte neben dem Stadion (Tailwind lg) */
+const WIDE = "(min-width: 1024px)";
 
 const store = {
   get(key: string): string | null {
@@ -98,6 +102,8 @@ export default function StadiumView({ data, notice, editor = false }: { data: Ra
       audience: (z === "vip" || z === "public" ? z : "all") as AudienceFilter,
       station: !deep && !store.get(TOUR_SEEN) ? 0 : null,
       ticker: q.get("live") === "1",
+      collapsed: store.get(TICKER_COLLAPSED) === "1",
+      lastSeen: store.get(TICKER_SEEN),
       found,
     };
   });
@@ -117,6 +123,21 @@ export default function StadiumView({ data, notice, editor = false }: { data: Ra
   const [switched, setSwitched] = useState<string | null>(null);
   const [found, setFound] = useState<Set<number>>(initial.found);
   const [tickerOpen, setTickerOpen] = useState<boolean>(initial.ticker);
+  const [collapsed, setCollapsed] = useState<boolean>(initial.collapsed);
+  const [lastSeen, setLastSeen] = useState<string | null>(initial.lastSeen);
+  const unseen = useMemo(() => unseenItems(data.ticker, lastSeen), [data, lastSeen]);
+  /** Ticker gelesen: alles bis zur neuesten Meldung gilt als gesehen */
+  const markSeen = useCallback(() => {
+    const newest = data.ticker[0]?.publishedAt;
+    if (!newest) return;
+    store.set(TICKER_SEEN, newest);
+    setLastSeen(newest);
+  }, [data]);
+  const collapseTicker = () => {
+    markSeen();
+    setCollapsed(true);
+    store.set(TICKER_COLLAPSED, "1");
+  };
 
   const touring = station !== null;
   const st = touring ? tour[station] : null;
@@ -249,6 +270,13 @@ export default function StadiumView({ data, notice, editor = false }: { data: Ra
     store.set(TOUR_SEEN, "1");
   }, []);
   const openTicker = () => {
+    markSeen();
+    if (window.matchMedia(WIDE).matches) {
+      // breiter Bildschirm: Spalte wieder ausklappen
+      setCollapsed(false);
+      store.set(TICKER_COLLAPSED, "0");
+      return;
+    }
     setTickerOpen((o) => !o);
     setCluster(null);
     setPlace(null);
@@ -343,10 +371,10 @@ export default function StadiumView({ data, notice, editor = false }: { data: Ra
     const top = [...data.trends].sort((a, b) => pos[persp][b.number].total - pos[persp][a.number].total)[0]?.number;
     const curious = data.trends.filter((t) => moved(pos, t.number)).map((t) => t.number);
     if (top) curious.push(top);
-    // Trends mit neuer Meldung im Liveticker
-    for (const [n, items] of news) if (isFresh(items[0])) curious.push(n);
+    // Trends mit ungesehener Meldung im Liveticker
+    for (const i of unseen) curious.push(i.trend);
     return new Set(curious.filter((n) => !found.has(n) && n !== selected));
-  }, [touring, data, pos, persp, found, selected, news]);
+  }, [touring, data, pos, persp, found, selected, unseen]);
   const labelled = useMemo(() => {
     if (st && st.highlight.length && st.highlight.length <= 12) return new Set(st.highlight);
     if (!touring && view === "radar" && cluster) return new Set(data.trends.filter((t) => t.cluster === cluster).map((t) => t.number));
@@ -489,8 +517,8 @@ export default function StadiumView({ data, notice, editor = false }: { data: Ra
             ))}
           </dl>
           <div className="pointer-events-none flex min-w-0 flex-col items-end gap-2">
-            <div className="contents lg:hidden">
-              <TickerStrip items={data.ticker} open={tickerOpen} onOpen={openTicker} editor={editor} />
+            <div className={collapsed ? "contents" : "contents lg:hidden"}>
+              <TickerStrip items={data.ticker} unseen={unseen} open={tickerOpen} onOpen={openTicker} editor={editor} />
             </div>
             <p className="glass pointer-events-auto rounded-[var(--radius-pill)] px-4 py-1.5 text-sm text-muted">
               <span className="num text-ink">{found.size}</span> von {data.trends.length} entdeckt
@@ -638,8 +666,8 @@ export default function StadiumView({ data, notice, editor = false }: { data: Ra
       </nav>
       </div>
 
-      <aside className="glass hidden w-[340px] shrink-0 flex-col !rounded-none !border-y-0 !border-r-0 pt-[57px] lg:flex xl:w-[380px]">
-        <TickerColumn data={data} onSelectTrend={selectTrend} onHover={setHovered} active={selected} editor={editor} />
+      <aside className={`glass hidden w-[340px] shrink-0 flex-col !rounded-none !border-y-0 !border-r-0 pt-[57px] xl:w-[380px] ${collapsed ? "" : "lg:flex"}`}>
+        <TickerColumn data={data} onSelectTrend={selectTrend} onHover={setHovered} active={selected} editor={editor} onCollapse={collapseTicker} />
       </aside>
     </div>
   );

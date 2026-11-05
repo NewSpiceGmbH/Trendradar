@@ -98,12 +98,29 @@ test.describe("Redaktion", () => {
     await expect(ticker.getByRole("link", { name: /Batteriespeicher/ })).toBeVisible();
     await ticker.getByRole("button", { name: "Alle Themen" }).click();
 
+    // Einklappen: Spalte weg, ruhige Pille (alles gesehen); Klick klappt wieder aus
+    await ticker.getByRole("button", { name: "Liveticker einklappen" }).click();
+    await expect(ticker).toBeHidden();
+    await page.getByRole("button", { name: /Liveticker öffnen, \d+ Meldungen, keine neuen/ }).click();
+    await expect(ticker).toBeVisible();
+
     await ticker.getByRole("button", { name: /#34 Energiespeicher/ }).click();
     await expect(page.locator("main aside, aside").getByRole("heading", { name: /Energiespeicher/ }).first()).toBeVisible({ timeout: 20_000 });
     await page.getByRole("button", { name: "Mehr erfahren" }).click();
     // Hinter dem Panel rendert WebGL ohne GPU sehr langsam; Playwrights Stabilitätsprüfung wartet dann ewig
     await page.getByRole("tab", { name: /News/ }).dispatchEvent("click");
     await expect(page.getByRole("tabpanel").getByRole("link", { name: /Batteriespeicher/ })).toBeVisible({ timeout: 20_000 });
+  });
+  test("Liveticker eingeklappt: neue Meldungen fallen auf", async ({ page }) => {
+    await loginAs(page, /Kunde A · Member/);
+    // eingeklappt, aber noch nie hineingeschaut: Meldungen der letzten 7 Tage gelten als neu
+    await page.addInitScript(() => window.localStorage.setItem("trendradar.ticker-eingeklappt", "1"));
+    await page.goto("/radar?v=journey");
+    await expect(page.getByRole("region", { name: "Liveticker" })).toBeHidden();
+    const strip = page.getByRole("button", { name: /Liveticker öffnen, \d+ neue Meldungen/ });
+    await expect(strip).toContainText("Neu ·");
+    await strip.click();
+    await expect(page.getByRole("region", { name: "Liveticker" })).toBeVisible();
   });
 });
 
