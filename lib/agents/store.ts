@@ -6,7 +6,7 @@ import { isFixtureMode } from "@/lib/auth/personas";
 import { createClient } from "@/lib/supabase/server";
 import { MigrationMissingError } from "@/lib/admin/types";
 import { fixtureScouting } from "./fixture";
-import { monthStart } from "./schedule";
+import { isStale, monthStart, STALE_ERROR } from "./schedule";
 import type { Channel, Scout, ScoutingSettings, Tip } from "./types";
 
 /** Zugriff auf den Scouting-Stab für das Backend (mit den Rechten der Redaktion; RLS gilt) */
@@ -20,7 +20,7 @@ export interface ScoutingRepo {
   tips(): Promise<Tip[]>;
   addTip(url: string, note: string | null, scoutId: string | null, userId: string): Promise<void>;
   monthSpendUsd(): Promise<number>;
-  runStats(): Promise<Record<string, { runs: number; costUsd: number; signals: number; published: number; lastError: string | null }>>;
+  runStats(): Promise<Record<string, { runs: number; costUsd: number; signals: number; published: number; lastError: string | null; runningSince: string | null }>>;
 }
 
 export async function getScoutingRepo(): Promise<ScoutingRepo> {
@@ -142,10 +142,12 @@ export function supabaseScouting(db: SupabaseClient): ScoutingRepo {
       if (runs.error) fail(runs.error, "agent_runs");
       if (signals.error) fail(signals.error, "signals");
       const out: Awaited<ReturnType<ScoutingRepo["runStats"]>> = {};
-      const get = (id: string) => (out[id] ??= { runs: 0, costUsd: 0, signals: 0, published: 0, lastError: null });
+      const get = (id: string) => (out[id] ??= { runs: 0, costUsd: 0, signals: 0, published: 0, lastError: null, runningSince: null });
       for (const r of runs.data ?? []) {
         const s = get(r.scout_id as string);
         if (s.runs === 0 && r.status === "failed") s.lastError = r.error as string;
+        if (s.runs === 0 && r.status === "running" && !isStale(r.started_at as string)) s.runningSince = r.started_at as string;
+        if (s.runs === 0 && r.status === "running" && isStale(r.started_at as string)) s.lastError = STALE_ERROR;
         s.runs++;
         s.costUsd += Number(r.cost_usd ?? 0);
       }

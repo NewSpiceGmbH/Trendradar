@@ -37,3 +37,8 @@ export function searchSince(lastRunAt: string | null, now: Date): Date {
 }
 
 export const monthStart = (now: Date) => new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
+
+/** Länger als das Funktionslimit (800 s) plus Puffer: dieser Lauf wurde von der Plattform abgebrochen */
+export const STALE_AFTER_MIN = 15;
+export const STALE_ERROR = "Zeitlimit überschritten – der Lauf wurde abgebrochen. Bitte erneut starten.";
+export const isStale = (startedAt: string, now: Date = new Date()) => now.getTime() - new Date(startedAt).getTime() > STALE_AFTER_MIN * 60_000;

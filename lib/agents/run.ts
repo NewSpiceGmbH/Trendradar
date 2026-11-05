@@ -5,7 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { toMediaRow } from "./media";
 import { parseFeed, recentItems } from "./rss";
-import { isDue, monthStart, searchSince } from "./schedule";
+import { isDue, monthStart, searchSince, STALE_AFTER_MIN, STALE_ERROR } from "./schedule";
 import { runScoutAgent, type Candidate } from "./scout";
 import { mapChannel, mapScout } from "./store";
 import type { Channel, Scout, Tip } from "./types";
@@ -82,6 +82,7 @@ async function load(db: SupabaseClient, scoutId: string) {
 
 export async function runScout(scoutId: string, opts: { userId?: string | null; client?: Pick<Anthropic, "beta">; db?: SupabaseClient } = {}): Promise<RunOutcome> {
   const db = opts.db ?? createAdminClient();
+  await closeStaleRuns(db);
   const ctx = await load(db, scoutId);
   const s: Scout = ctx.scout;
   if (ctx.paused) return { status: "skipped", reason: "Scouting ist pausiert (Not-Aus)." };
@@ -150,6 +151,13 @@ export async function runScout(scoutId: string, opts: { userId?: string | null; 
     await db.from("scouts").update({ last_run_at: now.toISOString() }).eq("id", s.id);
     return { status: "failed", runId, error };
   }
+}
+
+/** Läufe, die die Plattform abgebrochen hat (Zeitlimit), als fehlgeschlagen abschließen */
+async function closeStaleRuns(db: SupabaseClient) {
+  const cutoff = new Date(Date.now() - STALE_AFTER_MIN * 60_000).toISOString();
+  await db.from("agent_runs").update({ status: "failed", finished_at: new Date().toISOString(), error: STALE_ERROR })
+    .eq("status", "running").lt("started_at", cutoff);
 }
 
 /**

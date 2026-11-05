@@ -7,6 +7,9 @@ import { MigrationMissingError } from "@/lib/admin/types";
 import { isFixtureMode } from "@/lib/auth/personas";
 import { getScoutingRepo } from "@/lib/agents/store";
 
+// „Lauf starten“ ist eine Server Action dieser Seite; der Lauf läuft per after() weiter und braucht das Zeitlimit
+export const maxDuration = 800;
+
 export const metadata: Metadata = { title: "Scouting · Redaktion" };
 
 export default function ScoutingPage() {

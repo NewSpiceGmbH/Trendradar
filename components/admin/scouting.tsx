@@ -31,7 +31,7 @@ const WEEKDAY = ["", "Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
 
 export function ScoutCard({ scout, stats, channelNames, apiReady }: {
   scout: Scout;
-  stats: { runs: number; costUsd: number; signals: number; published: number; lastError: string | null } | undefined;
+  stats: { runs: number; costUsd: number; signals: number; published: number; lastError: string | null; runningSince: string | null } | undefined;
   channelNames: string[];
   apiReady: boolean;
 }) {
@@ -62,6 +62,7 @@ export function ScoutCard({ scout, stats, channelNames, apiReady }: {
         <div><dt className="text-xs text-muted">Trefferquote</dt><dd className="num text-ink" title="Anteil freigegebener Meldungen">{quote == null ? "–" : `${quote} %`}</dd></div>
         <div><dt className="text-xs text-muted">Kosten</dt><dd className="num text-ink">{usd(stats?.costUsd ?? 0)}</dd></div>
       </dl>
+      {stats?.runningSince && <p className="text-xs text-ink">Lauf läuft seit {new Date(stats.runningSince).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Berlin" })} Uhr – meist 2–8 Minuten. Seite neu laden für das Ergebnis.</p>}
       {stats?.lastError && <p className="text-xs text-[var(--cA)]">Letzter Lauf fehlgeschlagen: {stats.lastError}</p>}
       <Msg m={msg} />
       <div className="flex flex-wrap gap-2">
