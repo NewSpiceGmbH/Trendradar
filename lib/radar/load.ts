@@ -52,6 +52,16 @@ export async function loadRadar(supabase: SupabaseClient, opts: { premium: boole
     audience: (extraById.get(t.id)?.audience as string | undefined) ?? null,
   }));
 
+  // Liveticker: RLS gibt Kunden nur freigegebene Meldungen zu veröffentlichten Trends; die Redaktion sieht alle,
+  // deshalb hier ausdrücklich nur freigegebene. Fehlt die Spalte (vor 0006), bleibt der Ticker leer.
+  const ticker = await supabase
+    .from("signals")
+    .select("id, trend_id, title, summary, url, publisher, published_on, published_at")
+    .not("published_at", "is", null)
+    .not("trend_id", "is", null)
+    .order("published_at", { ascending: false })
+    .limit(60);
+
   const raw: RawRadar = {
     trends: trendRows,
     clusters: must(clusters, "clusters"),
@@ -64,6 +74,7 @@ export async function loadRadar(supabase: SupabaseClient, opts: { premium: boole
     sources: must(sources, "sources"),
     partners: must(partners, "partners") as unknown as RawRadar["partners"],
     cases: must(cases, "cases") as unknown as RawRadar["cases"],
+    ticker: ticker.error ? [] : (ticker.data as RawRadar["ticker"]),
     premium: opts.premium,
   };
   return mapRadar(raw);

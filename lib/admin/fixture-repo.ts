@@ -2,7 +2,7 @@ import "server-only";
 
 import { fixtureRaw } from "@/lib/radar/fixtures";
 import type { Horizon } from "@/lib/scoring";
-import type { RawTrend } from "@/lib/radar/raw";
+import type { RawRadar, RawTrend } from "@/lib/radar/raw";
 import { audienceOf } from "@/lib/stadium/audience";
 import { stageOf } from "@/lib/stadium/journey";
 import { applyPatch, proposalPatch, snapshotOf } from "./patch";
@@ -228,6 +228,13 @@ export function fixtureRepo(): AdminRepo {
       throw new Error("Rollen lassen sich im Testmodus nicht vergeben.");
     },
   };
+}
+
+/** Testmodus: freigegebene Meldungen aus dem Backend-Speicher für den Liveticker im Stadion */
+export function fixtureTicker(): NonNullable<RawRadar["ticker"]> {
+  return store().signals
+    .filter((s) => s.publishedAt && s.trendId != null && s.status !== "dismissed")
+    .map((s) => ({ id: s.id, trend_id: s.trendId, title: s.title, summary: s.summary, url: s.url, publisher: s.publisher, published_on: s.publishedOn, published_at: s.publishedAt }));
 }
 
 /** Testmodus: veröffentlichte Trends aus dem Backend-Speicher für den Radar (falls dort schon bearbeitet wurde) */

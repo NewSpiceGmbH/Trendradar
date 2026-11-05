@@ -57,6 +57,7 @@ test.describe("Redaktion", () => {
   test("Trend bearbeiten: Vorschau, Version, Wiederherstellen", async ({ page }) => {
     await loginAs(page, /Redaktion/);
     await page.goto("/admin/trends/18");
+    await page.waitForLoadState("networkidle"); // erst nach dem Hydrieren reagiert der Editor
     await page.getByLabel("Horizont Europa").selectOption("3–5");
     await page.getByRole("radiogroup", { name: "Market Readiness" }).nth(1).getByRole("radio", { name: "3" }).click();
     await expect(page.getByText("Scouting → Aufwärmen")).toBeVisible();
@@ -79,6 +80,23 @@ test.describe("Redaktion", () => {
     await assigned.getByRole("button", { name: "Veröffentlichen" }).click();
     await page.goto("/admin/ticker?tab=live");
     await expect(page.getByText("Batteriespeicher")).toBeVisible();
+  });
+
+  test("Liveticker im Stadion: Kunde sieht freigegebene Meldungen", async ({ page }) => {
+    // Das Stadion ist WebGL; ohne GPU rendert der Testbrowser langsam – mehr Zeit geben
+    test.slow();
+    await loginAs(page, /Kunde A · Member/);
+    await page.goto("/radar?v=journey");
+    await page.getByRole("button", { name: /Liveticker öffnen/ }).click();
+    const panel = page.locator("aside");
+    await expect(panel.getByRole("heading", { name: "Neu aus dem Scouting" })).toBeVisible();
+    await expect(panel.getByRole("link", { name: /Batteriespeicher/ })).toHaveAttribute("href", "https://example.org/beispiel/speicher");
+    await panel.getByRole("button", { name: /#34 Energiespeicher/ }).click();
+    await expect(page.locator("aside").getByRole("heading", { name: /Energiespeicher/ })).toBeVisible({ timeout: 20_000 });
+    await page.getByRole("button", { name: "Mehr erfahren" }).click();
+    // Hinter dem Panel rendert WebGL ohne GPU sehr langsam; Playwrights Stabilitätsprüfung wartet dann ewig
+    await page.getByRole("tab", { name: /News/ }).dispatchEvent("click");
+    await expect(page.getByRole("tabpanel").getByRole("link", { name: /Batteriespeicher/ })).toBeVisible({ timeout: 20_000 });
   });
 });
 

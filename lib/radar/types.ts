@@ -61,6 +61,20 @@ export interface RadarCase {
   trendNumbers: number[];
 }
 
+/** Freigegebene Meldung aus dem Liveticker: eigene Zusammenfassung mit Link auf die Quelle */
+export interface TickerItem {
+  id: string;
+  trend: number;
+  title: string;
+  summary: string | null;
+  url: string;
+  publisher: string | null;
+  /** Datum der Originalmeldung (falls bekannt) */
+  publishedOn: string | null;
+  /** Zeitpunkt der Freigabe durch die Redaktion */
+  publishedAt: string;
+}
+
 export interface RadarData {
   trends: RadarTrend[];
   clusters: { code: ClusterCode; name: string }[];
@@ -72,6 +86,8 @@ export interface RadarData {
   sources: Record<string, Source>;
   partners: Record<string, Partner>;
   cases: RadarCase[];
+  /** Liveticker, neueste zuerst */
+  ticker: TickerItem[];
   /** true, wenn der Nutzer Premium-Inhalte sehen darf */
   premium: boolean;
 }

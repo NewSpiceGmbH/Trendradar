@@ -3,7 +3,7 @@ import "server-only";
 import type { Viewer } from "@/lib/auth/viewer";
 import { isFixtureMode } from "@/lib/auth/personas";
 import { createClient } from "@/lib/supabase/server";
-import { fixtureTrendsForRadar } from "@/lib/admin/fixture-repo";
+import { fixtureTicker, fixtureTrendsForRadar } from "@/lib/admin/fixture-repo";
 import { fixtureRaw } from "./fixtures";
 import { mapRadar } from "./raw";
 import { loadRadar } from "./load";
@@ -14,7 +14,7 @@ export async function getRadarData(viewer: Viewer): Promise<RadarData> {
   if (isFixtureMode()) {
     // Testmodus: Änderungen aus dem Redaktions-Backend (Speicher im Prozess) gleich im Radar sehen
     const raw = fixtureRaw({ premium: viewer.hasPremium });
-    return mapRadar({ ...raw, trends: fixtureTrendsForRadar(raw.trends) });
+    return mapRadar({ ...raw, trends: fixtureTrendsForRadar(raw.trends), ticker: fixtureTicker() });
   }
   return loadRadar(await createClient(), { premium: viewer.hasPremium });
 }

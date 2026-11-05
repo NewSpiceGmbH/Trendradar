@@ -7,6 +7,7 @@ import { ORIGIN_LABEL, clusterFg, clusterVar, fmt, moved, type Positions } from 
 import { AUDIENCE_LABEL, audienceOf } from "@/lib/stadium/audience";
 import { STAGE, stageOf } from "@/lib/stadium/journey";
 import { USE_CASES, type UseCaseKey } from "@/lib/stadium/usecases";
+import { NewsList } from "./ticker";
 
 /**
  * Ebene 3: Detailansicht eines Trends als Glas-Panel über der Szene.
@@ -111,7 +112,7 @@ function Block({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-type Tab = "anwendung" | "markt" | "partner" | "quellen" | "empfehlung";
+type Tab = "anwendung" | "markt" | "news" | "partner" | "quellen" | "empfehlung";
 
 interface Props {
   data: RadarData;
@@ -141,11 +142,13 @@ export function TrendDetail({ data, trend: t, pos, persp, onClose, onOpen, onOpe
     .sort((a, b) => pos[persp][b.number].total - pos[persp][a.number].total)
     .slice(0, 4);
   const scenes = USE_CASES.flatMap((u) => u.hotspots.filter((h) => h.trend === t.number).map((h) => ({ u, h })));
+  const news = data.ticker.filter((n) => n.trend === t.number);
   const allSources = [...t.sourceIds, ...(t.eu?.sourceIds ?? []).filter((s) => !t.sourceIds.includes(s))];
 
   const tabs: { key: Tab; label: string; show: boolean }[] = [
     { key: "anwendung", label: "Anwendung", show: !!(t.useCases || t.bestPractice) },
     { key: "markt", label: "Markt", show: !!(t.signals || t.opportunities || t.risks) },
+    { key: "news", label: `News (${news.length})`, show: news.length > 0 },
     { key: "partner", label: "Partner", show: t.partnerKeys.length > 0 },
     { key: "quellen", label: `Quellen (${allSources.length})`, show: true },
     { key: "empfehlung", label: "Empfehlung", show: true },
@@ -276,6 +279,12 @@ export function TrendDetail({ data, trend: t, pos, persp, onClose, onOpen, onOpe
                   {t.opportunities && <Block title="Chancen">{t.opportunities}</Block>}
                   {t.risks && <Block title="Risiken">{t.risks}</Block>}
                 </div>
+              </>
+            )}
+            {active === "news" && (
+              <>
+                <p className="text-muted">Aktuelle Meldungen aus dem Liveticker – von unseren Scouts gefunden, von der Redaktion geprüft.</p>
+                <NewsList data={data} items={news} showTrend={false} />
               </>
             )}
             {active === "partner" && (

@@ -22,9 +22,6 @@ async function Radar() {
   if (!viewer.hasAccess) return <NoAccess viewer={viewer} />;
   const data = await getRadarData(viewer);
   return (
-    <>
-      <ExpiryNotice viewer={viewer} />
-      <StadiumView data={data} />
-    </>
+    <StadiumView data={data} notice={<ExpiryNotice viewer={viewer} overlay />} />
   );
 }

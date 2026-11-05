@@ -260,7 +260,11 @@ button.stadium-anchor { pointer-events: auto; }
 /* Übergang in und aus einer Use-Case-Szene */
 @keyframes stadium-fade { from { opacity: 1; } to { opacity: 0; } }
 .stadium-fade { opacity: 0; animation: stadium-fade 0.6s ease-out; }
-@media (prefers-reduced-motion: reduce) { .stadium-fade { animation: none; } }
+@keyframes stadium-live { 50% { opacity: 0.25; } }
+.stadium-live { animation: stadium-live 1.6s ease-in-out infinite; }
+@keyframes stadium-ticker-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.stadium-ticker-in { display: inline-block; animation: stadium-ticker-in 0.4s ease-out; }
+@media (prefers-reduced-motion: reduce) { .stadium-fade, .stadium-live, .stadium-ticker-in { animation: none; } }
 
 /* Redaktions-Backend: dezenter Verlauf, damit Glasflächen Tiefe haben (nur Tokens) */
 .admin-backdrop {

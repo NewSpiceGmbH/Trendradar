@@ -1,9 +1,18 @@
 import type { Viewer } from "@/lib/auth/viewer";
 
 /** Hinweis vor Ablauf des Zugangs (30 Tage vorher) */
-export function ExpiryNotice({ viewer }: { viewer: Viewer }) {
+export function ExpiryNotice({ viewer, overlay = false }: { viewer: Viewer; overlay?: boolean }) {
   const o = viewer.activeOrg;
   if (viewer.isEditor || !o || o.daysLeft == null || o.daysLeft > 30) return null;
+  if (overlay) {
+    // im Stadion als Glaskarte über der Szene, damit die Szene den ganzen Bildschirm behält
+    return (
+      <p role="status" className="glass max-w-md rounded-[var(--radius-card)] px-4 py-2 text-sm">
+        <b className="text-ink">Ihr Zugang für {o.name} endet {o.daysLeft === 0 ? "heute" : `in ${o.daysLeft} Tagen`}</b>{" "}
+        (am {new Date(o.accessUntil!).toLocaleDateString("de-DE")}). Zur Verlängerung hilft Ihre Ansprechperson bei New Spice.
+      </p>
+    );
+  }
   return (
     <div role="status" className="border-b border-line bg-surface">
       <p className="mx-auto max-w-[1320px] px-4 py-2 text-sm sm:px-8">

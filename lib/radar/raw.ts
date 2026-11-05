@@ -44,6 +44,8 @@ export interface RawRadar {
   insights: { title: string; body: string; position: number }[];
   sources: { id: string; title: string; publisher: string | null; published_label: string | null; url: string }[];
   partners: { key: string; name: string; role: string | null; knowledge_base: boolean; partner_sources: { source_id: string }[] }[];
+  /** freigegebene Meldungen (signals mit published_at); fehlt vor Migration 0006 */
+  ticker?: { id: string; trend_id: number | null; title: string; summary: string | null; url: string; publisher: string | null; published_on: string | null; published_at: string | null }[];
   cases: { id: string; client: string; year: string | null; title: string; solution: string | null; result: string | null; case_trends: { trend_id: number }[] }[];
   premium: boolean;
 }
@@ -139,6 +141,13 @@ export function mapRadar(raw: RawRadar): RadarData {
       result: c.result,
       trendNumbers: c.case_trends.map((ct) => numberById.get(ct.trend_id)).filter((n): n is number => n != null),
     })),
+    ticker: (raw.ticker ?? [])
+      .filter((s) => s.published_at && s.trend_id != null && numberById.has(s.trend_id))
+      .sort((a, b) => (b.published_at! < a.published_at! ? -1 : b.published_at! > a.published_at! ? 1 : 0))
+      .map((s) => ({
+        id: s.id, trend: numberById.get(s.trend_id!)!, title: s.title, summary: s.summary, url: s.url,
+        publisher: s.publisher, publishedOn: s.published_on, publishedAt: s.published_at!,
+      })),
     premium: raw.premium,
   };
 }
