@@ -173,6 +173,7 @@ main { max-width: 1440px; margin: 0 auto; padding-left: max(16px, env(safe-area-
       <a class="tab" href="#vergleich" data-v="vergleich">Vergleich</a>
       <a class="tab" href="#vorschlag" data-v="vorschlag">Vorschlag · Runde 2</a>
       <a class="tab" href="#runde3" data-v="runde3">Runde 3 · Feed &amp; Funnel</a>
+      <a class="tab" href="#runde4" data-v="runde4">Runde 4 · Ampel</a>
     </nav>
     <div class="tools">
       <div class="seg" role="group" aria-label="Gerät">
@@ -519,7 +520,7 @@ const PROJ = [
 ];
 const PH = ["Angefragt", "Deep Dive", "Shortlist", "Pilot", "Auswertung", "Abgeschlossen"];
 const phaseBar = (p) => `<span style="display:flex;flex-direction:column;gap:4px"><span style="display:flex;gap:3px" aria-label="Phase ${p + 1} von 6: ${PH[p]}">${PH.map((_, i) => `<span style="width:16px;height:6px;border-radius:3px;background:${i <= p ? "var(--ink)" : "var(--line)"}"></span>`).join("")}</span><span class="small" style="color:var(--ink);font-weight:700">${PH[p]}</span></span>`;
-function R3_desk() {
+function R3_desk(v4 = false) {
   return `${bhead()}
   <nav class="side">${NAV.map((g) => `<div class="grp">${g.g ? `<span class="gh">${g.g}</span>` : ""}${g.items.map(item).join("")}</div>`).join("")}</nav>
   <div class="content" style="left:240px;right:400px;gap:18px;padding:24px 28px">
@@ -528,24 +529,80 @@ function R3_desk() {
     <section class="lime" style="padding:18px 20px;display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:22px">
       <div style="display:flex;flex-direction:column;gap:10px;min-width:0">
         <div class="row" style="justify-content:space-between"><span class="eyebrow">Startup-Funnel · 90 Tage</span><b style="font-size:12px">Startup-Datenbank →</b></div>
-        ${funnel(84)}${legend}</div>
+        ${funnel(v4 ? 52 : 84)}${legend}</div>
       <div style="display:flex;flex-direction:column;gap:6px;min-width:0;border-left:1px solid rgba(37,57,18,.25);padding-left:18px">
         <div class="row" style="justify-content:space-between"><span class="eyebrow">Neu im Eingang</span><b style="font-size:12px">+ Startup eintragen</b></div>
         ${INBOX.map(([n, k, s, a]) => `<div style="display:grid;grid-template-columns:12px minmax(0,1fr) auto;gap:8px;align-items:center;padding:6px 0;border-top:1px solid rgba(37,57,18,.2)">
           <span style="width:12px;height:12px;border-radius:3px;${segStyle[k]}" title="${SRC[k]}"></span><span class="trunc"><b>${n}</b><br><span style="font-size:12px">${s}</span></span><span style="font-size:11px">${a}</span></div>`).join("")}
         <b style="font-size:12px;margin-top:auto">3 warten auf Vorevaluierung →</b></div>
     </section>
-    <section style="display:flex;flex-direction:column;gap:10px">
+    ${v4 ? projSection4() : `    <section style="display:flex;flex-direction:column;gap:10px">
       <div class="row" style="justify-content:space-between"><span class="h2">Projekte & Anfragen</span><span class="lnk">Alle Projekte →</span></div>
       <div class="warn" style="align-items:center;justify-content:space-between"><span style="flex:1"><b style="color:var(--ink)">Neue Anfrage von Kunde P:</b> „VIP-Lounge: Bestellung am Tisch“ · vor 1 Tag · noch nicht beantwortet</span><span class="btn solid">Anfrage öffnen</span></div>
       <table class="tbl"><thead><tr><th>Projekt</th><th style="width:150px">Phase</th><th>Nächster Schritt</th><th style="width:150px">Kunde sagt</th></tr></thead><tbody>
       ${PROJ.map((p) => `<tr><td><div style="font-weight:700;color:var(--ink)">${p.t}</div><div class="small">${p.org}</div></td><td>${phaseBar(p.ph)}</td>
         <td><div style="color:var(--ink)">${p.next}</div><div class="small" ${p.warn ? 'style="color:var(--ink);font-weight:700"' : ""}>${p.warn ? "⚠ " : ""}${p.due}</div></td><td class="small">${p.fb}</td></tr>`).join("")}
-      </tbody></table></section>
+      </tbody></table></section>`}
   </div>
   <aside style="position:absolute;right:0;top:60px;bottom:0;width:400px;border-left:1px solid var(--line);padding:18px 22px 0;display:flex;flex-direction:column;overflow:hidden">
     ${feedHead()}<ol style="margin:0;padding:0;overflow:hidden;flex:1">${feedList()}</ol></aside>`;
 }
+/* ───── Runde 4: Ampel für Fristen und ausstehende Rückmeldungen; Ausblick Postfach ───── */
+// Ampel-Farben: vorläufig aus den geprüften Clusterfarben (Rot = cA, Ocker = cC, Grün = cF); in der App eigene Tokens --ok/--warn/--alert
+const AMP = {
+  r: { c: "var(--cA)", fg: "var(--cA-fg)", g: "!", l: "Überfällig" },
+  y: { c: "var(--cC)", fg: "var(--cC-fg)", g: "◷", l: "Bald fällig" },
+  g: { c: "var(--cF)", fg: "var(--cF-fg)", g: "✓", l: "Im Plan", s: "im Plan" },
+  n: { c: "var(--line)", fg: "var(--ink)", g: "–", l: "Abgeschlossen" },
+};
+const amp = (k, size = 22) => `<span title="${AMP[k].l}" aria-label="${AMP[k].l}" style="display:inline-grid;place-items:center;flex:none;width:${size}px;height:${size}px;border-radius:${k === "r" ? "6px" : "50%"};background:${AMP[k].c};color:${AMP[k].fg};font-weight:800;font-size:${Math.round(size * 0.55)}px;line-height:1">${AMP[k].g}</span>`;
+const P4 = [
+  { id: "p3", a: "r", t: "Nachhaltige Fan-Anreise", org: "Kunde A", ph: 3, why: "Frist überschritten", next: "Zwischenauswertung Pilot", due: "fällig 3.11. · seit 3 Tagen überfällig", wait: "uns", since: "seit 3 Tagen", mails: 1,
+    x: { mails: [["Kunde A · Ansprechperson", "Pilot um 4 Wochen verlängern?", "4.11.", "unbeantwortet seit 2 Tagen"]],
+         todos: [["Zwischenauswertung an Kunde A schicken", "3.11.", "r", "aus Meilenstein"], ["Verlängerung des Pilots klären", "9.11.", "y", "aus Mail vom 4.11."], ["Angebot Verlängerung vorbereiten", "13.11.", "g", "aus Mail vom 4.11."]] } },
+  { id: "rq", a: "y", t: "Anfrage: VIP-Lounge – Bestellung am Tisch", org: "Kunde P", ph: 0, why: "Anfrage unbeantwortet", next: "Erstgespräch vereinbaren", due: "Antwort bis 9.11. · in 3 Tagen", wait: "uns", since: "seit 1 Tag", mails: 1, req: true },
+  { id: "p1", a: "y", t: "Halbzeit-Gastro schneller", org: "Kunde A", ph: 2, why: "Rückmeldung ausstehend", next: "Rückmeldung zur Shortlist", due: "fällig 9.11. · in 3 Tagen", wait: "Kunde A", since: "seit 4 Tagen", mails: 0 },
+  { id: "p2", a: "g", t: "Einlass ohne Stau", org: "Kunde P", ph: 1, why: "im Plan", next: "Gespräch Sicherheitsdienst", due: "13.11. · in 7 Tagen", wait: "–", since: "", mails: 0 },
+  { id: "p4", a: "n", t: "Mehrweg-Pfand im Stadion", org: "Kunde P", ph: 5, why: "abgeschlossen", next: "New Spice approved", due: "", wait: "–", since: "", mails: 0 },
+];
+Object.assign(state, { exp: "p3" });
+const ausblick = `<span style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border:1px dashed var(--muted);color:var(--muted);border-radius:40px;padding:1px 8px;white-space:nowrap">Ausblick · später</span>`;
+function expRow(p) {
+  return `<tr><td colspan="5" style="padding:0 10px 12px 44px;border-bottom:1px solid var(--line)">
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.7fr);gap:16px;border:1px dashed var(--line);border-radius:12px;padding:10px 12px">
+      <div style="display:flex;flex-direction:column;gap:6px;min-width:0"><span class="row" style="gap:8px"><b style="color:var(--ink);font-size:12px">Aus dem Postfach</b>${ausblick}</span>
+        ${p.x.mails.map(([f, s, d, st]) => `<div style="display:flex;flex-direction:column;gap:2px;font-size:12px"><span class="row" style="gap:6px"><span style="color:var(--cA);font-size:13px" aria-label="geflaggt">⚑</span><b style="color:var(--ink)" class="trunc">„${s}“</b></span><span class="small">${f} · ${d} · <b>${st}</b></span></div>`).join("")}
+        <span class="small">Postfach projekt@… angedockt · 12 Mails zugeordnet</span></div>
+      <div style="display:flex;flex-direction:column;gap:4px;min-width:0"><span class="row" style="gap:8px"><b style="color:var(--ink);font-size:12px">To-dos</b><span class="small">automatisch erstellt, Fristen lösen die Ampel aus</span></span>
+        ${p.x.todos.map(([t, d, a, src]) => `<div class="row" style="gap:8px;font-size:12px"><span style="width:14px;height:14px;border:1.5px solid var(--muted);border-radius:4px;flex:none"></span><span class="trunc" style="color:var(--ink);flex:1">${t}</span><span class="small" style="white-space:nowrap">${src}</span>${amp(a, 16)}<span class="small" style="width:38px;text-align:right">${d}</span></div>`).join("")}</div>
+    </div></td></tr>`;
+}
+function projSection4() {
+  const cnt = (k) => P4.filter((p) => p.a === k).length;
+  return `<section style="display:flex;flex-direction:column;gap:10px">
+    <div class="row" style="justify-content:space-between"><span class="h2">Projekte & Anfragen</span>
+      <span class="row" style="gap:12px;font-size:12px">${["r", "y", "g"].map((k) => `<span class="row" style="gap:6px">${amp(k, 16)}<b style="color:var(--ink)">${cnt(k)}</b> ${AMP[k].s ?? AMP[k].l.toLowerCase()}</span>`).join("")}<span class="lnk">Alle Projekte →</span></span></div>
+    <table class="tbl"><thead><tr><th style="width:34px"></th><th>Projekt / Anfrage</th><th style="width:118px">Phase</th><th>Nächste Frist</th><th style="width:132px">Wartet auf</th></tr></thead><tbody>
+    ${P4.map((p) => `<tr data-exp="${p.id}" style="cursor:${p.x ? "pointer" : "default"}${p.a === "r" ? ";background:var(--sunk)" : ""}">
+      <td style="padding-right:0">${amp(p.a)}</td>
+      <td><div class="row" style="gap:6px"><span style="font-weight:700;color:var(--ink)" class="trunc">${p.t}</span>${p.mails ? `<span class="small" title="offene Mails" style="white-space:nowrap">✉ ${p.mails}</span>` : ""}${p.x ? `<span class="small">${state.exp === p.id ? "▴" : "▾"}</span>` : ""}</div><div class="small">${p.org} · <b>${p.why}</b></div></td>
+      <td>${p.req ? '<span class="bdg">Neue Anfrage</span>' : phaseBar(p.ph).replace(/width:16px/g, "width:12px")}</td>
+      <td><div style="color:var(--ink)">${p.next}</div><div class="small" ${p.a === "r" ? 'style="color:var(--ink);font-weight:700"' : ""}>${p.due}</div></td>
+      <td class="small">${p.wait === "–" ? "–" : `<b>${p.wait}</b><br>${p.since}`}</td></tr>${state.exp === p.id && p.x ? expRow(p) : ""}`).join("")}
+    </tbody></table></section>`;
+}
+function R4_phone() {
+  return `${phead()}${phoneMenu()}
+  <div class="content" style="left:0;top:56px;padding:14px 16px;gap:12px">
+    <h1 class="h1" style="font-size:26px">Projekte & Anfragen</h1>
+    <div class="row" style="gap:10px;font-size:12px">${["r", "y", "g"].map((k) => `<span class="row" style="gap:5px">${amp(k, 16)}<b style="color:var(--ink)">${P4.filter((p) => p.a === k).length}</b> ${AMP[k].s ?? AMP[k].l.toLowerCase()}</span>`).join("")}</div>
+    ${P4.slice(0, 4).map((p) => `<div style="display:grid;grid-template-columns:24px minmax(0,1fr);gap:10px;border-bottom:1px solid var(--line);padding-bottom:10px">${amp(p.a)}
+      <div style="min-width:0;display:flex;flex-direction:column;gap:2px"><b style="color:var(--ink)" class="trunc">${p.t}</b><span class="small">${p.org} · <b>${p.why}</b></span><span class="small">${p.next} · ${p.due}</span>${p.wait !== "–" ? `<span class="small">Wartet auf <b>${p.wait}</b> ${p.since}${p.mails ? ` · ✉ ${p.mails} offen` : ""}</span>` : ""}</div></div>`).join("")}
+    <div style="border:1px dashed var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:4px">${ausblick}<span class="small">Aus Mails erzeugte To-dos erscheinen hier je Projekt, mit Frist und Ampel.</span></div>
+  </div>`;
+}
+
+function R4_desk() { return R3_desk(true); }
 function R3_phone() {
   const tab = state.phTab;
   const body = tab === "feed"
@@ -566,6 +623,13 @@ function R3_phone() {
 
 /* ───── Texte ───── */
 const V = {
+  runde4: { name: "Runde 4", eyebrow: "Runde 4 · Ampel", title: "Fristen und Rückmeldungen auf einen Blick",
+    lead: "„Projekte & Anfragen“ bekommt eine Ampel je Zeile. Rot heißt: Frist überschritten oder Rückmeldung überfällig. Gelb heißt: Frist in den nächsten 3 Werktagen oder Rückmeldung länger offen. Grün heißt: im Plan. Oben steht die Summe, sortiert wird nach Dringlichkeit. Die aufgeklappte Zeile zeigt als Ausblick, wie das angedockte Postfach Mails flaggt, To-dos anlegt und Fristen einträgt.",
+    desk: R4_desk, phone: R4_phone, navLabel: "Ampel-Regeln (Vorschlag)", pageLabel: "Ausblick: Postfach angedockt",
+    facts: ["Ampel <b>Rot · Gelb · Grün</b> je Zeile", "Form + Zeichen + Text, nicht nur Farbe", "Sortiert nach Dringlichkeit", "Zeile anklicken: Postfach & To-dos"],
+    nav: ["<b>Rot (!, eckig):</b> Frist überschritten · Rückmeldung von uns länger als 2 Werktage offen · Anfrage länger als 2 Werktage unbeantwortet.", "<b>Gelb (◷):</b> Frist in ≤ 3 Werktagen · Rückmeldung vom Kunden seit mehr als 3 Tagen offen · Anfrage unbeantwortet.", "<b>Grün (✓):</b> keine Frist in Sicht, nichts offen. Abgeschlossene Projekte grau.", "Spalte „Wartet auf“ zeigt, wer am Zug ist (wir oder der Kunde) und seit wann. Die Schwellen legt ihr fest."],
+    page: ["Ein Postfach je Projekt (oder Weiterleitung an eine Projekt-Adresse) wird angedockt. Mails werden dem Projekt zugeordnet; unbeantwortete Kundenmails bekommen ein Fähnchen ⚑ und zählen als „✉ offen“.", "Aus Mails und Meilensteinen entstehen automatisch To-dos mit Frist, jeweils mit Herkunft („aus Mail vom 4.11.“). Ihr könnt sie bestätigen, ändern oder löschen.", "Jede Frist speist die Ampel. Bei Rot zusätzlich Hinweis im Cockpit, später auch per Mail oder Push.", "Gehört eigentlich in die Projektseite (Ansicht 19). Das Cockpit zeigt nur die Zusammenfassung."],
+    pro: ["Man sieht sofort, wo es brennt und wer am Zug ist.", "Fristen entstehen aus der echten Kommunikation statt aus Handpflege."], con: ["Rot, Ocker und Grün sind vorläufig aus den Clusterfarben geliehen. Für die App braucht es eigene Status-Tokens, damit sie nicht mit Clustern verwechselt werden.", "Postfach-Anbindung (z. B. Microsoft 365 / Gmail) braucht Datenschutz-Klärung: welche Mails, wer sieht sie, wie lange gespeichert."] },
   runde3: { name: "Runde 3", eyebrow: "Runde 3 · eure Wünsche", title: "Live-Feed, Startup-Funnel, Projekte",
     lead: "Rechts läuft ein Live-Feed aller Meldungen, chronologisch sortiert, mit Live-Zeichen und der Zeit der letzten Meldung. Jede Meldung hat schon einen automatisch vorgeschlagenen Trend, den ihr ändern könnt. Danach geht sie per Knopf in den Ticker. Der Limetten-Block zeigt den Startup-Funnel nach Herkunft: Agent, Redaktion oder Kunde. Darunter steht der Stand der Projekte und Anfragen.",
     desk: R3_desk, phone: R3_phone, navLabel: "Live-Feed rechts", pageLabel: "Funnel und Projekte",
@@ -681,7 +745,7 @@ function render() {
 }
 function route() {
   const h = location.hash.slice(1);
-  state.view = ["heute", "a", "b", "c", "vergleich", "vorschlag", "runde3"].includes(h) ? h : "heute";
+  state.view = ["heute", "a", "b", "c", "vergleich", "vorschlag", "runde3", "runde4"].includes(h) ? h : "heute";
   state.drop = false; state.menu = false;
   render();
 }
@@ -700,6 +764,8 @@ document.addEventListener("click", (e) => {
   if (pu) { const id = pu.dataset.push; if (state.pushed[id]) delete state.pushed[id]; else state.pushed[id] = "09:45"; render(); return; }
   const ln = e.target.closest("[data-lane]");
   if (ln) { state.lane = ln.dataset.lane; render(); return; }
+  const ex = e.target.closest("[data-exp]");
+  if (ex && P4.find((p) => p.id === ex.dataset.exp)?.x) { state.exp = state.exp === ex.dataset.exp ? null : ex.dataset.exp; render(); return; }
   const pt = e.target.closest("[data-phtab]");
   if (pt) { state.phTab = pt.dataset.phtab; render(); return; }
 });
