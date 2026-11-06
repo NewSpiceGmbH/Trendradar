@@ -88,7 +88,7 @@ Aufbau Desktop: Navigation links · Hauptbereich · **Live-Feed rechts (400 px)*
 |---|---|
 | Verein, Betreiber | Organisation (Paket Basic, 5 Sitzplätze, Laufzeit 12 Monate) + Eintrag in der Netzwerk-Datenbank, die Ansprechperson wird als Owner eingeladen (Magic-Link) |
 | Multiplikator | Eintrag + **Partner-Zugang** (Radar lesen, Kontakte empfehlen, keine Projekte) |
-| Investor | Eintrag + **Investor-Zugang** (Radar und öffentliche Angaben der Netzwerk-Datenbank, nichts Vertrauliches) |
+| Investor | Eintrag + **Investor-Zugang** (Radar und öffentlich markierte Einträge der Netzwerk-Datenbank, nichts Vertrauliches) |
 | Solution Provider | Eintrag in der Netzwerk-Datenbank (Funnel „Eingang“, Quelle „Bewerbung“), optional sofort Vorevaluierung durch den Agenten |
 
 - Partner- und Investor-Zugang brauchen **neue Rollen** und RLS-Regeln mit Tests.
@@ -100,25 +100,31 @@ Eine redaktionell kuratierte Datenbank für alle Mitglieder. Aufgebaut nach Roll
 - **Liste** `/admin/netzwerk`: Filter nach Rolle (mit Zahl), nach Angebot/Tags und Suche (Name, Angebot, Trendnummer). Spalten: Name (+ Quelle · zuletzt gepflegt), Rolle/Typ, Angebot-Tags, Trends (#), Status (Aufgenommen · In Prüfung · On hold · Archiviert), Beziehung (Kunde, Partner, Siegel „New Spice approved“ als Limetten-Chip). „+ Eintrag“ legt manuell an.
 - **Rechts eine Spalte „Netzwerk-Manager“** mit Vorschlägen: aufnehmen und klassifizieren, Tags zusammenlegen, Eintrag veraltet (z. B. neue Referenzen auf der Website), Verbindungen (z. B. Investor ↔ Startup). Je Vorschlag: Übernehmen · Anpassen · Verwerfen.
 - **Eintrag** `/admin/netzwerk/[id]`:
-  - Kopf: Rolle/Typ, Status, Siegel, Kurzbeschreibung, Klassifizierung als Tags (Rolle, Typ, Angebot, Trends, Reifegrad, Region, „+ Tag“), Sichtbarkeit „nur intern / im Radar sichtbar“, Knöpfe „Bearbeiten“ und „Mit Challenge abgleichen“.
+  - Kopf: Rolle/Typ, Status, Siegel, Kurzbeschreibung, Klassifizierung als Tags (Rolle, Typ, Angebot, Trends, Reifegrad, Region, „+ Tag“), Sichtbarkeit „nur intern / öffentlich“, Knöpfe „Bearbeiten“ und „Mit Challenge abgleichen“.
   - Reiter **Angebot & Referenzen**: Produkte/Leistungen je mit eigenen Tags und Trends, Referenzen mit Ort, Zeitraum und Ergebnis, Agent-Hinweis zu neu gefundenen Referenzen.
   - Reiter **Verbindungen**: Challenges (mit Passung und Status), Projekte, Bewerbungen mit gleichem Problem, Investoren, ähnliche Anbieter, Partner.
   - Reiter **Kontakt & Vertrauliches**: nur Redaktion, für Kunden erst nach Freigabe im Projekt. Ansprechperson, Preise, Pitchdeck, Notiz.
   - Reiter **Verlauf**.
   - Vereine, Betreiber und Investoren bekommen dieselbe Form, mit „Interessen“ statt „Angebot“.
+- **Sichtbarkeit für Kunden (entschieden):** Kunden sehen keine anderen Mitglieder, außer
+  1. der Eintrag ist von der Redaktion als **öffentlich** markiert (dann nur die öffentlichen Angaben), oder
+  2. die Redaktion hat das Mitglied **einem Projekt des Kunden zugewiesen** (dann nur innerhalb dieses Projekts, z. B. als Partner oder auf der Shortlist).
+
+  Das gilt für alle Rollen und muss in RLS verankert sein, nicht nur in der UI. Tests je Fall: nicht öffentlich und nicht zugewiesen → unsichtbar; öffentlich → nur öffentliche Felder; zugewiesen → nur im eigenen Projekt, nicht im Projekt eines fremden Kunden. Vertrauliches (Kontakt, Preise, Pitchdeck, Notizen) bleibt auch dann verborgen, bis es im Projekt freigegeben ist.
 - Bestehende Startups (`startups`) und Kandidaten aus Challenges werden zu Einträgen mit Rolle Solution Provider / Startup. Die Trennung öffentlicher und vertraulicher Angaben bleibt.
 
 **Bausteine für das Schema (Skizze, nicht final):**
 
 | Baustein | Inhalt | pflegt | sieht |
 |---|---|---|---|
-| Mitglied | Rolle, Typ, Region, Reifegrad, Status, Quelle, Sichtbarkeit | Redaktion (Agent schlägt vor) | Redaktion; öffentliche Angaben im Radar nach Freigabe |
+| Mitglied | Rolle, Typ, Region, Reifegrad, Status, Quelle, Sichtbarkeit (intern/öffentlich) | Redaktion (Agent schlägt vor) | Redaktion; Kunden nur, wenn öffentlich (öffentliche Felder) oder ihrem Projekt zugewiesen |
 | Angebot | Produkte/Leistungen eines Solution Providers mit Tags, Trends | Redaktion | wie Mitglied |
 | Interessen | Themen von Vereinen, Betreibern, Investoren | Redaktion | Redaktion |
 | Tags | gepflegte Liste, verknüpft mit Trends/Clustern | Redaktion | alle |
 | Referenz | Ort, Zeitraum, Ergebnis | Redaktion | Redaktion; öffentlich nach Freigabe |
 | Match | Challenge × Angebot, Passung %, Begründung, Status (Vorschlag/Shortlist/verworfen) | Agent schlägt vor, Redaktion entscheidet | Redaktion; Kunde sieht die Shortlist |
 | Verbindung | Mitglied × Mitglied mit Grund | Agent schlägt vor, Redaktion entscheidet | Redaktion |
+| Projekt-Zuweisung | Mitglied × Projekt mit Rolle im Projekt (Partner, Shortlist) | Redaktion | Redaktion; der Kunde des Projekts |
 
 ## 5. Challenges (`/admin/netzwerk/challenges/[id]`)
 
@@ -154,7 +160,7 @@ Noch nicht ausdrücklich freigegeben; vor der Umsetzung bei Finn bestätigen.
 
 1. Darf ein Solution Provider sein Profil nach Aufnahme selbst pflegen (mit Freigabe)?
 2. Start-Liste der Tags: aus den 44 Trends abgeleitet oder eigene Angebotskategorien?
-3. Sollen Kunden andere Mitglieder (z. B. Vereine) sehen, oder nur Solution Provider?
+3. ~~Sollen Kunden andere Mitglieder sehen?~~ Entschieden: nur öffentlich markierte oder ihrem Projekt zugewiesene (siehe Abschnitt 4).
 4. „Im Netzwerk sichtbar“: alle Solution Provider oder nur passende?
 5. Schwellen der Ampel (2 / 3 Werktage) bestätigen.
 6. Blinken: Gelb nur bis zum ersten Ansehen?
