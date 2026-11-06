@@ -89,7 +89,7 @@ Aufbau Desktop: Navigation links · Hauptbereich · **Live-Feed rechts (400 px)*
 | Verein, Betreiber | Organisation (Paket Basic, 5 Sitzplätze, Laufzeit 12 Monate) + Eintrag in der Netzwerk-Datenbank, die Ansprechperson wird als Owner eingeladen (Magic-Link) |
 | Multiplikator | Eintrag + **Partner-Zugang** (Radar lesen, Kontakte empfehlen, keine Projekte) |
 | Investor | Eintrag + **Investor-Zugang** (Radar und öffentlich markierte Einträge der Netzwerk-Datenbank, nichts Vertrauliches) |
-| Solution Provider | Eintrag in der Netzwerk-Datenbank (Funnel „Eingang“, Quelle „Bewerbung“), optional sofort Vorevaluierung durch den Agenten |
+| Solution Provider | Eintrag in der Netzwerk-Datenbank (Funnel „Eingang“, Quelle „Bewerbung“), optional sofort Vorevaluierung durch den Agenten; Zugang zum eigenen Profil **nur lesend** mit „Änderung anfragen“ |
 
 - Partner- und Investor-Zugang brauchen **neue Rollen** und RLS-Regeln mit Tests.
 
@@ -118,7 +118,8 @@ Eine redaktionell kuratierte Datenbank für alle Mitglieder. Aufgebaut nach Roll
 | Baustein | Inhalt | pflegt | sieht |
 |---|---|---|---|
 | Mitglied | Rolle, Typ, Region, Reifegrad, Status, Quelle, Sichtbarkeit (intern/öffentlich) | Redaktion (Agent schlägt vor) | Redaktion; Kunden nur, wenn öffentlich (öffentliche Felder) oder ihrem Projekt zugewiesen |
-| Angebot | Produkte/Leistungen eines Solution Providers mit Tags, Trends | Redaktion | wie Mitglied |
+| Angebot | Produkte/Leistungen eines Solution Providers mit Tags, Trends | nur Redaktion | wie Mitglied |
+| Änderungsanfrage | gewünschte Änderung am eigenen Profil (Feld, alt, neu, Kommentar) | Solution Provider stellt, Redaktion entscheidet | Redaktion; der anfragende Provider |
 | Interessen | Themen von Vereinen, Betreibern, Investoren | Redaktion | Redaktion |
 | Tags | gepflegte Liste, verknüpft mit Trends/Clustern | Redaktion | alle |
 | Referenz | Ort, Zeitraum, Ergebnis | Redaktion | Redaktion; öffentlich nach Freigabe |
@@ -128,9 +129,10 @@ Eine redaktionell kuratierte Datenbank für alle Mitglieder. Aufgebaut nach Roll
 
 ## 5. Challenges (`/admin/netzwerk/challenges/[id]`)
 
-- Kopf: Challenge, Kunde, Zeichen **„Vertraulich“**. Rechts die **Sichtbarkeit in drei Stufen**: Nur intern → Mit Kunde abstimmen → Im Netzwerk sichtbar.
-  - Jede eingereichte Challenge startet bei „nur intern“.
-  - „Freigabe bei Kunde anfragen“ setzt Stufe 2. Erst wenn der Kunde zustimmt, wird sie sichtbar, auf Wunsch ohne Kundenname.
+- Kopf: Challenge, Kunde, Zeichen **„Privat“** bzw. **„Veröffentlicht“**. Rechts der Schalter **Sichtbarkeit** mit zwei Zuständen (entschieden):
+  - **Privat** (Standard): Jede Challenge ist zunächst privat und nur für die Redaktion sichtbar.
+  - **Veröffentlicht**: Auf Wunsch (des Kunden) veröffentlicht die Redaktion die Challenge; dann sehen sie **alle Mitglieder** mit Zugang. Veröffentlichen geht nur über die Redaktion, mit Bestätigungsdialog, und lässt sich zurücknehmen.
+  - In RLS verankern, mit Tests: privat → nur Redaktion; veröffentlicht → alle Mitglieder; vertrauliche Felder (z. B. Budget, Gesprächsnotizen, Deep Dive) bleiben auch bei veröffentlichten Challenges intern.
 - Reiter **Problem & Deep Dive**: wie heute (Notion-Deep-Dive, Problem-Briefing, Suchhypothesen).
 - Reiter **Matching**:
   - Der Netzwerk-Manager gleicht **zuerst mit der eigenen Datenbank** ab: Angebot-Tags, Trends, Muss-Kriterien, Referenzen; Grundlage ist die Vorevaluierung mit 7 Kriterien.
@@ -158,12 +160,16 @@ Noch nicht ausdrücklich freigegeben; vor der Umsetzung bei Finn bestätigen.
 
 ## 8. Offene Fragen an Finn
 
-1. Darf ein Solution Provider sein Profil nach Aufnahme selbst pflegen (mit Freigabe)?
-2. Start-Liste der Tags: aus den 44 Trends abgeleitet oder eigene Angebotskategorien?
+1. ~~Profil selbst pflegen?~~ Entschieden: **nein**. Solution Provider sehen ihr Profil und können über „Änderung anfragen“ Änderungen vorschlagen. Die Anfrage landet im Eingang (Art „Änderung“) mit Vorher/Nachher; die Redaktion übernimmt, passt an oder lehnt ab.
+2. Tags (siehe Erklärung unten): offen.
 3. ~~Sollen Kunden andere Mitglieder sehen?~~ Entschieden: nur öffentlich markierte oder ihrem Projekt zugewiesene (siehe Abschnitt 4).
-4. „Im Netzwerk sichtbar“: alle Solution Provider oder nur passende?
+4. ~~Wer sieht veröffentlichte Challenges?~~ Entschieden: privat = nur Redaktion; veröffentlicht = alle Mitglieder (Abschnitt 5).
 5. Schwellen der Ampel (2 / 3 Werktage) bestätigen.
 6. Blinken: Gelb nur bis zum ersten Ansehen?
+
+**Zu Frage 2 (Tags):** Tags sind die Schlagworte, mit denen wir beschreiben, was ein Solution Provider anbietet (z. B. „Kassensysteme“, „Zapfsysteme“, „Crowd-Management“). Über sie findet der Netzwerk-Manager passende Anbieter für eine Challenge. Zum Start braucht es eine erste Liste. Zwei Wege:
+- **A · Trends als Tags:** Jeder der 44 Trends ist ein Tag (z. B. „#24 Mobile Order & In-Seat“). Einfach, aber grob: Ein Kassenanbieter und ein App-Anbieter landen beide unter #24.
+- **B · eigene Angebotskategorien (Vorschlag):** Eine Liste von etwa 30–40 Produktkategorien (z. B. Kassensysteme, Zapfsysteme, Bestell-Apps, Sensorik, Energiespeicher). Jede Kategorie wird mit den passenden Trends verknüpft. Genauer beim Matching; der Netzwerk-Manager kann die erste Liste aus den vorhandenen Startups vorschlagen, ihr gebt sie frei.
 
 ## 9. Vorgeschlagene Reihenfolge
 
