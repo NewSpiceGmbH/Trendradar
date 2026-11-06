@@ -138,6 +138,7 @@ Details in `docs/agents.md`. Unverhandelbare Regeln:
 
 ## Design
 
+- **Gestaltung neuer Ansichten:** erst als Entwurf in `design/` (Briefing und Arbeitsweise: `docs/ui-briefing.md`), in die App erst nach Freigabe.
 - **CI in `docs/ci.md`** – Tokens in `app/globals.css`. Nur Tokens verwenden (`bg-surface`, `text-muted`,
   `text-accent-ink` …), keine Hex-Werte in Komponenten.
 - Dunkel (Anthrazit) ist Standard, Hell (Creme) per `data-theme="light"`.
