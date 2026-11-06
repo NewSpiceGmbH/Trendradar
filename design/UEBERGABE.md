@@ -6,7 +6,7 @@ Dateien. Jede Änderung an Zugriffsregeln braucht einen Test in `tests/db/rls.te
 
 | Entwurf | Datei | Ansehen |
 |---|---|---|
-| Cockpit (Redaktion) | `design/14-cockpit/index.html` | https://claude.ai/artifact/VtXSpraD9kbZFkquZNA6ny – Reiter „Runde 3“ bis „Runde 6“ |
+| Cockpit (Redaktion) | `design/14-cockpit/index.html` | https://claude.ai/artifact/VtXSpraD9kbZFkquZNA6ny – maßgeblich: **Runde 5** (Gesamtbild: Funnel, Live-Feed, Projekte, Anfragen-Pop-up), Runde 3 (Live-Feed mit Trend-Auswahl im Detail), Runde 4 (Ampel-Regeln, Ausblick Postfach). Runde 6 (Bewerbungsseite) ist durch den Netzwerk-Eingang ersetzt; Runde 1–2 sind Vorstufen. |
 | Netzwerk: Eingang, Datenbank, Eintrag, Challenge | `design/18-netzwerk/index.html` | https://claude.ai/artifact/77Q4pKLFQKZsKtUhPbr2yb |
 | Dashboard 3D (Kundenportal) | `design/03-dashboard/index.html` | https://claude.ai/artifact/KLu2jthLTXfcQyby6mmWHr – Reiter „Vorschlag · Runde 2“ (noch nicht ausdrücklich freigegeben) |
 
@@ -59,6 +59,8 @@ Aufbau Desktop: Navigation links · Hauptbereich · **Live-Feed rechts (400 px)*
 - „Details“ zeigt Ziel, Ort, Zeitraum und Budget aus dem Anfrageformular.
 - **Annehmen → Projekt anlegen**: Status `scoping` (Problem Deep Dive), erste Frist „Erstgespräch vereinbaren“ (+7 Tage). Das Projekt erscheint mit „Neu“ oben in der Liste.
 - Ablehnen: kurze Begründung an den Kunden.
+
+**Handy (390 px):** oben ein Umschalter „Übersicht | Live · n“. Übersicht = Funnel (kompakt), Hinweis auf neue Anfragen, Projekte als Zeilen mit Ampel; Live = der Feed mit denselben Karten und Aktionen. Anfragen-Pop-up unten über die volle Breite. Navigation hinter „Menü“.
 
 **Ausblick, noch nicht umsetzen:** Postfach je Projekt andocken. Offene Kundenmails werden geflaggt, aus Mails und Meilensteinen entstehen To-dos mit Frist, und die Fristen speisen die Ampel. Vorher Datenschutz klären (welche Postfächer, wer sieht was, Speicherdauer). Gehört auf die Projektseite (Ansicht 19).
 
