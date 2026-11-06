@@ -173,7 +173,7 @@ export function supabaseRepo(db: SupabaseClient): AdminRepo {
       }));
       // Scouting-Angaben (Migration 0007) – fehlen die Spalten noch, bleibt es bei den Grunddaten
       const extra = await db.from("signals")
-        .select("id, kind, evidence, relevance, press_release, scouts ( name ), signal_media ( id, kind, url, embed_url, title, credit, license, rights, approved )")
+        .select("id, kind, evidence, relevance, press_release, suggested_trends, scouts ( name ), signal_media ( id, kind, url, embed_url, title, credit, license, rights, approved )")
         .in("id", list.map((s) => s.id));
       if (!extra.error) {
         const byId = new Map((extra.data as unknown as Record<string, unknown>[]).map((r) => [r.id as string, r]));
@@ -182,6 +182,7 @@ export function supabaseRepo(db: SupabaseClient): AdminRepo {
           if (!r) continue;
           Object.assign(s, {
             kind: r.kind, evidence: r.evidence, relevance: r.relevance, pressRelease: r.press_release, scoutName: r.scouts?.name ?? null,
+            suggestedTrends: (r.suggested_trends as number[] | null) ?? [],
             media: (r.signal_media ?? []).map((m) => ({
               id: m.id, kind: m.kind, url: m.url, embedUrl: m.embed_url, title: m.title, credit: m.credit, license: m.license, rights: m.rights, approved: m.approved,
             })),

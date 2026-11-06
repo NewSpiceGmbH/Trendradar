@@ -187,3 +187,21 @@ Alle offenen Fragen sind damit beantwortet.
 5. Challenge: Sichtbarkeitsstufen und Matching gegen die Datenbank.
 6. Agent Netzwerk-Manager (Clustern, Matching, Verbindungen) über die Vorschlagsliste.
 7. Dashboard-Vorschlag nach Bestätigung.
+
+---
+
+## Umsetzungsstand (in `dev`)
+
+- [x] **Schritt 1** – Tokens `--ok/--warn/--alert` (+ `-fg`, beide Modi ≥ 4,5:1), Navigation in Gruppen mit „Menü“ am Handy,
+  seitliches Überlaufen im Backend am Handy behoben.
+- [x] **Schritt 2** – Cockpit: Netzwerk-Funnel (Limetten-Block, Quelle Agent/Redaktion/Kunde, Kunde schraffiert), Projekte mit
+  Ampel (3 Werktage, `app_settings.response_workdays`; Gelb blinkt bis `projects.editor_seen_at`), Anfragen als Pop-up
+  (Annehmen → Problem Deep Dive + Frist „Erstgespräch vereinbaren“ in 7 Tagen; Ablehnen mit Begründung an den Kunden),
+  Live-Feed rechts mit „In den Ticker“, „Zurückziehen“, ✕. Migration `0013_cockpit.sql`.
+  Noch ohne Prozentwerte (Trend-Vorschläge kommen vom Scout, Treffsicherheit folgt mit dem Analyst-Agenten).
+  Navigation heißt bereits „Netzwerk · Challenges / Netzwerk-Datenbank“; „Eingang“ und „Netzwerk-Manager“ folgen mit Schritt 3–6.
+- [ ] Schritt 3 – Netzwerk-Datenbank
+- [ ] Schritt 4 – Bewerbungen und Eingang (neue Rollen Partner/Investor)
+- [ ] Schritt 5 – Challenge: Sichtbarkeit und Matching
+- [ ] Schritt 6 – Agent Netzwerk-Manager
+- [ ] Schritt 7 – Dashboard-Vorschlag (nach Bestätigung)

@@ -34,6 +34,9 @@
 
   --cA: #c2402a; --cB: #4d9cd0; --cC: #9d6500; --cD: #2ca8a0; --cE: #7b57b9; --cF: #66a758; --cG: #ca6db8;
   --cA-fg: #fcf4e6; --cB-fg: #1d1d1d; --cC-fg: #fcf4e6; --cD-fg: #1d1d1d; --cE-fg: #fcf4e6; --cF-fg: #1d1d1d; --cG-fg: #1d1d1d;
+  /* Status (Ampel): je ≥ 4,5:1 zu Grund und Karte, Schrift -fg ≥ 4,5:1; nie allein – Form und Text tragen mit */
+  --ok: #5cb86a; --warn: #e0a830; --alert: #ef6a4f;
+  --ok-fg: #1d1d1d; --warn-fg: #1d1d1d; --alert-fg: #1d1d1d;
   color-scheme: dark;
 }
 
@@ -63,6 +66,8 @@
 
   --cA: #b6341f; --cB: #3e8cc9; --cC: #8f5d04; --cD: #009b92; --cE: #6a45a6; --cF: #549a44; --cG: #c562b2;
   --cA-fg: #fcf4e6; --cB-fg: #1d1d1d; --cC-fg: #fcf4e6; --cD-fg: #1d1d1d; --cE-fg: #fcf4e6; --cF-fg: #1d1d1d; --cG-fg: #1d1d1d;
+  --ok: #2e7d3a; --warn: #8a5a00; --alert: #b3321e;
+  --ok-fg: #fcf4e6; --warn-fg: #fcf4e6; --alert-fg: #fcf4e6;
   color-scheme: light;
 }
 
@@ -77,6 +82,12 @@
   --color-accent: var(--accent);
   --color-on-accent: var(--on-accent);
   --color-accent-ink: var(--accent-ink);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-alert: var(--alert);
+  --color-ok-fg: var(--ok-fg);
+  --color-warn-fg: var(--warn-fg);
+  --color-alert-fg: var(--alert-fg);
   --color-image-bg: var(--image-bg);
   --color-logo: var(--logo);
   --color-pitch: var(--pitch);
@@ -269,6 +280,17 @@ button.stadium-anchor { pointer-events: auto; }
 @keyframes stadium-ticker-new { from { opacity: 0; transform: translateY(16px) scale(0.96); } to { opacity: 1; transform: none; } }
 .stadium-ticker-new { animation: stadium-ticker-new 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
 @media (prefers-reduced-motion: reduce) { .stadium-fade, .stadium-live, .stadium-ticker-in, .stadium-ping, .stadium-ticker-new { animation: none; } }
+
+/* Netzwerk-Funnel: Anteil „Kunde/Bewerbung“ schraffiert, damit er nicht nur an der Tönung erkennbar ist */
+.funnel-hatch { background: repeating-linear-gradient(135deg, var(--on-accent) 0 2px, transparent 2px 6px); }
+
+/* Ampel im Cockpit: Rot blinkt schnell, Gelb langsam (bis zum ersten Ansehen); bei reduzierter Bewegung fester Ring */
+@keyframes signal-blink { 50% { opacity: 0.35; } }
+.signal-fast { animation: signal-blink 1s steps(2, jump-none) infinite; }
+.signal-slow { animation: signal-blink 2s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .signal-fast, .signal-slow { animation: none; box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 45%, transparent); }
+}
 
 /* Redaktions-Backend: dezenter Verlauf, damit Glasflächen Tiefe haben (nur Tokens) */
 .admin-backdrop {

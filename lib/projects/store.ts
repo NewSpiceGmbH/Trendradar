@@ -9,7 +9,7 @@ import { fixtureProjects } from "./fixture";
 import {
   BUCKET, inviteOpen, safeFileName,
   type CustomerStatus, type Invitation, type Member, type Org, type OrgInput, type Project, type ProjectDetail, type ProjectDocument,
-  type ProjectPatch, type ProjectRequest, type ShortlistEntry, type ShortlistPatch,
+  type ProjectOverview, type ProjectPatch, type ProjectRequest, type ShortlistEntry, type ShortlistPatch,
 } from "./types";
 
 /** Daten fehlen, weil Migration 0010 noch nicht angewendet ist */
@@ -34,6 +34,12 @@ export interface ProjectsRepo {
   removeMember(orgId: string, userId: string): Promise<void>;
   // Projekte
   projects(): Promise<Project[]>;
+  /** alle Projekte mit Meilensteinen und letzter Nachricht je Seite (Cockpit, Redaktion) */
+  overview(): Promise<ProjectOverview[]>;
+  /** Redaktion hat das Projekt angesehen (Gelb hört auf zu blinken) */
+  markSeen(id: string): Promise<void>;
+  /** Schwelle der Ampel in Werktagen (Standard 3) */
+  responseWorkdays(): Promise<number>;
   project(id: string): Promise<ProjectDetail | null>;
   requestProject(orgId: string, r: ProjectRequest, userId: string): Promise<string>;
   saveProject(id: string, p: ProjectPatch): Promise<void>;
@@ -84,7 +90,7 @@ const mapProject = (r: Row): Project => ({
   timeframe: r.timeframe as string | null, budget: r.budget as string | null, status: r.status as Project["status"],
   outcome: r.outcome as Project["outcome"], outcomeNote: r.outcome_note as string | null, challengeId: r.challenge_id as string | null,
   leadId: r.lead_id as string | null, requestedBy: r.requested_by as string | null, completedAt: r.completed_at as string | null,
-  createdAt: r.created_at as string, updatedAt: r.updated_at as string,
+  createdAt: r.created_at as string, updatedAt: r.updated_at as string, editorSeenAt: (r.editor_seen_at as string | null) ?? null,
 });
 
 const mapOrg = (r: Row): Org => ({
@@ -137,6 +143,53 @@ export function supabaseProjects(db: SupabaseClient, viewer: Viewer): ProjectsRe
 
     async projects() {
       return ok(await db.from("projects").select("*, organizations ( name )").order("updated_at", { ascending: false }), "projects").map(mapProject);
+    },
+    async overview() {
+      const projects = ok(await db.from("projects").select("*, organizations ( name )").order("updated_at", { ascending: false }), "projects").map(mapProject);
+      if (!projects.length) return [];
+      const ids = projects.map((p) => p.id);
+      const orgIds = [...new Set(projects.map((p) => p.orgId))];
+      const [ms, ups, mem, sl] = await Promise.all([
+        db.from("project_milestones").select("project_id, title, due_date, done_at").in("project_id", ids),
+        db.from("project_updates").select("project_id, author_id, created_at").in("project_id", ids).eq("internal", false),
+        db.from("memberships").select("org_id, user_id").in("org_id", orgIds),
+        db.from("project_startups").select("project_id, startup_id, customer_status, shared").in("project_id", ids),
+      ]);
+      // Kunde = Mitglied der Organisation des Projekts; alles andere kommt von New Spice
+      const members = new Set((ok(mem, "memberships") as Row[]).map((m) => `${m.org_id}:${m.user_id}`));
+      const orgOf = new Map(projects.map((p) => [p.id, p.orgId]));
+      const last = new Map<string, { c: string | null; t: string | null }>();
+      for (const u of ok(ups, "project_updates") as Row[]) {
+        const pid = u.project_id as string;
+        const e = last.get(pid) ?? { c: null, t: null };
+        const fromCustomer = members.has(`${orgOf.get(pid)}:${u.author_id}`);
+        const at = u.created_at as string;
+        if (fromCustomer) { if (!e.c || at > e.c) e.c = at; } else if (!e.t || at > e.t) e.t = at;
+        last.set(pid, e);
+      }
+      const msRows = ok(ms, "project_milestones") as Row[];
+      const slRows = ok(sl, "project_startups") as Row[];
+      return projects.map((project) => ({
+        project,
+        milestones: msRows.filter((m) => m.project_id === project.id).map((m) => ({ title: m.title as string, dueDate: m.due_date as string | null, doneAt: m.done_at as string | null })),
+        lastCustomerAt: last.get(project.id)?.c ?? null,
+        lastTeamAt: last.get(project.id)?.t ?? null,
+        shortlist: (() => {
+          const mine = slRows.filter((r) => r.project_id === project.id);
+          const sel = mine.filter((r) => r.customer_status === "selected");
+          return { total: mine.length, open: mine.filter((r) => r.shared && r.customer_status === "open").length, selected: sel.length,
+            startupIds: mine.map((r) => r.startup_id as string), selectedIds: sel.map((r) => r.startup_id as string) };
+        })(),
+      }));
+    },
+    async markSeen(id) {
+      const { error } = await db.from("projects").update({ editor_seen_at: new Date().toISOString() }).eq("id", id);
+      // vor Migration 0013 fehlt die Spalte: dann blinkt Gelb eben weiter
+      if (error && !/editor_seen_at/.test(error.message)) fail(error, "projects");
+    },
+    async responseWorkdays() {
+      const { data, error } = await db.from("app_settings").select("response_workdays").maybeSingle();
+      return error || !data ? 3 : (data.response_workdays as number);
     },
     async project(id) {
       const p = ok(await db.from("projects").select("*, organizations ( name )").eq("id", id).maybeSingle(), "projects");

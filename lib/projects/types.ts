@@ -64,6 +64,18 @@ export interface Project {
   completedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  /** zuletzt von der Redaktion angesehen (Migration 0013; vorher null) */
+  editorSeenAt?: string | null;
+}
+
+/** Projekt mit allem, was die Ampel im Cockpit braucht */
+export interface ProjectOverview {
+  project: Project;
+  milestones: { title: string; dueDate: string | null; doneAt: string | null }[];
+  lastCustomerAt: string | null;
+  lastTeamAt: string | null;
+  /** Shortlist: Einträge gesamt, freigegeben und noch ohne Rückmeldung, ausgewählt (umgesetzt) */
+  shortlist: { total: number; open: number; selected: number; startupIds: string[]; selectedIds: string[] };
 }
 export type ProjectRequest = Pick<Project, "title" | "request" | "goal" | "venue" | "timeframe" | "budget">;
 export type ProjectPatch = Partial<Pick<Project, "title" | "request" | "goal" | "venue" | "timeframe" | "budget" | "status" | "challengeId" | "leadId">>;

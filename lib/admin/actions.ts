@@ -81,6 +81,19 @@ export async function publishSignal(id: string, publish: boolean): Promise<Actio
   });
 }
 
+/** Live-Feed im Cockpit: Meldung mit dem gewählten Trend in den Ticker */
+export async function publishToTicker(id: string, trendId: number): Promise<ActionResult> {
+  return run(async () => {
+    const v = await guard();
+    const repo = await getAdminRepo();
+    await repo.assignSignal(id, trendId);
+    await repo.publishSignal(id, true, v.id);
+    revalidatePath("/radar");
+    revalidatePath("/news");
+    return { ok: true, message: "Im Ticker." };
+  });
+}
+
 export async function dismissSignal(id: string): Promise<ActionResult> {
   return run(async () => {
     await (await getAdminRepo()).dismissSignal(id);

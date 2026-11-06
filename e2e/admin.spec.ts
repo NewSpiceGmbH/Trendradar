@@ -34,15 +34,29 @@ test.describe("Redaktion", () => {
     await page.waitForLoadState("networkidle"); // Stadion (WebGL) erst fertig laden lassen
     await page.getByRole("link", { name: "Redaktion", exact: true }).click();
     await expect(page.getByRole("heading", { name: "Cockpit" })).toBeVisible();
-    // Lagebild: drei Bereiche mit ihren Meldungen
-    for (const lane of ["Sport & Hospitality", "Startups & Technologie", "Cross-Industry"]) {
-      await expect(page.getByRole("heading", { name: lane, exact: true })).toBeVisible();
-    }
-    await expect(page.getByRole("link", { name: /Flughafen testet Boarding/ })).toBeVisible();
-    await page.goto("/admin/ticker?lane=startup_tech");
-    await expect(page.getByText(/Münchner Startup/)).toBeVisible();
-    await expect(page.getByText(/Flughafen testet Boarding/)).toHaveCount(0);
-    await page.goto("/admin");
+    // Netzwerk-Funnel (der Limetten-Block) und Projekte mit Ampel
+    await expect(page.getByRole("heading", { name: /Netzwerk-Funnel/ })).toBeVisible();
+    const red = page.getByRole("listitem").filter({ hasText: "Nachhaltige Fan-Anreise" });
+    await expect(red.getByRole("img", { name: /Ampel Rot: Zwischenauswertung überfällig/ })).toBeVisible();
+    await red.getByRole("button").first().click();
+    await expect(red.getByRole("link", { name: "Projekt öffnen" })).toBeVisible();
+
+    // Live-Feed: nach Bereich filtern, mit Trend in den Ticker
+    const feed = page.getByRole("region", { name: "Live-Feed" });
+    await feed.getByRole("button", { name: "Startups", exact: true }).click();
+    await expect(feed.getByText(/Münchner Startup/)).toBeVisible();
+    await expect(feed.getByText(/Flughafen testet Boarding/)).toHaveCount(0);
+    await feed.getByRole("button", { name: "Alle", exact: true }).click();
+    const item = feed.getByRole("listitem").filter({ hasText: "Flughafen testet Boarding" });
+    await expect(item.getByRole("button", { name: /#18/ })).toBeVisible();
+    await item.getByRole("button", { name: "In den Ticker" }).click();
+    await expect(item.getByText(/Im Ticker seit/)).toBeVisible();
+
+    // Anfrage als Pop-up annehmen → wird Projekt (Problem Deep Dive), erscheint mit „Neu“ oben
+    const dock = page.getByRole("dialog", { name: "Neue Anfrage" });
+    await expect(dock.getByText(/Wegeleitung am Spieltag/)).toBeVisible();
+    await dock.getByRole("button", { name: /Annehmen/ }).click();
+    await expect(page.getByRole("listitem").filter({ hasText: "Wegeleitung am Spieltag" }).getByText("Neu", { exact: true })).toBeVisible();
 
     await page.getByRole("navigation", { name: "Redaktion" }).getByRole("link", { name: /Review-Queue/ }).click();
     await expect(page.getByText("Scouting → Aufwärmen")).toBeVisible();

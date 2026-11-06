@@ -55,14 +55,18 @@ function init(): Store {
     orgs,
     members: new Map([["a", [m("owner", "owner"), m("member", "member")]], ["p", [m("premium", "member")]], ["x", [m("abgelaufen", "owner")]]]),
     invitations: new Map(),
-    projects: [project],
-    milestones: new Map([["pr-1", [
+    projects: [project, ...moreProjects()],
+    milestones: new Map([["pr-2", [
+      { id: "ms-21", title: "Zwischenauswertung", dueDate: day(-3), doneAt: null, position: 0 },
+    ]], ["pr-3", [
+      { id: "ms-31", title: "Erstgespräche", dueDate: day(20), doneAt: null, position: 0 },
+    ]], ["pr-1", [
       { id: "ms-1", title: "Anforderungen geklärt", dueDate: day(-10), doneAt: ago(200), position: 0 },
       { id: "ms-2", title: "Erstgespräche mit der Shortlist", dueDate: day(10), doneAt: null, position: 1 },
       { id: "ms-3", title: "Pilot an 4 Ständen", dueDate: day(60), doneAt: null, position: 2 },
     ]]]),
     updates: new Map([["pr-1", [
-      { id: "up-1", body: "Die Shortlist steht. Zwei Startups mit Kosten, eines noch in Prüfung.", internal: false, authorId: "fixture-redaktion", authorName: "New Spice", createdAt: ago(5) },
+      { id: "up-1", body: "Die Shortlist steht. Zwei Startups mit Kosten, eines noch in Prüfung.", internal: false, authorId: "fixture-redaktion", authorName: "New Spice", createdAt: ago(150) },
       { id: "up-2", body: "Intern: Bei QueueLess Rabatt für Referenzkunden verhandeln.", internal: true, authorId: "fixture-redaktion", authorName: "Redaktion (Demo)", createdAt: ago(4) },
     ]]]),
     shortlist: new Map([["pr-1", [
@@ -76,6 +80,28 @@ function init(): Store {
     ]]]),
     catalog, seq: 10,
   };
+}
+
+/** Weitere Beispiele fürs Cockpit: eine überfällige Frist (Rot), im Plan (Grün), abgeschlossen, zwei offene Anfragen */
+function moreProjects(): Project[] {
+  const p = (id: string, orgId: string, orgName: string, title: string, status: Project["status"], hoursAgo: number, extra: Partial<Project> = {}): Project => ({
+    id, orgId, orgName, title: `${B}${title}`, status, request: "Beispielanfrage für den Testmodus.", goal: "", venue: null, timeframe: null, budget: null,
+    outcome: null, outcomeNote: null, challengeId: null, leadId: null, requestedBy: null, completedAt: null,
+    createdAt: ago(hoursAgo + 200), updatedAt: ago(hoursAgo), editorSeenAt: null, ...extra,
+  });
+  return [
+    p("pr-2", "a", "Kunde A", "Nachhaltige Fan-Anreise", "pilot", 30, { editorSeenAt: ago(20) }),
+    p("pr-3", "p", "Kunde P", "Einlass ohne Stau", "shortlist", 10, { editorSeenAt: ago(5) }),
+    p("pr-4", "p", "Kunde P", "Mehrweg-Pfand im Stadion", "completed", 400, { outcome: "success", outcomeNote: "Rücklaufquote 96 %.", completedAt: ago(400) }),
+    p("req-1", "p", "Kunde P", "VIP-Lounge: Bestellung am Tisch", "requested", 20, {
+      request: "In der Loge sollen Gäste per Tablet bestellen und am Platz bedient werden.", goal: "Mehr Umsatz je Loge, weniger Laufwege für das Personal.",
+      venue: "Arena Süd, 24 Logen", timeframe: "ab Saison 2027/28", budget: "offen", requestedBy: "fixture-premium",
+    }),
+    p("req-2", "a", "Kunde A", "Wegeleitung am Spieltag", "requested", 50, {
+      request: "Gäste finden ihren Block und die Stände schlecht, vor allem Auswärtsfans.", goal: "Weniger Fragen an die Ordner, schnellere Wege.",
+      venue: "Arena Nord", timeframe: "Rückrunde", budget: "bis 20.000 €", requestedBy: "fixture-owner",
+    }),
+  ];
 }
 
 const store = () => (g.__trendradarProjects ??= init());
@@ -133,6 +159,28 @@ export function fixtureProjects(viewer: Viewer): ProjectsRepo {
     async removeMember(orgId, userId) { mustEditor(); store().members.set(orgId, (store().members.get(orgId) ?? []).filter((m) => m.userId !== userId)); },
 
     async projects() { return structuredClone(store().projects.filter(visible).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))); },
+    async overview() {
+      mustEditor();
+      const s = store();
+      return structuredClone(s.projects.map((project) => {
+        const ups = (s.updates.get(project.id) ?? []).filter((u) => !u.internal);
+        const team = ups.filter((u) => u.authorId === "fixture-redaktion" || u.authorId === viewer.id).map((u) => u.createdAt).sort().at(-1) ?? null;
+        const cust = ups.filter((u) => u.authorId !== "fixture-redaktion" && u.authorId !== viewer.id).map((u) => u.createdAt).sort().at(-1) ?? null;
+        return {
+          project,
+          milestones: (s.milestones.get(project.id) ?? []).map((m) => ({ title: m.title, dueDate: m.dueDate, doneAt: m.doneAt })),
+          lastCustomerAt: cust, lastTeamAt: team,
+          shortlist: (() => {
+            const mine = s.shortlist.get(project.id) ?? [];
+            const sel = mine.filter((e) => e.customerStatus === "selected");
+            return { total: mine.length, open: mine.filter((e) => e.shared && e.customerStatus === "open").length, selected: sel.length,
+              startupIds: mine.map((e) => e.startupId), selectedIds: sel.map((e) => e.startupId) };
+          })(),
+        };
+      }));
+    },
+    async markSeen(id) { mustEditor(); const p = find(id); p.editorSeenAt = new Date().toISOString(); },
+    async responseWorkdays() { return 3; },
     async project(id) {
       const p = store().projects.find((x) => x.id === id);
       if (!p || !visible(p)) return null;

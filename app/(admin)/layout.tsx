@@ -15,23 +15,23 @@ import { getVentureRepo } from "@/lib/venture/store";
 /** Redaktions-Backend: nur für platform_role admin/editor. Maßgeblich bleibt RLS in der Datenbank. */
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="admin-backdrop flex min-h-dvh flex-col">
+    <div className="admin-backdrop flex min-h-dvh flex-col overflow-x-clip">
       <header className="glass sticky top-0 z-20 !border-x-0 !border-t-0 !shadow-none">
-        <div className="mx-auto flex max-w-[1440px] items-center gap-6 px-4 py-3 sm:px-8">
+        <div className="mx-auto flex max-w-[1600px] items-center gap-3 px-4 py-3 sm:gap-6 sm:px-8">
           <Link href="/admin" className="flex items-center gap-3 text-ink no-underline" aria-label="New Spice Redaktion – Cockpit">
-            <Logo className="h-7 w-auto" />
-            <span className="text-sm text-muted">Redaktion</span>
+            <Logo className="h-6 w-auto sm:h-7" />
+            <span className="hidden text-sm text-muted sm:inline">Redaktion</span>
           </Link>
-          <Link href="/radar" className="text-sm text-text no-underline hover:text-ink">Zum Dashboard →</Link>
+          <Link href="/radar" className="text-sm text-text no-underline hover:text-ink"><span className="hidden sm:inline">Zum </span>Dashboard →</Link>
           <div className="ml-auto flex items-center gap-3">
-            <ThemeToggle />
+            <span className="hidden sm:contents"><ThemeToggle /></span>
             <Suspense fallback={<span className="text-sm text-muted">…</span>}>
               <UserMenu />
             </Suspense>
           </div>
         </div>
       </header>
-      <Suspense fallback={<p className="mx-auto max-w-[1440px] px-8 py-16 text-muted">Redaktion wird geladen …</p>}>
+      <Suspense fallback={<p className="mx-auto max-w-[1600px] px-8 py-16 text-muted">Redaktion wird geladen …</p>}>
         <Shell>{children}</Shell>
       </Suspense>
     </div>
@@ -67,26 +67,34 @@ async function Shell({ children }: { children: ReactNode }) {
     else throw e;
   }
 
-  const items = [
-    { href: "/admin", label: "Cockpit" },
-    { href: "/admin/review", label: "Review-Queue", count: pending },
-    { href: "/admin/ticker", label: "Liveticker", count: fresh },
-    { href: "/admin/trends", label: "Trends" },
-    { href: "/admin/datenbank", label: "Trenddatenbank" },
-    { href: "/admin/quellenverzeichnis", label: "Quellenverzeichnis" },
-    { href: "/admin/scouting", label: "Scouting" },
-    { href: "/admin/venture", label: "Venture Clienting", count: openCandidates },
-    { href: "/admin/startups", label: "Startup-Datenbank" },
-    { href: "/admin/projekte", label: "Projekte", count: newRequests },
-    { href: "/admin/kunden", label: "Kunden" },
-    { href: "/admin/agents", label: "Agenten" },
-    ...(viewer.platformRole === "admin" ? [{ href: "/admin/team", label: "Team" }] : []),
+  const groups = [
+    { label: null, items: [{ href: "/admin", label: "Cockpit" }] },
+    { label: "Inhalte", items: [
+      { href: "/admin/review", label: "Review-Queue", count: pending },
+      { href: "/admin/ticker", label: "Liveticker", count: fresh },
+      { href: "/admin/trends", label: "Trends" },
+      { href: "/admin/datenbank", label: "Trenddatenbank" },
+      { href: "/admin/quellenverzeichnis", label: "Quellenverzeichnis" },
+    ] },
+    { label: "Netzwerk", items: [
+      { href: "/admin/venture", label: "Challenges", count: openCandidates },
+      { href: "/admin/startups", label: "Netzwerk-Datenbank" },
+    ] },
+    { label: "Agenten", items: [
+      { href: "/admin/scouting", label: "Scouting" },
+      { href: "/admin/agents", label: "Agenten-Protokoll" },
+    ] },
+    { label: "Kunden", items: [
+      { href: "/admin/projekte", label: "Projekte", count: newRequests },
+      { href: "/admin/kunden", label: "Kunden" },
+      ...(viewer.platformRole === "admin" ? [{ href: "/admin/team", label: "Team" }] : []),
+    ] },
   ];
 
   return (
-    <div className="mx-auto grid w-full max-w-[1440px] flex-1 gap-8 px-4 py-8 sm:px-8 lg:grid-cols-[220px_minmax(0,1fr)]">
+    <div className="mx-auto grid w-full min-w-0 max-w-[1600px] flex-1 gap-6 px-4 py-6 sm:px-8 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-8 lg:py-8">
       <aside className="lg:sticky lg:top-24 lg:self-start">
-        <AdminNav items={items} />
+        <AdminNav groups={groups} />
       </aside>
       <main className="flex min-w-0 flex-col gap-8">{migration ? <MigrationNotice detail={migration} /> : children}</main>
     </div>

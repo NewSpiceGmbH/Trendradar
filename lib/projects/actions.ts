@@ -199,3 +199,45 @@ export async function documentUrl(id: string): Promise<ActionResult & { url?: st
     return url ? { ok: true, url } : { ok: false, error: "Im Testmodus gibt es keine Dateien – nur die Einträge." };
   } catch (e) { return fail(e); }
 }
+
+// ───────────────────────── Cockpit ─────────────────────────
+
+/** Redaktion hat das Projekt angesehen (aufgeklappt oder geöffnet): Gelb blinkt danach nicht mehr */
+export async function markProjectSeen(id: string): Promise<ActionResult> {
+  try { await (await getProjectsRepo(await editor())).markSeen(id); return { ok: true }; } catch (e) { return fail(e); }
+}
+
+/** Anfrage annehmen: Projekt startet im Problem Deep Dive, erste Frist „Erstgespräch vereinbaren“ in 7 Tagen */
+export async function acceptRequest(id: string): Promise<ActionResult> {
+  try {
+    const v = await editor();
+    const repo = await getProjectsRepo(v);
+    const d = await repo.project(id);
+    if (!d) return { ok: false, error: "Anfrage nicht gefunden." };
+    if (d.project.status !== "requested") return { ok: false, error: "Diese Anfrage ist schon bearbeitet." };
+    await repo.saveProject(id, { status: "scoping", leadId: d.project.leadId ?? v.id });
+    await repo.addMilestone(id, "Erstgespräch vereinbaren", inDays(7));
+    await repo.addUpdate(id, "Danke für Ihre Anfrage – wir sind dabei. Als Nächstes vereinbaren wir ein Erstgespräch, um das Problem genau zu verstehen (Problem Deep Dive).", false, v.id);
+    refresh();
+    return { ok: true, message: `„${d.project.title}“ ist jetzt ein Projekt.` };
+  } catch (e) { return fail(e); }
+}
+
+/** Anfrage ablehnen: kurze Begründung geht als Nachricht an den Kunden */
+export async function declineRequest(id: string, reason: string): Promise<ActionResult> {
+  try {
+    const v = await editor();
+    if (reason.trim().length < 10) return { ok: false, error: "Bitte kurz begründen – der Kunde bekommt die Begründung." };
+    const repo = await getProjectsRepo(v);
+    const d = await repo.project(id);
+    if (!d || d.project.status !== "requested") return { ok: false, error: "Diese Anfrage ist schon bearbeitet." };
+    await repo.addUpdate(id, reason.trim(), false, v.id);
+    await repo.saveProject(id, { status: "cancelled" });
+    refresh();
+    return { ok: true, message: "Abgelehnt. Der Kunde sieht die Begründung im Projekt." };
+  } catch (e) { return fail(e); }
+}
+
+function inDays(n: number) {
+  return new Date(Date.now() + n * 86_400_000).toISOString().slice(0, 10);
+}
