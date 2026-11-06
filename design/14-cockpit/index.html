@@ -159,6 +159,13 @@ main { max-width: 1440px; margin: 0 auto; padding-left: max(16px, env(safe-area-
 .ping::after { content: ""; position: absolute; inset: 0; border-radius: inherit; border: 2px solid var(--ink); animation: ping 1.8s ease-out infinite; }
 @keyframes ping { from { transform: scale(1); opacity: .9; } to { transform: scale(1.6); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .ping::after { animation: none; } }
+.blink-r::after, .blink-y::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; pointer-events: none; }
+.blink-r::after { border-radius: 9px; border: 2px solid var(--cA); animation: blink 1.1s ease-in-out infinite; }
+.blink-y::after { border: 2px solid var(--cC); animation: blink 2.2s ease-in-out infinite; }
+@keyframes blink { 0%, 100% { opacity: 0; transform: scale(.85); } 50% { opacity: 1; transform: scale(1.1); } }
+.toast-in { animation: tin .35s ease-out; }
+@keyframes tin { from { transform: translateY(16px); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .blink-r::after, .blink-y::after { animation: none; opacity: 1; } .toast-in { animation: none; } }
 .drop { position: absolute; z-index: 5; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--glass-shadow); padding: 8px; width: 260px; display: flex; flex-direction: column; gap: 2px; }
 </style>
 
@@ -174,6 +181,7 @@ main { max-width: 1440px; margin: 0 auto; padding-left: max(16px, env(safe-area-
       <a class="tab" href="#vorschlag" data-v="vorschlag">Vorschlag · Runde 2</a>
       <a class="tab" href="#runde3" data-v="runde3">Runde 3 · Feed &amp; Funnel</a>
       <a class="tab" href="#runde4" data-v="runde4">Runde 4 · Ampel</a>
+      <a class="tab" href="#runde5" data-v="runde5">Runde 5 · Anfragen &amp; Projekte</a>
     </nav>
     <div class="tools">
       <div class="seg" role="group" aria-label="Gerät">
@@ -520,23 +528,23 @@ const PROJ = [
 ];
 const PH = ["Angefragt", "Deep Dive", "Shortlist", "Pilot", "Auswertung", "Abgeschlossen"];
 const phaseBar = (p) => `<span style="display:flex;flex-direction:column;gap:4px"><span style="display:flex;gap:3px" aria-label="Phase ${p + 1} von 6: ${PH[p]}">${PH.map((_, i) => `<span style="width:16px;height:6px;border-radius:3px;background:${i <= p ? "var(--ink)" : "var(--line)"}"></span>`).join("")}</span><span class="small" style="color:var(--ink);font-weight:700">${PH[p]}</span></span>`;
-function R3_desk(v4 = false) {
+function R3_desk(v4 = false, v5 = false) {
   return `${bhead()}
   <nav class="side">${NAV.map((g) => `<div class="grp">${g.g ? `<span class="gh">${g.g}</span>` : ""}${g.items.map(item).join("")}</div>`).join("")}</nav>
   <div class="content" style="left:240px;right:400px;gap:18px;padding:24px 28px">
     <div class="row" style="justify-content:space-between;align-items:flex-end"><div><p class="eyebrow" style="color:var(--muted)">Freitag, 6. November</p><h1 class="h1" style="font-size:34px">Cockpit</h1></div>
-      <span class="row" style="gap:8px"><span class="btn" style="padding:6px 12px"><span class="num" style="font-size:15px">4</span> Vorschläge zur Freigabe →</span><span class="btn" style="padding:6px 12px">⚠ <span class="num" style="font-size:15px">0</span> Agentenläufe</span></span></div>
+      <span class="row" style="gap:8px">${v5 ? reqBtn() : ""}<span class="btn" style="padding:6px 12px"><span class="num" style="font-size:15px">4</span> Vorschläge zur Freigabe →</span><span class="btn" style="padding:6px 12px">⚠ <span class="num" style="font-size:15px">0</span> Agentenläufe</span></span></div>
     <section class="lime" style="padding:18px 20px;display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:22px">
       <div style="display:flex;flex-direction:column;gap:10px;min-width:0">
         <div class="row" style="justify-content:space-between"><span class="eyebrow">Startup-Funnel · 90 Tage</span><b style="font-size:12px">Startup-Datenbank →</b></div>
-        ${funnel(v4 ? 52 : 84)}${legend}</div>
+        ${funnel(v4 || v5 ? 52 : 84)}${legend}</div>
       <div style="display:flex;flex-direction:column;gap:6px;min-width:0;border-left:1px solid rgba(37,57,18,.25);padding-left:18px">
         <div class="row" style="justify-content:space-between"><span class="eyebrow">Neu im Eingang</span><b style="font-size:12px">+ Startup eintragen</b></div>
         ${INBOX.map(([n, k, s, a]) => `<div style="display:grid;grid-template-columns:12px minmax(0,1fr) auto;gap:8px;align-items:center;padding:6px 0;border-top:1px solid rgba(37,57,18,.2)">
           <span style="width:12px;height:12px;border-radius:3px;${segStyle[k]}" title="${SRC[k]}"></span><span class="trunc"><b>${n}</b><br><span style="font-size:12px">${s}</span></span><span style="font-size:11px">${a}</span></div>`).join("")}
         <b style="font-size:12px;margin-top:auto">3 warten auf Vorevaluierung →</b></div>
     </section>
-    ${v4 ? projSection4() : `    <section style="display:flex;flex-direction:column;gap:10px">
+    ${v5 ? projSection5() : v4 ? projSection4() : `    <section style="display:flex;flex-direction:column;gap:10px">
       <div class="row" style="justify-content:space-between"><span class="h2">Projekte & Anfragen</span><span class="lnk">Alle Projekte →</span></div>
       <div class="warn" style="align-items:center;justify-content:space-between"><span style="flex:1"><b style="color:var(--ink)">Neue Anfrage von Kunde P:</b> „VIP-Lounge: Bestellung am Tisch“ · vor 1 Tag · noch nicht beantwortet</span><span class="btn solid">Anfrage öffnen</span></div>
       <table class="tbl"><thead><tr><th>Projekt</th><th style="width:150px">Phase</th><th>Nächster Schritt</th><th style="width:150px">Kunde sagt</th></tr></thead><tbody>
@@ -602,6 +610,78 @@ function R4_phone() {
   </div>`;
 }
 
+/* ───── Runde 5: Anfragen als Pop-up (Annehmen → Projekt), Projekte als ruhige Zeilen zum Aufklappen, Alarme blinken ───── */
+const REQS = [
+  { id: "rq1", org: "Kunde P", who: "Ansprechperson Kunde P", t: "VIP-Lounge: Bestellung am Tisch", age: "vor 1 Tag", goal: "Gäste in der VIP-Lounge sollen ohne Wartezeit am Tisch bestellen und bezahlen.", venue: "Arena, VIP-Lounge (400 Plätze)", time: "Start zur Rückrunde", budget: "noch offen" },
+  { id: "rq2", org: "Kunde A", who: "Ansprechperson Kunde A", t: "Hitzeschutz auf der Gegentribüne", age: "vor 3 Std.", goal: "Lösungen gegen Hitze bei Sommerspielen auf der unüberdachten Gegentribüne.", venue: "Stadion, Gegentribüne", time: "bis Saisonstart 2027", budget: "bis 80 Tsd. €" },
+];
+const P5 = [
+  { id: "p3", a: "r", t: "Nachhaltige Fan-Anreise", org: "Kunde A", ph: 3, short: "Zwischenauswertung überfällig · 3 T.", next: "Zwischenauswertung Pilot", due: "3.11. – seit 3 Tagen überfällig", wait: "uns · seit 3 Tagen", mails: 1, x: P4[0].x },
+  { id: "p1", a: "y", t: "Halbzeit-Gastro schneller", org: "Kunde A", ph: 2, short: "Kunde antwortet nicht · 4 T.", next: "Rückmeldung zur Shortlist", due: "9.11. – in 3 Tagen", wait: "Kunde A · seit 4 Tagen", mails: 0 },
+  { id: "p2", a: "g", t: "Einlass ohne Stau", org: "Kunde P", ph: 1, short: "im Plan", next: "Gespräch Sicherheitsdienst", due: "13.11. – in 7 Tagen", wait: "–", mails: 0 },
+  { id: "p4", a: "n", t: "Mehrweg-Pfand im Stadion", org: "Kunde P", ph: 5, short: "abgeschlossen · New Spice approved", next: "–", due: "", wait: "–", mails: 0 },
+];
+Object.assign(state, { reqs: ["rq1", "rq2"], toast: true, tIdx: 0, tMore: false, newProj: [], p5: null, gone: [] });
+const ORDER = { r: 0, y: 1, g: 2, n: 3 };
+function projects5() {
+  const acc = state.newProj.map((id) => { const q = REQS.find((r) => r.id === id);
+    return { id: "n-" + id, a: "g", t: q.t, org: q.org, ph: 1, short: "neu angenommen · Erstgespräch planen", next: "Erstgespräch vereinbaren", due: "13.11. – in 7 Tagen", wait: "uns", mails: 1, fresh: true }; });
+  return [...acc, ...P5].sort((a, b) => ORDER[a.a] - ORDER[b.a]);
+}
+const ampB = (k, size = 22) => `<span class="${k === "r" ? "blink-r" : k === "y" ? "blink-y" : ""}" style="display:inline-grid;position:relative;flex:none">${amp(k, size)}</span>`;
+function projRow5(p) {
+  const open = state.p5 === p.id;
+  const detail = open ? `<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;padding:4px 12px 14px 46px">
+      <div><div class="small">Phase</div>${phaseBar(p.ph)}</div>
+      <div><div class="small">Nächste Frist</div><div style="color:var(--ink);font-weight:700">${p.next}</div><div class="small">${p.due}</div></div>
+      <div><div class="small">Wartet auf</div><div style="color:var(--ink);font-weight:700">${p.wait}</div>${p.mails ? `<div class="small">✉ ${p.mails} offene Mail</div>` : ""}</div>
+      ${p.x ? `<div style="grid-column:1 / -1;border-top:1px dashed var(--line);padding-top:10px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:16px">
+        <div style="display:flex;flex-direction:column;gap:4px"><span class="row" style="gap:8px"><b style="color:var(--ink);font-size:12px">Postfach</b>${ausblick}</span>${p.x.mails.map(([f, s, d, st]) => `<span style="font-size:12px"><span style="color:var(--cA)">⚑</span> <b style="color:var(--ink)">„${s}“</b><br><span class="small">${d} · ${st}</span></span>`).join("")}</div>
+        <div style="display:flex;flex-direction:column;gap:4px"><b style="color:var(--ink);font-size:12px">To-dos</b>${p.x.todos.map(([t, d, a]) => `<div class="row" style="gap:8px;font-size:12px"><span style="width:14px;height:14px;border:1.5px solid var(--muted);border-radius:4px;flex:none"></span><span class="trunc" style="color:var(--ink);flex:1">${t}</span>${amp(a, 14)}<span class="small" style="width:34px;text-align:right">${d}</span></div>`).join("")}</div></div>` : ""}
+      <div style="grid-column:1 / -1" class="row"><span class="btn solid">Projekt öffnen</span><span class="btn">Nachricht an ${p.org}</span></div>
+    </div>` : "";
+  return `<li style="list-style:none;border-radius:12px;${open ? "background:var(--surface);border:1px solid var(--line);" : "border:1px solid transparent;"}${p.fresh ? "box-shadow:inset 3px 0 0 var(--ink);" : ""}">
+    <button type="button" data-p5="${p.id}" aria-expanded="${open}" style="width:100%;display:grid;grid-template-columns:24px minmax(0,1fr) auto 16px;gap:12px;align-items:center;padding:10px 12px;text-align:left">
+      ${ampB(p.a)}
+      <span class="trunc"><b style="color:var(--ink)">${p.t}</b> <span class="small">· ${p.org}</span>${p.fresh ? ' <span class="bdg">Neu</span>' : ""}</span>
+      <span class="small" style="white-space:nowrap;${p.a === "r" ? "color:var(--ink);font-weight:700" : ""}">${p.short}${p.mails ? ` · ✉ ${p.mails}` : ""}</span>
+      <span class="small">${open ? "▴" : "▾"}</span></button>${detail}</li>`;
+}
+function projSection5() {
+  const list = projects5();
+  const cnt = (k) => list.filter((p) => p.a === k).length;
+  return `<section style="display:flex;flex-direction:column;gap:8px">
+    <div class="row" style="justify-content:space-between"><span class="h2">Projekte</span>
+      <span class="row" style="gap:12px;font-size:12px">${["r", "y", "g"].map((k) => `<span class="row" style="gap:6px">${amp(k, 14)}<b style="color:var(--ink)">${cnt(k)}</b></span>`).join("")}<span class="lnk">Alle →</span></span></div>
+    <ol style="margin:0;padding:0;display:flex;flex-direction:column;gap:2px">${list.map(projRow5).join("")}</ol></section>`;
+}
+function toast5(phone = false) {
+  const open = state.reqs.filter((id) => !state.newProj.includes(id) && !state.gone.includes(id));
+  if (!open.length) return "";
+  if (!state.toast) return "";
+  const q = REQS.find((r) => r.id === open[state.tIdx % open.length]);
+  const pos = phone ? "left:12px;right:12px;bottom:12px" : "left:268px;bottom:24px;width:380px";
+  return `<div class="ui glass-strong toast-in" role="dialog" aria-label="Neue Anfrage" style="position:absolute;${pos};border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;z-index:6;color:var(--text)">
+    <div class="row" style="justify-content:space-between"><span class="row" style="gap:8px"><span class="badge-new ping">Anfrage</span><span class="small">${open.length > 1 ? `${(state.tIdx % open.length) + 1} von ${open.length} · <button type="button" data-tnext="1" class="lnk" style="font-size:12px">nächste ›</button>` : ""}</span></span>
+      <button type="button" data-tclose="1" class="round" aria-label="Pop-up schließen" style="width:24px;height:24px;font-size:12px">${ic.x}</button></div>
+    <div><b style="color:var(--ink);font-size:15px">${q.t}</b><div class="small">${q.org} · ${q.age}</div></div>
+    ${state.tMore ? `<dl style="margin:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;font-size:12px">
+      <dt class="small">Ziel</dt><dd style="margin:0;color:var(--ink)">${q.goal}</dd><dt class="small">Ort</dt><dd style="margin:0">${q.venue}</dd>
+      <dt class="small">Zeitraum</dt><dd style="margin:0">${q.time}</dd><dt class="small">Budget</dt><dd style="margin:0">${q.budget}</dd></dl>` : ""}
+    <div class="row" style="gap:6px"><button type="button" data-accept="${q.id}" class="btn solid">${ic.ok} Annehmen</button><button type="button" data-tmore="1" class="btn">${state.tMore ? "Weniger" : "Details"}</button><button type="button" data-decline="${q.id}" class="btn" style="margin-left:auto">Ablehnen</button></div>
+  </div>`;
+}
+const reqBtn = () => { const n = state.reqs.filter((id) => !state.newProj.includes(id) && !state.gone.includes(id)).length;
+  return n && !state.toast ? `<button type="button" data-topen="1" class="btn" style="padding:6px 12px;position:relative"><span class="badge-new ping" style="padding:0 7px">${n}</span> Anfragen</button>` : ""; };
+function R5_desk() { return R3_desk(false, true) + toast5(); }
+function R5_phone() {
+  return `${phead()}${phoneMenu()}
+  <div class="content" style="left:0;top:56px;padding:14px 16px;gap:12px">
+    <div class="row" style="justify-content:space-between"><h1 class="h1" style="font-size:26px">Projekte</h1>${reqBtn()}</div>
+    <ol style="margin:0;padding:0;display:flex;flex-direction:column;gap:2px">${projects5().map((p) => projRow5(p).replace("grid-template-columns:24px minmax(0,1fr) auto 16px", "grid-template-columns:24px minmax(0,1fr) 16px").replace(/<span class="small" style="white-space:nowrap;[^"]*">[^<]*<\/span>/, "")).join("")}</ol>
+  </div>${toast5(true)}`;
+}
+
 function R4_desk() { return R3_desk(true); }
 function R3_phone() {
   const tab = state.phTab;
@@ -623,6 +703,13 @@ function R3_phone() {
 
 /* ───── Texte ───── */
 const V = {
+  runde5: { name: "Runde 5", eyebrow: "Runde 5 · Anfragen und Projekte getrennt", title: "Anfragen als Pop-up, Projekte zum Aufklappen",
+    lead: "Anfragen stehen nicht mehr in der Projektliste. Sie erscheinen als kleines Pop-up unten im Cockpit. „Annehmen“ macht daraus ein Projekt, das mit „Neu“ oben in der Liste auftaucht. Projekte zeigen eingeklappt nur Ampel, Name, Kunde und einen kurzen Status. Ein Klick klappt Phase, Frist, „Wartet auf“, Postfach und To-dos aus. Rote und gelbe Ampeln blinken.",
+    desk: R5_desk, phone: R5_phone, navLabel: "Anfragen", pageLabel: "Projekte",
+    facts: ["Anfrage: <b>Pop-up</b>, Annehmen → Projekt", "Projekt: <b>1 Zeile</b>, Klick klappt aus", "Rot blinkt schnell, Gelb langsam", "In der Bühne alles anklickbar"],
+    nav: ["Pop-up unten links im Inhaltsbereich, mit „Anfrage“-Zeichen, Titel, Kunde und Alter. „Details“ zeigt Ziel, Ort, Zeitraum und Budget aus dem Anfrageformular.", "<b>Annehmen</b>: Das Pop-up verschwindet, das Projekt erscheint oben in der Liste (Phase Problem Deep Dive, erste Frist „Erstgespräch“ in 7 Tagen). <b>Ablehnen</b> fragt in der App noch nach einer kurzen Begründung an den Kunden.", "Mehrere Anfragen: „1 von 2 · nächste ›“. Geschlossen bleibt oben ein Knopf „Anfragen“ mit blinkender Zahl.", "Unbeantwortete Anfragen zählen nicht mehr in die Projekt-Ampel."],
+    page: ["Eingeklappt: Ampel · Name · Kunde · ein Status in wenigen Worten (z. B. „Kunde antwortet nicht · 4 T.“) · ✉ offene Mails.", "Ausgeklappt: Phase, nächste Frist, wer am Zug ist, dazu Postfach und automatische To-dos (Ausblick) und zwei Knöpfe.", "Rot blinkt im Sekundentakt, Gelb halb so schnell, Grün ruhig. Bei „Bewegung reduzieren“ bleibt ein fester Ring.", "Sortiert nach Ampel; neu angenommene Projekte stehen mit Strich links und „Neu“ oben."],
+    pro: ["Die Liste ist ruhig. Was brennt, fällt durch Blinken auf, ohne dass man lesen muss.", "Anfragen verlangen eine Entscheidung und bekommen sie direkt im Pop-up."], con: ["Blinken nutzt sich ab. Ich würde es nur bei Rot dauerhaft lassen und Gelb nach dem ersten Ansehen beruhigen.", "Das Pop-up kann Inhalte verdecken; es liegt deshalb unten links über dem Projektbereich und lässt sich schließen."] },
   runde4: { name: "Runde 4", eyebrow: "Runde 4 · Ampel", title: "Fristen und Rückmeldungen auf einen Blick",
     lead: "„Projekte & Anfragen“ bekommt eine Ampel je Zeile. Rot heißt: Frist überschritten oder Rückmeldung überfällig. Gelb heißt: Frist in den nächsten 3 Werktagen oder Rückmeldung länger offen. Grün heißt: im Plan. Oben steht die Summe, sortiert wird nach Dringlichkeit. Die aufgeklappte Zeile zeigt als Ausblick, wie das angedockte Postfach Mails flaggt, To-dos anlegt und Fristen einträgt.",
     desk: R4_desk, phone: R4_phone, navLabel: "Ampel-Regeln (Vorschlag)", pageLabel: "Ausblick: Postfach angedockt",
@@ -745,7 +832,7 @@ function render() {
 }
 function route() {
   const h = location.hash.slice(1);
-  state.view = ["heute", "a", "b", "c", "vergleich", "vorschlag", "runde3", "runde4"].includes(h) ? h : "heute";
+  state.view = ["heute", "a", "b", "c", "vergleich", "vorschlag", "runde3", "runde4", "runde5"].includes(h) ? h : "heute";
   state.drop = false; state.menu = false;
   render();
 }
@@ -766,6 +853,16 @@ document.addEventListener("click", (e) => {
   if (ln) { state.lane = ln.dataset.lane; render(); return; }
   const ex = e.target.closest("[data-exp]");
   if (ex && P4.find((p) => p.id === ex.dataset.exp)?.x) { state.exp = state.exp === ex.dataset.exp ? null : ex.dataset.exp; render(); return; }
+  const p5 = e.target.closest("[data-p5]");
+  if (p5) { state.p5 = state.p5 === p5.dataset.p5 ? null : p5.dataset.p5; render(); return; }
+  const ac = e.target.closest("[data-accept]");
+  if (ac) { state.newProj.push(ac.dataset.accept); state.p5 = "n-" + ac.dataset.accept; state.tMore = false; state.tIdx = 0; render(); return; }
+  const de = e.target.closest("[data-decline]");
+  if (de) { state.gone.push(de.dataset.decline); state.tMore = false; state.tIdx = 0; render(); return; }
+  if (e.target.closest("[data-tmore]")) { state.tMore = !state.tMore; render(); return; }
+  if (e.target.closest("[data-tnext]")) { state.tIdx++; state.tMore = false; render(); return; }
+  if (e.target.closest("[data-tclose]")) { state.toast = false; render(); return; }
+  if (e.target.closest("[data-topen]")) { state.toast = true; render(); return; }
   const pt = e.target.closest("[data-phtab]");
   if (pt) { state.phTab = pt.dataset.phtab; render(); return; }
 });
