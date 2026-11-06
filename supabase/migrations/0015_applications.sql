@@ -151,9 +151,9 @@ create policy application_files_editor on storage.objects for select using (buck
 -- ───────────────────────── Annehmen ─────────────────────────
 -- Legt je nach Partner-Typ an (Werte änderbar über die Parameter):
 --   Verein, Betreiber, Caterer → Organisation „Kunde“ (Basic, 5 Plätze, 12 Monate) + Eintrag
---   Multiplikator              → Organisation „Partner“ + Eintrag
---   Investor                   → Organisation „Investor“ + Eintrag
---   Solution Provider          → Organisation „Solution Provider“ (eigenes Profil lesen) + Eintrag
+--   Multiplikator              → Organisation „Partner“ (1 Monat kostenlos) + Eintrag
+--   Investor                   → Organisation „Investor“ (1 Monat kostenlos) + Eintrag
+--   Solution Provider          → Organisation „Solution Provider“ (eigenes Profil lesen, 1 Monat kostenlos) + Eintrag
 -- Gibt es schon einen Eintrag mit derselben Domain, wird er verknüpft statt doppelt angelegt.
 -- Die Ansprechperson wird als Owner eingeladen (p_invite). Rückgabe: Eintrag, Organisation, Einladungs-Token.
 create function accept_application(
@@ -184,7 +184,7 @@ begin
 
   v_kind := case a.partner_type when 'multiplier' then 'partner' when 'investor' then 'investor'
                                 when 'solution_provider' then 'provider' else 'customer' end;
-  v_months := coalesce(p_months, case when v_kind = 'customer' then 12 else null end);
+  v_months := coalesce(p_months, case when v_kind = 'customer' then 12 else 1 end);  -- Partner/Investor/SP: 1 Monat kostenlos, danach Abo
   v_domain := nullif(lower(regexp_replace(coalesce(a.website, ''), '^https?://(www\.)?([^/:?#]+).*$', '\2')), '');
 
   if v_domain is not null then select id into v_member from startups where domain = v_domain; end if;

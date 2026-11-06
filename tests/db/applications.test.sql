@@ -173,7 +173,9 @@ select t.eq((select o.access_until from organizations o, r where o.id = (r.club-
 select t.eq((select m.org_id from member_internal m, r where m.member_id = (r.club->>'member_id')::uuid), (select (r.club->>'org_id')::uuid from r), 'Verein: Beziehung „Kunde“ gesetzt');
 select t.eq((select s.partner_types from startups s, r where s.id = (r.club->>'member_id')::uuid), '{club}'::text[], 'Verein: Eintrag als Verein');
 -- Multiplikator: Partner-Zugang, unbefristet, ohne Einladung
-select t.eq((select o.kind || '/' || coalesce(o.access_until::text, 'unbefristet') from organizations o, r where o.id = (r.multi->>'org_id')::uuid), 'partner/unbefristet', 'Multiplikator: Partner-Zugang');
+select t.eq((select o.kind from organizations o, r where o.id = (r.multi->>'org_id')::uuid), 'partner', 'Multiplikator: Partner-Zugang');
+select t.eq((select o.access_until from organizations o, r where o.id = (r.multi->>'org_id')::uuid), (current_date + interval '1 month')::date, 'Multiplikator: 1 Monat kostenlos');
+select t.eq((select o.access_until from organizations o, r where o.id = (r.sp->>'org_id')::uuid), (current_date + interval '1 month')::date, 'Solution Provider: 1 Monat kostenlos');
 select t.eq((select r.multi->>'token' from r), null, 'Ohne Einladung kein Token');
 select t.eq((select hold_until from applications where id = 'a1000000-0000-0000-0000-000000000003'), null, 'Wiedervorlage nach Annahme gelöscht');
 -- Gleiche Domain: kein zweiter Eintrag
