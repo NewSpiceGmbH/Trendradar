@@ -47,9 +47,9 @@ Aufbau Desktop: Navigation links · Hauptbereich · **Live-Feed rechts (400 px)*
 - Eingeklappt eine Zeile: Ampel · Name · Kunde · Status in wenigen Worten („Kunde antwortet nicht · 4 T.“) · ✉ offene Mails. Sortiert nach Ampel.
 - Ein Klick klappt aus: Phase (6 Stufen: Angefragt, Problem Deep Dive, Shortlist, Pilot, Auswertung, Abgeschlossen), nächste Frist, „Wartet auf“ (wir oder Kunde, seit wann), Knöpfe „Projekt öffnen“ und „Nachricht an Kunde“.
 - **Ampel:** Rot = eckig mit „!“, blinkt schnell. Gelb = rund mit ◷, blinkt langsam. Grün = rund mit ✓, ruhig. Abgeschlossen = grau. Bei `prefers-reduced-motion` fester Ring statt Blinken. Der Grund steht immer als Text daneben.
-- **Regeln (Schwellen als Einstellung):**
-  - Rot: Frist überschritten, oder unsere Rückmeldung länger als 2 Werktage offen.
-  - Gelb: Frist in höchstens 3 Werktagen, oder Kundenrückmeldung länger als 3 Tage offen.
+- **Regeln (entschieden: einheitlich 3 Werktage; als Einstellung änderbar):**
+  - Rot: Frist überschritten, oder unsere Rückmeldung länger als 3 Werktage offen.
+  - Gelb: Frist in höchstens 3 Werktagen, oder Kundenrückmeldung länger als 3 Werktage offen.
   - Grün: sonst.
 - **Farben:** Neue Tokens `--ok`, `--warn`, `--alert` (mit `-fg`) in `app/globals.css` für beide Modi anlegen und prüfen. Im Entwurf sind sie aus `--cF`, `--cC` und `--cA` geliehen, das soll nicht so bleiben.
 - Vorschlag: Gelb nur bis zum ersten Ansehen blinken lassen.
@@ -170,7 +170,7 @@ Noch nicht ausdrücklich freigegeben; vor der Umsetzung bei Finn bestätigen.
 2. ~~Tags?~~ Entschieden: Partner-Typ-Tags (Verein, Caterer, Betreiber, Multiplikator, Investor, Startup) + eigene Angebotskategorien (Weg B); Trends hängen an den Kategorien (Abschnitt 4).
 3. ~~Sollen Kunden andere Mitglieder sehen?~~ Entschieden: nur öffentlich markierte oder ihrem Projekt zugewiesene (siehe Abschnitt 4).
 4. ~~Wer sieht veröffentlichte Challenges?~~ Entschieden: privat = nur Redaktion; veröffentlicht = alle Mitglieder (Abschnitt 5).
-5. Schwellen der Ampel (2 / 3 Werktage) bestätigen.
+5. ~~Schwellen der Ampel?~~ Entschieden: einheitlich 3 Werktage (Abschnitt 2).
 6. Blinken: Gelb nur bis zum ersten Ansehen?
 
 **Noch zu klären:** Welchen Partner-Typ bekommen etablierte Anbieter, die kein Startup sind (z. B. ein Kassenhersteller oder Energieversorger als Partner)? Vorschlag: einen siebten Typ „Anbieter“ ergänzen.
