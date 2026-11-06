@@ -164,6 +164,7 @@ main { max-width: 1440px; margin: 0 auto; padding-left: max(16px, env(safe-area-
       <a class="tab" href="#b" data-v="b">B · Arbeitsliste</a>
       <a class="tab" href="#c" data-v="c">C · Newsroom</a>
       <a class="tab" href="#vergleich" data-v="vergleich">Vergleich</a>
+      <a class="tab" href="#vorschlag" data-v="vorschlag">Vorschlag · Runde 2</a>
     </nav>
     <div class="tools">
       <div class="seg" role="group" aria-label="Gerät">
@@ -210,7 +211,7 @@ const ic = {
   ok: `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8.5l3 3 7-7"/></svg>`,
   x: `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4l8 8M12 4l-8 8"/></svg>`,
 };
-const state = { view: "heute", dev: "desk", drop: false, menu: false };
+const state = { view: "heute", dev: "desk", drop: false, menu: false, hov: "0-0" };
 
 /* Navigation gruppiert (Vorschlag aus dem Briefing, leicht umgestellt) */
 const NAV = [
@@ -371,8 +372,72 @@ function C_phone() {
   </div>`;
 }
 
+/* ───── Vorschlag (Runde 2): Navigation aus A, Freigabe-Block aus A, Lagebild als Spalten aus C, Schnell-Aktionen nur für Meldungen ───── */
+function R_card(s, li, si) {
+  const on = state.hov === `${li}-${si}`;
+  const acts = s.st === "Im Ticker"
+    ? `<span class="btn">Aus dem Ticker nehmen</span>`
+    : `${s.st === "neu" ? `<span class="btn">Trend zuordnen ${ic.chev}</span>` : ""}<span class="btn solid">In den Ticker</span><span class="btn" title="Verwerfen" aria-label="Verwerfen">${ic.x}</span>`;
+  return `<div data-hov="${li}-${si}" class="card" style="padding:12px 14px;display:flex;flex-direction:column;gap:6px;${on ? "border-color:var(--ink);" : ""}">
+    <span style="font-weight:700;color:var(--ink);line-height:1.3">${s.t} <span style="color:var(--muted)">↗</span></span>
+    <span class="row small" style="gap:8px;flex-wrap:wrap">${rel(s.rel)}${s.src} · ${s.age}</span>
+    <span class="row" style="justify-content:${on ? "flex-end" : "flex-start"};gap:6px;min-height:24px">${on ? acts : st(s.st)}</span></div>`;
+}
+function R_desk() {
+  return `${bhead()}
+  <nav class="side">${NAV.map((g) => `<div class="grp">${g.g ? `<span class="gh">${g.g}</span>` : ""}${g.items.map(item).join("")}</div>`).join("")}
+    <div class="warn" style="margin-top:auto">Keine Agentenläufe in den letzten 7 Tagen. <span class="lnk" style="font-size:12px">Scouting →</span></div></nav>
+  <div class="content" style="left:240px;gap:20px;padding:24px 32px">
+    <div class="row" style="justify-content:space-between;align-items:flex-end"><div><p class="eyebrow" style="color:var(--muted)">Freitag, 6. November</p><h1 class="h1" style="font-size:34px">Cockpit</h1></div>
+      <span class="small">Radar heute <b>18 · 18 · 8</b> · Trends <b>44</b> veröffentlicht</span></div>
+    <div style="display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:20px">
+      <section class="lime" style="padding:18px 22px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 24px;align-items:start">
+        <div style="display:flex;flex-direction:column;gap:2px"><span class="eyebrow" style="font-size:10px">Zur Freigabe</span><span class="num" style="font-size:64px;line-height:.95">4</span><b style="font-size:13px">Vorschläge</b></div>
+        <ol style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column">${P.slice(0, 3).map((p, i) => `
+          <li style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;padding:7px 0;${i ? "border-top:1px solid rgba(37,57,18,.2)" : ""}">
+            <span class="trunc"><b>${p.what}</b> · ${p.kind}</span><span style="font-size:12px;white-space:nowrap">${p.age} · <b>Prüfen →</b></span></li>`).join("")}
+          <li style="padding-top:6px;font-size:13px"><b>Alle in der Review-Queue →</b></li></ol>
+      </section>
+      <section style="display:flex;flex-direction:column">
+        ${[["Meldungen ohne Freigabe", "6", "davon 4 mit hoher Relevanz", false], ["Agentenläufe (7 Tage)", "0", "Kein Scout im Einsatz · Scouting →", true]].map(([l, v, s, w]) => `
+          <div style="display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)">
+            <span><span style="color:var(--ink);font-weight:700">${l}</span><br><span class="small" ${w ? 'style="color:var(--ink)"' : ""}>${w ? "⚠ " : ""}${s}</span></span><span class="num" style="font-size:30px;color:var(--ink)">${v}</span></div>`).join("")}
+      </section>
+    </div>
+    <section style="display:flex;flex-direction:column;gap:10px;min-height:0">
+      <div class="row" style="justify-content:space-between"><span class="h2">Lagebild</span><span class="small">Letzte 14 Tage, nach Relevanz · <span class="lnk">Scouts steuern →</span></span></div>
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px">${L.map((l, li) => `
+        <div style="display:flex;flex-direction:column;gap:10px;min-width:0">
+          <div style="padding-bottom:6px;border-bottom:2px solid var(--ink);display:flex;flex-direction:column;gap:2px">
+            <div class="row" style="justify-content:space-between"><span class="h3">${l.key}</span><span class="small"><b>${l.fresh}</b> neu · <span class="lnk" style="font-size:12px">Alle →</span></span></div>
+            <span class="small">${l.scouts}</span></div>
+          ${l.items.map((s, si) => R_card(s, li, si)).join("")}</div>`).join("")}
+      </div></section>
+  </div>`;
+}
+function R_phone() {
+  return `${phead()}${phoneMenu()}
+  <div class="content" style="left:0;top:56px;padding:18px 16px;gap:14px">
+    <h1 class="h1" style="font-size:28px">Cockpit</h1>
+    <section class="lime" style="padding:16px;display:flex;flex-direction:column;gap:8px">
+      <div class="row" style="justify-content:space-between;align-items:baseline"><span class="row" style="align-items:baseline;gap:8px"><span class="num" style="font-size:44px;line-height:.9">4</span><b>zur Freigabe</b></span><b style="font-size:13px">Öffnen →</b></div>
+      ${P.slice(0, 2).map((p) => `<div class="trunc" style="border-top:1px solid rgba(37,57,18,.2);padding-top:6px;font-size:13px"><b>${p.what}</b> · ${p.kind}</div>`).join("")}</section>
+    <div class="warn">Keine Agentenläufe in 7 Tagen · Scouting →</div>
+    <div class="tabsb" style="font-size:12px"><span class="on">Sport & Hosp. · 3</span><span>Startups · 2</span><span>Cross · 2</span></div>
+    ${L[0].items.slice(0, 2).map((s, si) => `<div class="card" style="padding:12px;display:flex;flex-direction:column;gap:6px"><span style="font-weight:700;color:var(--ink);line-height:1.3">${s.t}</span><span class="row small" style="gap:8px">${rel(s.rel)}${s.age}</span>
+      <span class="row" style="gap:6px">${s.st === "Im Ticker" ? st(s.st) : `<span class="btn solid">In den Ticker</span><span class="btn">Verwerfen</span>`}</span></div>`).join("")}
+  </div>`;
+}
+
 /* ───── Texte ───── */
 const V = {
+  vorschlag: { name: "Vorschlag", eyebrow: "Runde 2 · Vorschlag", title: "Gruppierte Leiste, Freigaben oben, Lagebild in Spalten",
+    lead: "Die Seitenleiste aus A bleibt links und bekommt Gruppen. Oben im Cockpit steht der Limetten-Block mit den nächsten Freigaben, daneben nur die zwei Zahlen, die Handeln auslösen. Darunter das Lagebild als drei Spalten. Fährt man über eine Meldung, erscheinen ihre Aktionen: in den Ticker, Trend zuordnen, verwerfen.",
+    desk: R_desk, phone: R_phone,
+    facts: ["Navigation in <b>4 Gruppen</b>", "Freigaben + <b>2</b> Handlungszahlen oben", "Lagebild: <b>3</b> Spalten mit Karten", "Aktionen nur für Meldungen, beim Überfahren"],
+    nav: ["Wie A: Inhalte, Agenten, Venture Clienting, Kunden. „Agenten“ heißt „Agenten-Protokoll“.", "Hinweis unten in der Leiste, solange Agenten stillstehen. Er verschwindet, sobald wieder Läufe kommen.", "Am Handy hinter „Menü“, gleiche Gruppen."],
+    page: ["Limetten-Block: Zahl links, die drei ältesten Vorschläge rechts mit „Prüfen →“. Freigegeben wird weiter in der Review-Queue mit Vorher/Nachher.", "Daneben nur zwei Zahlen: Meldungen ohne Freigabe und Agentenläufe, mit Warnung bei 0. „Radar heute“ und „Trends veröffentlicht“ werden zur Textzeile oben rechts.", "Lagebild: je Bereich eine Spalte mit Scout-Stand im Kopf. Karten zeigen in Ruhe nur Status, beim Überfahren die Aktionen (in der Bühne ausprobieren).", "„Zuletzt im Liveticker“ entfällt; das steht im Liveticker selbst."],
+    pro: ["Erster Bildschirm zeigt alles, was heute zu tun ist, und das Lagebild.", "Meldungen lassen sich ohne Seitenwechsel abarbeiten. Trend-Änderungen bleiben geprüft."], con: ["Bei vielen Meldungen werden die Spalten lang. Je Spalte nach 5 Karten „Alle →“?", "Aktionen beim Überfahren gibt es am Handy nicht; dort stehen sie dauerhaft auf der Karte."] },
   a: { name: "Ruhig", lead: "Die Seitenleiste bekommt Gruppen: Inhalte, Agenten, Venture Clienting, Kunden. Das Cockpit wird luftiger: Ein großer Limetten-Block zeigt, was auf Freigabe wartet, mit den drei nächsten Vorschlägen. Daneben stehen die Kennzahlen als ruhige Liste. Das Lagebild zeigt je Bereich nur die zwei wichtigsten Meldungen.",
     desk: A_desk, phone: A_phone,
     facts: ["Navigation in <b>4 Gruppen</b>", "<b>1</b> großer Limetten-Block", "Lagebild: <b>2</b> Meldungen je Bereich", "Hinweis, wenn Agenten ruhen"],
@@ -396,7 +461,7 @@ const V = {
 /* ───── Seiten ───── */
 function variantPage(v) {
   const d = V[v];
-  return `<section class="intro"><div><p class="eyebrow">Variante ${v.toUpperCase()}</p><h1>${d.name}</h1><p class="lead">${d.lead}</p></div></section>
+  return `<section class="intro"><div><p class="eyebrow">${d.eyebrow ?? "Variante " + v.toUpperCase()}</p><h1>${d.title ?? d.name}</h1><p class="lead">${d.lead}</p></div></section>
     <div class="stage ${state.dev}" data-stage><div class="canvas">${state.dev === "desk" ? d.desk() : d.phone()}</div></div>
     <div class="facts">${d.facts.map((f) => `<span class="fact">${f}</span>`).join("")}${d.dropHint && state.dev === "desk" ? '<span class="fact">„Inhalte“ in der Bühne anklicken</span>' : ""}${state.dev === "phone" && v !== "c" ? '<span class="fact">„Menü“ in der Bühne anklicken</span>' : ""}<span class="fact">Bühne zeigt den ersten Bildschirm (1440 × 900)</span></div>
     <section class="notes">
@@ -442,7 +507,7 @@ function comparePage() {
         <tr><td>Lagebild je Bereich</td><td>ja</td><td>ja, gekürzt</td><td>nur als Etikett</td><td>ja, als Spalten</td></tr>
         <tr><td>Umbau in der App</td><td>–</td><td>klein</td><td>mittel</td><td>groß (Navigation für alle Seiten)</td></tr>
       </tbody></table></div>
-    <div class="reco"><p class="eyebrow">Mein Vorschlag für Runde 2</p>
+    <div class="reco"><p class="eyebrow">Mein Vorschlag für Runde 2 · <a href="#vorschlag">ansehen →</a></p>
       <p><b style="color:var(--ink)">Navigation aus A, Cockpit als Mischung aus A und C.</b> Die Seitenleiste behält ihren Platz, aber mit Gruppen. Das kostet die anderen 12 Backend-Seiten keinen Umbau. Im Cockpit bleibt der Limetten-Block mit den nächsten Freigaben oben. Darunter steht das Lagebild als drei Spalten wie in C. Die Schnell-Aktionen aus B kommen dorthin, wo sie gefahrlos sind: Meldung in den Ticker übernehmen oder verwerfen. Vorschläge, die Trends verändern, bleiben in der Review-Queue mit Vorher/Nachher.</p></div>
     <div class="note"><p class="eyebrow">Fragen an euch</p><ul>
       <li>Wie viele Leute arbeiten täglich im Backend, und wie viele Meldungen pro Tag sind realistisch? Davon hängt ab, ob sich die Arbeitsliste (B) lohnt.</li>
@@ -474,7 +539,7 @@ function render() {
 }
 function route() {
   const h = location.hash.slice(1);
-  state.view = ["heute", "a", "b", "c", "vergleich"].includes(h) ? h : "heute";
+  state.view = ["heute", "a", "b", "c", "vergleich", "vorschlag"].includes(h) ? h : "heute";
   state.drop = false; state.menu = false;
   render();
 }
@@ -485,6 +550,11 @@ document.addEventListener("click", (e) => {
   if (th) { document.documentElement.dataset.theme = th.dataset.th; render(); return; }
   if (e.target.closest("[data-drop]")) { state.drop = !state.drop; render(); return; }
   if (e.target.closest("[data-menu]")) { state.menu = !state.menu; render(); return; }
+});
+document.addEventListener("mouseover", (e) => {
+  const c = e.target.closest("[data-hov]");
+  if (!c || c.dataset.hov === state.hov) return;
+  state.hov = c.dataset.hov; render();
 });
 addEventListener("hashchange", route);
 addEventListener("resize", fit);
