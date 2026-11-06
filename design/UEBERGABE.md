@@ -52,7 +52,7 @@ Aufbau Desktop: Navigation links · Hauptbereich · **Live-Feed rechts (400 px)*
   - Gelb: Frist in höchstens 3 Werktagen, oder Kundenrückmeldung länger als 3 Werktage offen.
   - Grün: sonst.
 - **Farben:** Neue Tokens `--ok`, `--warn`, `--alert` (mit `-fg`) in `app/globals.css` für beide Modi anlegen und prüfen. Im Entwurf sind sie aus `--cF`, `--cC` und `--cA` geliehen, das soll nicht so bleiben.
-- Vorschlag: Gelb nur bis zum ersten Ansehen blinken lassen.
+- **Blinken (entschieden):** Rot blinkt, bis das Problem gelöst ist. Gelb blinkt nur, bis jemand aus der Redaktion das Projekt einmal angesehen hat (aufgeklappt oder geöffnet), danach ruhig gelb.
 
 **Anfragen von Kunden als Pop-up**
 - Unten links im Hauptbereich: Zeichen „Anfrage“, Titel, Kunde, Alter. Knöpfe Annehmen · Details · Ablehnen. Bei mehreren „1 von 2 · nächste ›“. Geschlossen bleibt oben der Knopf „Eingang · n“.
@@ -65,15 +65,15 @@ Aufbau Desktop: Navigation links · Hauptbereich · **Live-Feed rechts (400 px)*
 ## 3. Bewerbungen und Netzwerk-Eingang
 
 **Öffentliches Formular** `/bewerben`, verlinkt von der Login-Seite („Noch kein Zugang? Jetzt bewerben“)
-- Schritt 1: Partner-Typ wählen: Verein, Caterer, Betreiber, Multiplikator, Investor oder Startup (entspricht den Partner-Typ-Tags in Abschnitt 4).
+- Schritt 1: Partner-Typ wählen: Verein, Caterer, Betreiber, Multiplikator, Investor oder Solution Provider (entspricht den Partner-Typ-Tags in Abschnitt 4). Bei Solution Provider wird das Gründungsjahr abgefragt; daraus ergibt sich das Merkmal „Startup“.
 - Schritt 2: Organisation, Rolle, E-Mail, Website. Je Kategorie zwei bis drei eigene Felder:
   - Verein: Sportart/Liga, Stadion/Kapazität
   - Betreiber: Art der Venue, Kapazität/Zimmer
   - Multiplikator: Netzwerk, Reichweite
   - Investor: Fokus, Ticketgröße
   - Caterer: Art der Gastronomie, Standorte/Venues
-  - Startup: Angebot (Produkt/Leistung, Auswahl aus den Angebotskategorien), Reifegrad, Referenzen, Pitchdeck-PDF
-  - Wer etwas anbietet (Startup, Caterer, auch Betreiber), kann zusätzlich Angebot und Referenzen angeben.
+  - Solution Provider: Gründungsjahr, Angebot (Produkt/Leistung, Auswahl aus den Angebotskategorien), Reifegrad, Referenzen, Pitchdeck-PDF
+  - Wer etwas anbietet (Solution Provider, Caterer, auch Betreiber), kann zusätzlich Angebot und Referenzen angeben.
 - Dazu eine kurze Nachricht und die Datenschutz-Bestätigung. Nach dem Senden: „Danke! Wir melden uns innerhalb von 5 Werktagen.“
 - **Es wird kein Konto angelegt** (Regel „keine offene Registrierung“). Spam-Schutz: Rate-Limit und Bestätigung der E-Mail-Adresse.
 
@@ -91,16 +91,17 @@ Aufbau Desktop: Navigation links · Hauptbereich · **Live-Feed rechts (400 px)*
 | Verein, Betreiber, Caterer | Organisation (Paket Basic, 5 Sitzplätze, Laufzeit 12 Monate) + Eintrag in der Netzwerk-Datenbank, die Ansprechperson wird als Owner eingeladen (Magic-Link) |
 | Multiplikator | Eintrag + **Partner-Zugang** (Radar lesen, Kontakte empfehlen, keine Projekte) |
 | Investor | Eintrag + **Investor-Zugang** (Radar und öffentlich markierte Einträge der Netzwerk-Datenbank, nichts Vertrauliches) |
-| Startup | Eintrag in der Netzwerk-Datenbank (Funnel „Eingang“, Quelle „Bewerbung“), optional sofort Vorevaluierung durch den Agenten; Zugang zum eigenen Profil **nur lesend** mit „Änderung anfragen“ |
+| Solution Provider (auch Startups) | Eintrag in der Netzwerk-Datenbank (Funnel „Eingang“, Quelle „Bewerbung“), optional sofort Vorevaluierung durch den Agenten; Zugang zum eigenen Profil **nur lesend** mit „Änderung anfragen“ |
 
 - Partner- und Investor-Zugang brauchen **neue Rollen** und RLS-Regeln mit Tests.
 
 ## 4. Netzwerk-Datenbank (ersetzt die Startup-Datenbank)
 
 Eine redaktionell kuratierte Datenbank für alle Mitglieder. Aufgebaut über **zwei Arten von Tags** (entschieden):
-- **Partner-Typ** (klassifiziert das Mitglied, mehrere möglich, z. B. Betreiber + Caterer): **Verein, Caterer, Betreiber, Multiplikator, Investor, Startup.** Feste Liste, nur die Redaktion ändert sie.
+- **Partner-Typ** (klassifiziert das Mitglied, mehrere möglich, z. B. Betreiber + Caterer): **Verein, Caterer, Betreiber, Multiplikator, Investor, Solution Provider.** Feste Liste, nur die Redaktion ändert sie. Etablierte Anbieter (z. B. Kassenhersteller, Energieversorger) ordnet die Redaktion als Solution Provider oder passenden Typ zu.
+- **Merkmal „Startup“** (die einzige Zusatzkategorie, entschieden): Ein Startup ist grundsätzlich ein Unternehmen, das **jünger als 5 Jahre** ist. Das Merkmal wird aus dem Gründungsjahr vorgeschlagen und von der Redaktion bestätigt; sie kann es im Einzelfall überschreiben. Wird ein Startup 5 Jahre alt, schlägt der Netzwerk-Manager vor, das Merkmal zu entfernen. Filter „Startups“ in der Liste und im Funnel.
 - **Angebotskategorien** (Weg B, eigene Liste, etwa 30–40, z. B. Kassensysteme, Zapfsysteme, Bestell-Apps, Sensorik, Energiespeicher, Mehrweg): beschreiben, was ein Mitglied anbietet. **Die Trends hängen an den Angebotskategorien**, nicht am Mitglied: Kategorie „Bestell-Apps“ → #24, „Kassensysteme“ → #19, #26. Die Trends eines Mitglieds ergeben sich aus seinen Kategorien.
-- „Solution Provider“ ist kein eigener Typ mehr, sondern ein Filter: alle Mitglieder mit mindestens einem Angebot.
+- Filter „bietet etwas an“: alle Mitglieder mit mindestens einem Angebot (meist Solution Provider, aber auch Caterer oder Betreiber).
 - Die erste Kategorienliste schlägt der Netzwerk-Manager aus den vorhandenen Startups und Kandidaten vor; die Redaktion gibt sie frei und pflegt sie danach.
 - **Liste** `/admin/netzwerk`: Filter nach Partner-Typ (mit Zahl), nach Angebotskategorie, „bietet etwas an“ und Suche (Name, Kategorie, Trendnummer – über die Kategorien). Spalten: Name (+ Quelle · zuletzt gepflegt), Partner-Typ, Angebotskategorien, Trends (abgeleitet), Status (Aufgenommen · In Prüfung · On hold · Archiviert), Beziehung (Kunde, Partner, Siegel „New Spice approved“ als Limetten-Chip). „+ Eintrag“ legt manuell an.
 - **Rechts eine Spalte „Netzwerk-Manager“** mit Vorschlägen: aufnehmen und klassifizieren, Tags zusammenlegen, Eintrag veraltet (z. B. neue Referenzen auf der Website), Verbindungen (z. B. Investor ↔ Startup). Je Vorschlag: Übernehmen · Anpassen · Verwerfen.
@@ -116,17 +117,17 @@ Eine redaktionell kuratierte Datenbank für alle Mitglieder. Aufgebaut über **z
   2. die Redaktion hat das Mitglied **einem Projekt des Kunden zugewiesen** (dann nur innerhalb dieses Projekts, z. B. als Partner oder auf der Shortlist).
 
   Das gilt für alle Rollen und muss in RLS verankert sein, nicht nur in der UI. Tests je Fall: nicht öffentlich und nicht zugewiesen → unsichtbar; öffentlich → nur öffentliche Felder; zugewiesen → nur im eigenen Projekt, nicht im Projekt eines fremden Kunden. Vertrauliches (Kontakt, Preise, Pitchdeck, Notizen) bleibt auch dann verborgen, bis es im Projekt freigegeben ist.
-- Bestehende Startups (`startups`) und Kandidaten aus Challenges werden zu Einträgen mit Partner-Typ Startup. Die Trennung öffentlicher und vertraulicher Angaben bleibt.
+- Bestehende Startups (`startups`) und Kandidaten aus Challenges werden zu Einträgen mit Partner-Typ Solution Provider; das Merkmal Startup ergibt sich aus dem Gründungsjahr (Feld `founded` gibt es schon bei Kandidaten). Die Trennung öffentlicher und vertraulicher Angaben bleibt.
 
 **Bausteine für das Schema (Skizze, nicht final):**
 
 | Baustein | Inhalt | pflegt | sieht |
 |---|---|---|---|
-| Mitglied | Partner-Typ(en), Region, Reifegrad, Status, Quelle, Sichtbarkeit (intern/öffentlich) | Redaktion (Agent schlägt vor) | Redaktion; Kunden nur, wenn öffentlich (öffentliche Felder) oder ihrem Projekt zugewiesen |
+| Mitglied | Partner-Typ(en), Gründungsjahr, Merkmal Startup (vorgeschlagen bei < 5 Jahren, überschreibbar), Region, Reifegrad, Status, Quelle, Sichtbarkeit (intern/öffentlich) | Redaktion (Agent schlägt vor) | Redaktion; Kunden nur, wenn öffentlich (öffentliche Felder) oder ihrem Projekt zugewiesen |
 | Angebot | Produkte/Leistungen eines Mitglieds mit Angebotskategorien | nur Redaktion | wie Mitglied |
 | Änderungsanfrage | gewünschte Änderung am eigenen Profil (Feld, alt, neu, Kommentar) | Solution Provider stellt, Redaktion entscheidet | Redaktion; der anfragende Provider |
 | Interessen | Angebotskategorien, die ein Mitglied sucht (Vereine, Betreiber, Investoren) | Redaktion | Redaktion |
-| Partner-Typ | feste Liste: Verein, Caterer, Betreiber, Multiplikator, Investor, Startup | Redaktion | alle |
+| Partner-Typ | feste Liste: Verein, Caterer, Betreiber, Multiplikator, Investor, Solution Provider | Redaktion | alle |
 | Angebotskategorie | eigene Liste (ca. 30–40), je Kategorie verknüpfte Trends | Redaktion; Agent schlägt Ergänzungen und Zusammenlegungen vor | alle |
 | Referenz | Ort, Zeitraum, Ergebnis | Redaktion | Redaktion; öffentlich nach Freigabe |
 | Match | Challenge × Angebot (über Angebotskategorien), Passung %, Begründung, Status (Vorschlag/Shortlist/verworfen) | Agent schlägt vor, Redaktion entscheidet | Redaktion; Kunde sieht die Shortlist |
@@ -167,13 +168,15 @@ Noch nicht ausdrücklich freigegeben; vor der Umsetzung bei Finn bestätigen.
 ## 8. Offene Fragen an Finn
 
 1. ~~Profil selbst pflegen?~~ Entschieden: **nein**. Solution Provider sehen ihr Profil und können über „Änderung anfragen“ Änderungen vorschlagen. Die Anfrage landet im Eingang (Art „Änderung“) mit Vorher/Nachher; die Redaktion übernimmt, passt an oder lehnt ab.
-2. ~~Tags?~~ Entschieden: Partner-Typ-Tags (Verein, Caterer, Betreiber, Multiplikator, Investor, Startup) + eigene Angebotskategorien (Weg B); Trends hängen an den Kategorien (Abschnitt 4).
+2. ~~Tags?~~ Entschieden: Partner-Typ-Tags (Verein, Caterer, Betreiber, Multiplikator, Investor, Solution Provider), Merkmal Startup (< 5 Jahre) + eigene Angebotskategorien (Weg B); Trends hängen an den Kategorien (Abschnitt 4).
 3. ~~Sollen Kunden andere Mitglieder sehen?~~ Entschieden: nur öffentlich markierte oder ihrem Projekt zugewiesene (siehe Abschnitt 4).
 4. ~~Wer sieht veröffentlichte Challenges?~~ Entschieden: privat = nur Redaktion; veröffentlicht = alle Mitglieder (Abschnitt 5).
 5. ~~Schwellen der Ampel?~~ Entschieden: einheitlich 3 Werktage (Abschnitt 2).
-6. Blinken: Gelb nur bis zum ersten Ansehen?
+6. ~~Blinken?~~ Entschieden: Gelb nur bis zum ersten Ansehen (Abschnitt 2).
 
-**Noch zu klären:** Welchen Partner-Typ bekommen etablierte Anbieter, die kein Startup sind (z. B. ein Kassenhersteller oder Energieversorger als Partner)? Vorschlag: einen siebten Typ „Anbieter“ ergänzen.
+7. ~~Etablierte Anbieter?~~ Entschieden: kein eigener Typ; die Redaktion ordnet sie als Solution Provider (oder passenden Typ) zu. „Startup“ ist die einzige Zusatzkategorie.
+
+Alle offenen Fragen sind damit beantwortet.
 
 ## 9. Vorgeschlagene Reihenfolge
 
