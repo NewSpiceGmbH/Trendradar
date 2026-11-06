@@ -1,0 +1,533 @@
+<meta charset="utf-8">
+<title>Netzwerk-Datenbank · Entwurf 18</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@800&family=DM+Sans:opsz,wght@9..40,400;9..40,700&display=swap">
+<style>
+
+/* Layout: Entwurfsmappe – oben Reiter (Heute · A · B · C), je Reiter eine skalierte 1440er-Bühne bzw. 390er-Handy,
+   darunter die Notizen. Tokens 1:1 aus app/globals.css (Dunkel Standard, Hell per data-theme="light"). */
+:root {
+  --bg: #1d1d1d; --surface: #2b2a27; --sunk: #242321; --line: #3d3b37;
+  --ink: #fcf4e6; --text: #d9cfbd; --muted: #a8a195;
+  --accent: #c2e689; --on-accent: #253912; --accent-ink: #c2e689; --logo: #f3efe6;
+  --glass-tint: rgba(43, 42, 39, 0.38); --glass-tint-strong: rgba(36, 35, 33, 0.62);
+  --glass-edge: rgba(252, 244, 230, 0.14); --glass-hi: rgba(252, 244, 230, 0.24);
+  --glass-sheen: rgba(252, 244, 230, 0.08); --glass-shadow: 0 18px 50px rgba(0, 0, 0, 0.4);
+  --cA: #c2402a; --cB: #4d9cd0; --cC: #9d6500; --cD: #2ca8a0; --cE: #7b57b9; --cF: #66a758; --cG: #ca6db8;
+  --cA-fg: #fcf4e6; --cB-fg: #1d1d1d; --cC-fg: #fcf4e6; --cD-fg: #1d1d1d; --cE-fg: #fcf4e6; --cF-fg: #1d1d1d; --cG-fg: #1d1d1d;
+  --font-display: "Archivo", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --font-sans: "DM Sans", "Segoe UI", system-ui, sans-serif;
+  --radius-card: 16px; --radius-pill: 40px;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) {
+  --bg: #fcf4e6; --surface: #faf8f4; --sunk: #f2e5cf; --line: #e3d7c2;
+  --ink: #1d1d1d; --text: #3d3b37; --muted: #655f55; --accent-ink: #4a6b1a; --logo: #1d1d1d;
+  --glass-tint: rgba(252, 248, 240, 0.42); --glass-tint-strong: rgba(252, 248, 240, 0.72);
+  --glass-edge: rgba(255, 255, 255, 0.75); --glass-hi: rgba(255, 255, 255, 0.95);
+  --glass-sheen: rgba(255, 255, 255, 0.4); --glass-shadow: 0 18px 50px rgba(29, 29, 29, 0.14);
+  --cA: #b6341f; --cB: #3e8cc9; --cC: #8f5d04; --cD: #009b92; --cE: #6a45a6; --cF: #549a44; --cG: #c562b2;
+  color-scheme: light;
+} }
+:root[data-theme="light"] {
+  --bg: #fcf4e6; --surface: #faf8f4; --sunk: #f2e5cf; --line: #e3d7c2;
+  --ink: #1d1d1d; --text: #3d3b37; --muted: #655f55; --accent-ink: #4a6b1a; --logo: #1d1d1d;
+  --glass-tint: rgba(252, 248, 240, 0.42); --glass-tint-strong: rgba(252, 248, 240, 0.72);
+  --glass-edge: rgba(255, 255, 255, 0.75); --glass-hi: rgba(255, 255, 255, 0.95);
+  --glass-sheen: rgba(255, 255, 255, 0.4); --glass-shadow: 0 18px 50px rgba(29, 29, 29, 0.14);
+  --cA: #b6341f; --cB: #3e8cc9; --cC: #8f5d04; --cD: #009b92; --cE: #6a45a6; --cF: #549a44; --cG: #c562b2;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--text); font-family: var(--font-sans); font-size: 16px; line-height: 1.55; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 800; color: var(--ink); letter-spacing: -0.014em; line-height: 1.1; text-wrap: balance; margin: 0; }
+p { margin: 0; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; padding: 0; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.eyebrow { font-weight: 700; font-size: 12px; letter-spacing: .125em; text-transform: uppercase; color: var(--accent-ink); }
+.num { font-family: var(--font-display); font-weight: 800; font-variant-numeric: tabular-nums; }
+.glass { background: linear-gradient(180deg, var(--glass-sheen), transparent 55%), var(--glass-tint);
+  -webkit-backdrop-filter: blur(22px) saturate(170%); backdrop-filter: blur(22px) saturate(170%);
+  border: 1px solid var(--glass-edge); box-shadow: inset 0 1px 0 var(--glass-hi), var(--glass-shadow); }
+.glass-strong { background: linear-gradient(180deg, var(--glass-sheen), transparent 45%), var(--glass-tint-strong);
+  -webkit-backdrop-filter: blur(28px) saturate(180%); backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid var(--glass-edge); box-shadow: inset 0 1px 0 var(--glass-hi), var(--glass-shadow); }
+
+/* ───── Mappe ───── */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; border-bottom: 1px solid var(--line);
+  background: var(--bg); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--bg); }
+.top-in { max-width: 1440px; margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; padding-block: 12px; }
+.brand { display: flex; align-items: center; gap: 12px; color: var(--logo); }
+.brand svg { height: 22px; width: auto; }
+.brand span { font-size: 13px; color: var(--muted); }
+.tabs { display: flex; flex-wrap: wrap; gap: 4px; flex: 1; }
+.tab { border-radius: var(--radius-pill); padding: 6px 14px; font-size: 14px; font-weight: 700; color: var(--ink); }
+.tab:hover { background: var(--sunk); }
+.tab[aria-current="page"] { background: var(--ink); color: var(--bg); }
+.tools { display: flex; gap: 8px; flex-wrap: wrap; }
+.seg { display: inline-flex; border-radius: var(--radius-pill); padding: 2px; border: 1px solid var(--line); }
+.seg button { border-radius: var(--radius-pill); padding: 4px 12px; font-size: 13px; font-weight: 700; color: var(--ink); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+
+main { max-width: 1440px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 32px 64px; display: flex; flex-direction: column; gap: 32px; }
+.intro { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px 32px; align-items: end; }
+.intro h1 { font-size: clamp(28px, 3.4vw, 44px); }
+.intro p.lead { max-width: 68ch; margin-top: 8px; }
+.state { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; font-size: 13px; color: var(--muted); }
+@media (max-width: 760px) { .intro { grid-template-columns: 1fr; } }
+
+/* Bühne: 1440×900 (Desktop) bzw. 390×844 (Handy), skaliert auf die verfügbare Breite */
+.stage { position: relative; width: 100%; max-width: 100%; border-radius: var(--radius-card); overflow: hidden; border: 1px solid var(--line); background: var(--bg); }
+.stage.desk { aspect-ratio: 1440 / 900; }
+.stage.phone { aspect-ratio: 390 / 844; width: min(100%, 390px); margin: 0 auto; border-radius: 32px; }
+.canvas { position: absolute; left: 0; top: 0; transform-origin: 0 0; transform: scale(var(--s, 1)); overflow: hidden; background: var(--bg); }
+.desk .canvas { width: 1440px; height: 900px; }
+.phone .canvas { width: 390px; height: 844px; }
+.pair { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 24px; align-items: start; }
+@media (max-width: 1000px) { .pair { grid-template-columns: 1fr; } }
+.shot { width: 100%; display: block; border-radius: var(--radius-card); border: 1px solid var(--line); }
+
+.notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; }
+.note { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.note h3 { font-size: 20px; }
+.note ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; }
+.note .eyebrow { color: var(--muted); }
+.facts { display: flex; flex-wrap: wrap; gap: 8px; }
+.fact { border: 1px solid var(--line); border-radius: var(--radius-pill); padding: 4px 12px; font-size: 13px; color: var(--text); }
+.fact b { color: var(--ink); }
+.cmp { overflow-x: auto; }
+.cmp table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 14px; }
+.cmp th, .cmp td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.cmp th { color: var(--muted); font-weight: 700; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; }
+.cmp td:first-child { color: var(--ink); font-weight: 700; }
+.reco { border: 1px solid var(--line); border-radius: var(--radius-card); padding: 24px; display: flex; flex-direction: column; gap: 8px; background: var(--surface); }
+.reco p { max-width: 75ch; }
+
+
+/* ───── Bühne: nachgebautes Backend ───── */
+.canvas { color: var(--text); font-size: 14px; line-height: 1.45; }
+.b-head { position: absolute; inset: 0 0 auto; height: 60px; display: flex; align-items: center; gap: 24px; padding: 0 32px; border-bottom: 1px solid var(--line); background: var(--bg); z-index: 3; }
+.b-head .logo { color: var(--logo); display: flex; align-items: center; gap: 12px; }
+.b-head .logo svg { height: 26px; width: auto; }
+.b-head .logo span { color: var(--muted); font-size: 14px; }
+.b-user { margin-left: auto; display: flex; align-items: center; gap: 16px; font-size: 13px; color: var(--muted); }
+.b-user b { color: var(--ink); }
+.side { position: absolute; left: 0; top: 60px; bottom: 0; width: 240px; padding: 24px 16px; display: flex; flex-direction: column; gap: 18px; border-right: 1px solid var(--line); overflow: hidden; }
+.grp { display: flex; flex-direction: column; gap: 2px; }
+.grp > .gh { font-weight: 700; font-size: 10px; letter-spacing: .125em; text-transform: uppercase; color: var(--muted); padding: 0 12px 4px; }
+.it { display: flex; align-items: center; justify-content: space-between; gap: 8px; border-radius: 12px; padding: 6px 12px; color: var(--text); }
+.it.on { background: var(--ink); color: var(--bg); font-weight: 700; }
+.cnt { font-family: var(--font-display); font-weight: 800; font-size: 11px; border-radius: 999px; padding: 0 7px; background: var(--line); color: var(--ink); font-variant-numeric: tabular-nums; }
+.it.on .cnt { background: var(--bg); color: var(--ink); }
+.content { position: absolute; top: 60px; right: 0; bottom: 0; overflow: hidden; padding: 28px 32px; display: flex; flex-direction: column; gap: 24px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 20px; min-width: 0; }
+.h1 { font-family: var(--font-display); font-weight: 800; color: var(--ink); font-size: 40px; line-height: 1.05; letter-spacing: -.014em; }
+.h2 { font-family: var(--font-display); font-weight: 800; color: var(--ink); font-size: 22px; line-height: 1.1; }
+.h3 { font-family: var(--font-display); font-weight: 800; color: var(--ink); font-size: 17px; line-height: 1.15; }
+.small { font-size: 12px; color: var(--muted); }
+.small b { color: var(--ink); }
+.bdg { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 40px; padding: 0 8px; font-size: 11px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+.bdg.muted { color: var(--muted); }
+.ex { font-size: 10px; font-weight: 700; color: var(--muted); border: 1px dashed var(--line); border-radius: 40px; padding: 0 7px; white-space: nowrap; }
+.rel { letter-spacing: .15em; color: var(--ink); font-size: 11px; }
+.rel s { text-decoration: none; color: var(--line); }
+.lnk { color: var(--accent-ink); font-size: 13px; font-weight: 700; white-space: nowrap; }
+.btn { display: inline-flex; align-items: center; gap: 6px; border-radius: 40px; padding: 4px 12px; font-size: 12px; font-weight: 700; border: 1px solid var(--line); color: var(--ink); white-space: nowrap; }
+.btn.solid { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.warn { display: flex; gap: 8px; align-items: flex-start; font-size: 12px; color: var(--text); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--sunk); }
+.warn::before { content: "!"; flex: none; display: grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: var(--ink); color: var(--bg); font-weight: 800; font-size: 11px; }
+.lime { background: var(--accent); color: var(--on-accent); border-radius: 16px; }
+.lime .eyebrow, .lime .h1, .lime .h2, .lime .h3, .lime b, .lime .small { color: var(--on-accent); }
+.row { display: flex; align-items: center; gap: 12px; }
+.trunc { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+.tbl th { text-align: left; font-size: 10px; letter-spacing: .125em; text-transform: uppercase; color: var(--muted); font-weight: 700; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+.tbl td { padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.tbl tr.hi td { background: var(--sunk); }
+.ico { width: 16px; height: 16px; flex: none; }
+.tabsb { display: flex; gap: 4px; }
+.tabsb span { padding: 6px 14px; border-radius: 40px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+.tabsb span.on { background: var(--ink); color: var(--bg); }
+.chip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); border-radius: 40px; padding: 1px 10px 1px 3px; font-size: 12px; font-weight: 700; color: var(--ink); white-space: nowrap; background: none; }
+.chip i { font-style: normal; display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; font-size: 10px; font-weight: 800; font-family: var(--font-display); }
+.badge-new { position: relative; display: inline-flex; align-items: center; gap: 6px; border-radius: 40px; background: var(--ink); color: var(--bg); padding: 2px 10px; font-size: 11px; font-weight: 700; text-transform: uppercase; white-space: nowrap; }
+.badge-new::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--bg); }
+.ping::after { content: ""; position: absolute; inset: 0; border-radius: inherit; border: 2px solid var(--ink); animation: ping 1.8s ease-out infinite; }
+@keyframes ping { from { transform: scale(1); opacity: .9; } to { transform: scale(1.6); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .ping::after { animation: none; } }
+.blink-r::after, .blink-y::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; pointer-events: none; }
+.blink-r::after { border-radius: 9px; border: 2px solid var(--cA); animation: blink 1.1s ease-in-out infinite; }
+.blink-y::after { border: 2px solid var(--cC); animation: blink 2.2s ease-in-out infinite; }
+@keyframes blink { 0%, 100% { opacity: 0; transform: scale(.85); } 50% { opacity: 1; transform: scale(1.1); } }
+.toast-in { animation: tin .35s ease-out; }
+@keyframes tin { from { transform: translateY(16px); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .blink-r::after, .blink-y::after { animation: none; opacity: 1; } .toast-in { animation: none; } }
+.drop { position: absolute; z-index: 5; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--glass-shadow); padding: 8px; width: 260px; display: flex; flex-direction: column; gap: 2px; }
+</style>
+<style>
+.tag { display: inline-flex; align-items: center; gap: 4px; border-radius: 6px; padding: 1px 7px; font-size: 11px; font-weight: 700; background: var(--sunk); color: var(--text); border: 1px solid var(--line); white-space: nowrap; }
+.tag.tr { border-radius: 40px; padding: 1px 8px 1px 2px; }
+.tag.tr i { font-style: normal; display: inline-grid; place-items: center; width: 16px; height: 16px; border-radius: 50%; font-size: 9px; font-family: var(--font-display); }
+.agent { border: 1px solid var(--line); border-radius: 14px; background: var(--sunk); padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+.agent-h { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.agent-h::before { content: "◆"; color: var(--ink); font-size: 10px; letter-spacing: 0; }
+.fit { font-family: var(--font-display); font-weight: 800; font-variant-numeric: tabular-nums; color: var(--ink); }
+.fitbar { height: 4px; border-radius: 4px; background: var(--line); overflow: hidden; }
+.fitbar span { display: block; height: 100%; background: var(--ink); }
+.conf { display: inline-flex; align-items: center; gap: 6px; border-radius: 40px; padding: 2px 10px; font-size: 11px; font-weight: 700; border: 1.5px dashed var(--ink); color: var(--ink); white-space: nowrap; }
+.seal { display: inline-flex; align-items: center; gap: 6px; border-radius: 40px; padding: 2px 10px 2px 3px; font-size: 11px; font-weight: 700; background: var(--accent); color: var(--on-accent); white-space: nowrap; }
+.seal::before { content: "✓"; display: inline-grid; place-items: center; width: 16px; height: 16px; border-radius: 50%; background: var(--on-accent); color: var(--accent); font-size: 10px; }
+.steps { display: flex; gap: 0; }
+.steps span { flex: 1; font-size: 11px; font-weight: 700; padding: 5px 8px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+.steps span:first-child { border-radius: 40px 0 0 40px; }
+.steps span:last-child { border-radius: 0 40px 40px 0; }
+.steps span.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.steps span.done { color: var(--ink); }
+</style>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand"><svg role="img" aria-label="New Spice" viewBox="0 0 535 212" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M534.427 139.758H466.278V148.893H534.427V172.803H466.278V181.938H534.427V210.063H429.357V111.633H534.427V139.758Z" fill="currentColor"/><path d="M299.594 160.713C299.594 126.543 318.164 110.223 361.469 110.223C400.843 110.223 421.378 124.008 422.923 155.088H385.513C384.103 145.803 376.934 141.168 361.469 141.168C339.809 141.168 336.148 150.303 336.148 160.713C336.148 171.123 339.944 180.543 361.469 180.543C376.934 180.543 384.103 175.758 385.513 166.338H422.923C421.378 197.553 400.993 211.473 361.469 211.473C318.149 211.473 299.594 195.018 299.594 160.713Z" fill="currentColor"/><path d="M292.498 111.633V210.063H255.928V111.633H292.498Z" fill="currentColor"/><path d="M211.793 111.633C234.158 111.633 249.473 127.383 249.473 149.313C249.473 171.243 234.143 186.993 211.793 186.993H171.008V210.063H134.438V111.633H211.778H211.793ZM204.758 156.063C208.418 156.063 212.918 156.063 212.918 149.313C212.918 142.563 208.418 142.563 204.758 142.563H171.008V156.063H204.758Z" fill="currentColor"/><path d="M0.25 175.338H37.3982C37.3982 180.123 41.9712 183.348 65.5527 183.348C87.5642 183.348 90.8415 181.938 90.8415 178.278C90.8415 174.063 87.5489 173.493 64.1198 172.788C18.9689 171.378 1.66764 164.073 1.66764 141.153C1.66764 119.493 23.2523 110.223 62.6869 110.223C102.122 110.223 123.706 119.508 123.706 144.678H86.5581C86.5581 139.473 77.9913 138.348 59.8364 138.348C41.6815 138.348 38.831 139.188 38.831 142.983C38.831 146.778 42.398 146.643 64.1198 147.483C103.57 149.028 128.005 151.698 128.005 177.438C128.005 204.573 105.14 211.473 64.1198 211.473C23.0999 211.473 0.25 204.588 0.25 175.338Z" fill="currentColor"/><path d="M409.445 0.632812H448.685L416.345 99.0629H362.06L345.89 42.3928L329.72 99.0629H275.435L243.095 0.632812H282.335L302.72 70.0978L324.095 0.632812H367.685L389.06 70.0978L409.445 0.632812Z" fill="currentColor"/><path d="M238.367 28.7578H170.867V37.8928H238.367V61.8028H170.867V70.9378H238.367V99.0629H134.297V0.632812H238.367V28.7578Z" fill="currentColor"/><path d="M91.4499 0.632812H128.005V99.0629H80.1999L37.7349 40.9828V99.0629H1.17993V0.632812H48.9849L91.4499 58.7128V0.632812Z" fill="currentColor"/><path d="M475.236 20.073H472.011L468.366 15.048H466.521V20.073H463.851V6.33301H469.341C472.461 6.33301 474.381 7.99801 474.381 10.773C474.381 12.798 473.151 14.268 471.201 14.808L475.221 20.073H475.236ZM469.206 8.71801H466.521V12.813H469.206C470.691 12.813 471.576 12.123 471.576 10.773C471.576 9.42301 470.676 8.71801 469.206 8.71801Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M468.561 25.6828C474.966 25.6828 480.156 20.4928 480.156 14.0878C480.156 7.68284 474.966 2.49283 468.561 2.49283C462.156 2.49283 456.966 7.68284 456.966 14.0878C456.966 20.4928 462.156 25.6828 468.561 25.6828ZM468.561 27.6478C476.046 27.6478 482.121 21.5728 482.121 14.0878C482.121 6.60284 476.046 0.527832 468.561 0.527832C461.076 0.527832 455.001 6.60284 455.001 14.0878C455.001 21.5728 461.076 27.6478 468.561 27.6478Z" fill="currentColor"/></svg><span>Entwurf 18 · Netzwerk: Eingang, Datenbank, Challenges · Runde 1, grob</span></div>
+    <nav class="tabs" aria-label="Ansicht der Mappe">
+      <a class="tab" href="#heute" data-v="heute">Heute</a>
+      <a class="tab" href="#eingang" data-v="eingang">Eingang</a>
+      <a class="tab" href="#datenbank" data-v="datenbank">Netzwerk-Datenbank</a>
+      <a class="tab" href="#eintrag" data-v="eintrag">Eintrag</a>
+      <a class="tab" href="#challenge" data-v="challenge">Challenge</a>
+      <a class="tab" href="#modell" data-v="modell">Aufbau &amp; offene Fragen</a>
+    </nav>
+    <div class="tools">
+      <div class="seg" role="group" aria-label="Gerät">
+        <button type="button" id="dev-desk" data-dev="desk" aria-pressed="true">Desktop 1440</button>
+        <button type="button" id="dev-phone" data-dev="phone" aria-pressed="false">Handy 390</button>
+      </div>
+      <div class="seg" role="group" aria-label="Darstellung">
+        <button type="button" id="th-dark" data-th="dark">Dunkel</button>
+        <button type="button" id="th-light" data-th="light">Hell</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main id="main"></main>
+
+<script>
+const LOGO = `<svg role="img" aria-label="New Spice" viewBox="0 0 535 212" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M534.427 139.758H466.278V148.893H534.427V172.803H466.278V181.938H534.427V210.063H429.357V111.633H534.427V139.758Z" fill="currentColor"/><path d="M299.594 160.713C299.594 126.543 318.164 110.223 361.469 110.223C400.843 110.223 421.378 124.008 422.923 155.088H385.513C384.103 145.803 376.934 141.168 361.469 141.168C339.809 141.168 336.148 150.303 336.148 160.713C336.148 171.123 339.944 180.543 361.469 180.543C376.934 180.543 384.103 175.758 385.513 166.338H422.923C421.378 197.553 400.993 211.473 361.469 211.473C318.149 211.473 299.594 195.018 299.594 160.713Z" fill="currentColor"/><path d="M292.498 111.633V210.063H255.928V111.633H292.498Z" fill="currentColor"/><path d="M211.793 111.633C234.158 111.633 249.473 127.383 249.473 149.313C249.473 171.243 234.143 186.993 211.793 186.993H171.008V210.063H134.438V111.633H211.778H211.793ZM204.758 156.063C208.418 156.063 212.918 156.063 212.918 149.313C212.918 142.563 208.418 142.563 204.758 142.563H171.008V156.063H204.758Z" fill="currentColor"/><path d="M0.25 175.338H37.3982C37.3982 180.123 41.9712 183.348 65.5527 183.348C87.5642 183.348 90.8415 181.938 90.8415 178.278C90.8415 174.063 87.5489 173.493 64.1198 172.788C18.9689 171.378 1.66764 164.073 1.66764 141.153C1.66764 119.493 23.2523 110.223 62.6869 110.223C102.122 110.223 123.706 119.508 123.706 144.678H86.5581C86.5581 139.473 77.9913 138.348 59.8364 138.348C41.6815 138.348 38.831 139.188 38.831 142.983C38.831 146.778 42.398 146.643 64.1198 147.483C103.57 149.028 128.005 151.698 128.005 177.438C128.005 204.573 105.14 211.473 64.1198 211.473C23.0999 211.473 0.25 204.588 0.25 175.338Z" fill="currentColor"/><path d="M409.445 0.632812H448.685L416.345 99.0629H362.06L345.89 42.3928L329.72 99.0629H275.435L243.095 0.632812H282.335L302.72 70.0978L324.095 0.632812H367.685L389.06 70.0978L409.445 0.632812Z" fill="currentColor"/><path d="M238.367 28.7578H170.867V37.8928H238.367V61.8028H170.867V70.9378H238.367V99.0629H134.297V0.632812H238.367V28.7578Z" fill="currentColor"/><path d="M91.4499 0.632812H128.005V99.0629H80.1999L37.7349 40.9828V99.0629H1.17993V0.632812H48.9849L91.4499 58.7128V0.632812Z" fill="currentColor"/><path d="M475.236 20.073H472.011L468.366 15.048H466.521V20.073H463.851V6.33301H469.341C472.461 6.33301 474.381 7.99801 474.381 10.773C474.381 12.798 473.151 14.268 471.201 14.808L475.221 20.073H475.236ZM469.206 8.71801H466.521V12.813H469.206C470.691 12.813 471.576 12.123 471.576 10.773C471.576 9.42301 470.676 8.71801 469.206 8.71801Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M468.561 25.6828C474.966 25.6828 480.156 20.4928 480.156 14.0878C480.156 7.68284 474.966 2.49283 468.561 2.49283C462.156 2.49283 456.966 7.68284 456.966 14.0878C456.966 20.4928 462.156 25.6828 468.561 25.6828ZM468.561 27.6478C476.046 27.6478 482.121 21.5728 482.121 14.0878C482.121 6.60284 476.046 0.527832 468.561 0.527832C461.076 0.527832 455.001 6.60284 455.001 14.0878C455.001 21.5728 461.076 27.6478 468.561 27.6478Z" fill="currentColor"/></svg>`;
+const ic = {
+  chev: `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6l4 4 4-4"/></svg>`,
+  search: `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>`,
+  menu: `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 4h12M2 8h12M2 12h12"/></svg>`,
+  ok: `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8.5l3 3 7-7"/></svg>`,
+  x: `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4l8 8M12 4l-8 8"/></svg>`,
+  lock: `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3.5" y="7" width="9" height="6.5" rx="1.5"/><path d="M5.5 7V5a2.5 2.5 0 015 0v2"/></svg>`,
+  link: `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6.5 9.5l3-3M7 4.5l1-1a3 3 0 014 4l-1 1M9 11.5l-1 1a3 3 0 01-4-4l1-1"/></svg>`,
+};
+const state = { view: "heute", dev: "desk", menu: false, role: "Alle", tag: null, sel: "tapflow", ptab: "angebot", ctab: "matching", short: {}, sugg: {}, cl: "c1", conf: 0, phEntry: false };
+
+/* ───── Begriffe und Beispielinhalte ───── */
+const ROLES = [["Solution Provider", 38, "Startups und Partner mit eigener Lösung"], ["Verein", 12, "Clubs und Vereine"], ["Betreiber", 9, "Arenen, Venues, Hotels, Veranstalter"], ["Multiplikator", 6, "Verbände, Agenturen, Medien"], ["Investor", 4, "VCs, Angels, Corporate Venture"]];
+const TR = { 19: ["D", "Checkout-freie Gastronomie"], 24: ["D", "Mobile Order & In-Seat"], 25: ["D", "Self-Pour & Smart Schank"], 26: ["D", "Cashless & Mobile POS"], 31: ["F", "Circular Events"], 34: ["F", "Energiespeicher & EMS"], 37: ["G", "KI-Crowd-Management"], 41: ["G", "Hitzeschutz & Wetterresilienz"] };
+const trTag = (n) => `<span class="tag tr"><i style="background:var(--c${TR[n][0]});color:var(--c${TR[n][0]}-fg)">${TR[n][0]}</i>#${n}</span>`;
+const DB = [
+  { id: "tapflow", n: "TapFlow", role: "Solution Provider", sub: "Startup", offer: ["Self-Pour", "Zapfsysteme"], tr: [25], st: "Aufgenommen", rel: "approved", ref: 4, upd: "vor 3 Tagen", src: "Bewerbung" },
+  { id: "queueless", n: "QueueLess", role: "Solution Provider", sub: "Startup", offer: ["Kassensysteme", "Warteschlange"], tr: [19, 26], st: "Aufgenommen", rel: "", ref: 2, upd: "vor 1 Woche", src: "Agent" },
+  { id: "preorder", n: "Pre-Order Pro", role: "Solution Provider", sub: "Startup", offer: ["Mobile Order", "Vorbestellung"], tr: [24], st: "Aufgenommen", rel: "", ref: 3, upd: "vor 2 Wochen", src: "Agent" },
+  { id: "kassen", n: "Beispiel Kassensysteme AG", role: "Solution Provider", sub: "Partner", offer: ["Kassensysteme", "Cashless"], tr: [26], st: "Aufgenommen", rel: "Partner", ref: 40, upd: "vor 1 Monat", src: "Redaktion" },
+  { id: "crowdsense", n: "CrowdSense", role: "Solution Provider", sub: "Startup", offer: ["Crowd-Management", "Sensorik"], tr: [37], st: "Aufgenommen", rel: "", ref: 1, upd: "vor 5 Tagen", src: "Redaktion" },
+  { id: "energie", n: "Beispiel Energie GmbH", role: "Solution Provider", sub: "Partner", offer: ["Energiespeicher"], tr: [34], st: "Aufgenommen", rel: "Partner", ref: 12, upd: "vor 2 Monaten", src: "Redaktion" },
+  { id: "seatserve", n: "SeatServe GmbH", role: "Solution Provider", sub: "Startup", offer: ["Mobile Order", "In-Seat"], tr: [24], st: "In Prüfung", rel: "", ref: 1, upd: "heute", src: "Bewerbung" },
+  { id: "greencup", n: "GreenCup", role: "Solution Provider", sub: "Startup", offer: ["Mehrweg"], tr: [31], st: "On hold", rel: "", ref: 0, upd: "30.10.", src: "Bewerbung" },
+  { id: "kundea", n: "Kunde A", role: "Verein", sub: "Fußball, Profi", offer: ["Gastronomie", "Anreise"], tr: [], st: "Aufgenommen", rel: "Kunde", ref: 0, upd: "gestern", src: "Redaktion" },
+  { id: "fcb", n: "FC Beispielstadt 1912 e. V.", role: "Verein", sub: "Fußball, 3. Liga", offer: ["Gastronomie", "Wartezeit"], tr: [], st: "In Prüfung", rel: "", ref: 0, upd: "heute", src: "Bewerbung" },
+  { id: "arena", n: "Beispiel-Arena Nord", role: "Betreiber", sub: "Arena, 12.000", offer: ["Einlass", "Gastronomie"], tr: [], st: "In Prüfung", rel: "", ref: 0, upd: "gestern", src: "Bewerbung" },
+  { id: "hotel", n: "Hotel am Stadion", role: "Betreiber", sub: "Hotel, 180 Zimmer", offer: ["Hospitality"], tr: [], st: "Aufgenommen", rel: "Kunde", ref: 0, upd: "28.10.", src: "Bewerbung" },
+  { id: "vbs", n: "Verband Beispiel-Sportstätten", role: "Multiplikator", sub: "120 Mitglieder", offer: ["Sportstätten"], tr: [], st: "On hold", rel: "", ref: 0, upd: "Mo", src: "Bewerbung" },
+  { id: "ventures", n: "Beispiel Ventures", role: "Investor", sub: "Fonds", offer: ["Fan Experience", "Venue-Tech"], tr: [], st: "In Prüfung", rel: "", ref: 0, upd: "gestern", src: "Bewerbung" },
+];
+const ST = { "Aufgenommen": "g", "In Prüfung": "y", "On hold": "n" };
+const TAGS = [["Kassensysteme", 7], ["Mobile Order", 6], ["Crowd-Management", 4], ["Self-Pour", 3], ["Energiespeicher", 3], ["Mehrweg", 2], ["Einlass", 5], ["Gastronomie", 9]];
+
+const NAV = [
+  { g: null, items: [["Cockpit", 0]] },
+  { g: "Inhalte", items: [["Review-Queue", 4], ["Liveticker", 6], ["Trends", 0], ["Trenddatenbank", 0], ["Quellenverzeichnis", 0]] },
+  { g: "Netzwerk", items: [["Eingang", 7], ["Netzwerk-Datenbank", 0], ["Challenges", 2]] },
+  { g: "Agenten", items: [["Scouting", 0], ["Netzwerk-Manager", 5], ["Agenten-Protokoll", 0]] },
+  { g: "Kunden", items: [["Projekte", 0], ["Kunden", 0], ["Team", 0]] },
+];
+const item = (active) => ([l, c]) => `<span class="it${l === active ? " on" : ""}"><span>${l}</span>${c ? `<span class="cnt">${c}</span>` : ""}</span>`;
+const side = (active) => `<nav class="side">${NAV.map((g) => `<div class="grp">${g.g ? `<span class="gh">${g.g}</span>` : ""}${g.items.map(item(active)).join("")}</div>`).join("")}</nav>`;
+const bhead = () => `<div class="b-head"><span class="logo">${LOGO}<span>Redaktion</span></span><span class="b-user"><span>Zum Dashboard →</span><span>Hell</span><span><b>Redaktion</b> · Admin</span><span>Abmelden</span></span></div>`;
+const phead = () => `<div class="b-head" style="height:56px;padding:0 16px;gap:10px"><span class="logo">${LOGO.replace("<svg", '<svg style="height:20px"')}<span style="font-size:13px">Redaktion</span></span><span class="b-user"><button type="button" data-menu="1" class="btn">${ic.menu} Menü</button></span></div>`;
+const phoneMenu = (active) => state.menu ? `<div style="position:absolute;inset:56px 0 0;background:var(--bg);z-index:4;padding:16px;display:flex;flex-direction:column;gap:14px;overflow:hidden">${NAV.map((g) => `<div class="grp">${g.g ? `<span class="gh">${g.g}</span>` : ""}${g.items.map(item(active)).join("")}</div>`).join("")}</div>` : "";
+const AMP = { r: ["var(--cA)", "var(--cA-fg)", "!"], y: ["var(--cC)", "var(--cC-fg)", "◷"], g: ["var(--cF)", "var(--cF-fg)", "✓"], n: ["var(--line)", "var(--ink)", "–"] };
+const amp = (k, s = 16) => `<span style="display:inline-grid;place-items:center;flex:none;width:${s}px;height:${s}px;border-radius:50%;background:${AMP[k][0]};color:${AMP[k][1]};font-weight:800;font-size:${Math.round(s * .55)}px">${AMP[k][2]}</span>`;
+const stBadge = (s) => `<span class="row small" style="gap:6px;white-space:nowrap">${amp(ST[s], 14)}${s}</span>`;
+const relBadge = (r) => r === "approved" ? `<span class="seal">New Spice approved</span>` : r ? `<span class="bdg">${r}</span>` : "";
+const fitRow = (f) => `<span class="row" style="gap:8px"><span class="fit" style="font-size:15px;width:38px">${f} %</span><span class="fitbar" style="flex:1;min-width:50px"><span style="width:${f}%"></span></span></span>`;
+const agentBox = (title, body) => `<div class="agent"><span class="agent-h">Netzwerk-Manager · ${title}</span>${body}</div>`;
+const sugBtns = (id) => state.sugg[id] ? `<span class="small"><b>${state.sugg[id] === "ok" ? "✓ übernommen" : "verworfen"}</b> · <button type="button" data-sug="${id}:" class="lnk" style="font-size:12px">rückgängig</button></span>` : `<span class="row" style="gap:6px"><button type="button" data-sug="${id}:ok" class="btn solid">Übernehmen</button><span class="btn">Anpassen</span><button type="button" data-sug="${id}:no" class="btn">Verwerfen</button></span>`;
+
+/* ───── 1 · Eingang: Bewerbungen, Anfragen, Challenges – vom Agenten geclustert ───── */
+const CLUSTERS = [
+  { id: "c1", t: "Wartezeiten in der Gastronomie", n: 4, sum: "Drei Bewerbungen und eine Kundenanfrage drehen sich um Wartezeit an Ständen und Bestellung am Platz.",
+    items: [["Bewerbung", "FC Beispielstadt 1912 e. V.", "Verein", "Umbau der Gastronomie, sucht Partner für kürzere Wartezeiten", "vor 2 Std."], ["Bewerbung", "SeatServe GmbH", "Solution Provider · Startup", "Bestellung am Platz per QR-Code; Pilotpartner gesucht", "vor 5 Std."], ["Bewerbung", "Beispiel-Arena Nord", "Betreiber", "Einlass und Besucherströme, Gastronomie", "gestern"], ["Anfrage", "Kunde P", "Kunde", "VIP-Lounge: Bestellung am Tisch", "vor 1 Tag"]],
+    sug: ["SeatServe als <b>Solution Provider · Startup</b> aufnehmen, Tags <b>Mobile Order, In-Seat</b>, Trend #24", "FC Beispielstadt und Arena Nord haben dieselbe Herausforderung wie die Challenge „Wartezeit am Bierstand“ (Kunde A). Gemeinsames Vorgehen anbieten?", "Passende Solution Provider aus der Datenbank: QueueLess, TapFlow, Pre-Order Pro, Beispiel Kassensysteme AG"] },
+  { id: "c2", t: "Nachhaltigkeit und Mehrweg", n: 1, sum: "Ein Startup für Mehrwegbecher, Unterlagen unvollständig.", items: [["Bewerbung", "GreenCup", "Solution Provider · Startup", "Mehrwegsystem für Stadien und Festivals", "30.10."]], sug: ["Pitchdeck nachfordern; danach Tag <b>Mehrweg</b>, Trend #31"] },
+  { id: "c3", t: "Hitze und Wetter", n: 1, sum: "Kundenanfrage zu Hitzeschutz auf einer unüberdachten Tribüne.", items: [["Anfrage", "Kunde A", "Kunde", "Hitzeschutz auf der Gegentribüne", "vor 3 Std."]], sug: ["Als Challenge anlegen; in der Datenbank gibt es noch keinen Provider mit Tag <b>Hitzeschutz</b>, Suche im Web starten"] },
+  { id: "c4", t: "Investoren und Dealflow", n: 1, sum: "Ein Fonds mit Fokus Fan Experience und Venue-Tech.", items: [["Bewerbung", "Beispiel Ventures", "Investor", "Sucht Dealflow Fan Experience, Venue-Technologie", "gestern"]], sug: ["Als <b>Investor</b> aufnehmen; passt zu 6 Startups in der Datenbank (Mobile Order, Kassensysteme)"] },
+];
+function Eingang_desk() {
+  const c = CLUSTERS.find((x) => x.id === state.cl);
+  return `${bhead()}${side("Eingang")}
+  <div class="content" style="left:240px;gap:16px;padding:24px 32px">
+    <div class="row" style="justify-content:space-between;align-items:flex-end"><div><p class="eyebrow" style="color:var(--muted)">Netzwerk</p><h1 class="h1" style="font-size:34px">Eingang</h1></div>
+      <span class="row small" style="gap:14px"><span><b>5</b> Bewerbungen</span><span><b>2</b> Anfragen</span><span><b>0</b> Challenges eingereicht</span><span class="btn">Liste statt Themen</span></span></div>
+    <div style="display:grid;grid-template-columns:340px minmax(0,1fr);gap:24px;min-height:0">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <span class="agent-h">Themen · vom Netzwerk-Manager geclustert</span>
+        ${CLUSTERS.map((x) => `<button type="button" data-cl="${x.id}" style="text-align:left;border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;border:1px solid ${x.id === state.cl ? "var(--ink)" : "var(--line)"};${x.id === state.cl ? "background:var(--surface)" : ""}">
+          <span class="row" style="justify-content:space-between"><b style="color:var(--ink)">${x.t}</b><span class="num" style="font-size:18px;color:var(--ink)">${x.n}</span></span><span class="small" style="line-height:1.4">${x.sum}</span></button>`).join("")}
+      </div>
+      <section style="display:flex;flex-direction:column;gap:14px;min-width:0">
+        <div><span class="h2">${c.t}</span><div class="small">${c.n} Eingänge · zusammengefasst vom Netzwerk-Manager</div></div>
+        <table class="tbl"><thead><tr><th style="width:96px">Art</th><th>Wer</th><th>Worum es geht</th><th style="width:80px">Eingang</th><th style="width:96px"></th></tr></thead><tbody>
+          ${c.items.map(([k, w, r, t, a]) => `<tr><td><span class="bdg${k === "Anfrage" ? "" : " muted"}">${k}</span></td><td><b style="color:var(--ink)">${w}</b><div class="small">${r}</div></td><td>${t}</td><td class="small">${a}</td><td><span class="btn">Öffnen</span></td></tr>`).join("")}</tbody></table>
+        ${agentBox("Vorschläge", c.sug.map((t, i) => `<div style="display:flex;flex-direction:column;gap:6px;padding:8px 0;${i ? "border-top:1px solid var(--line)" : ""}"><span style="font-size:13px;color:var(--text)">${t}</span>${sugBtns(c.id + i)}</div>`).join(""))}
+      </section></div>
+  </div>`;
+}
+function Eingang_phone() {
+  return `${phead()}${phoneMenu("Eingang")}
+  <div class="content" style="left:0;top:56px;padding:14px 16px;gap:10px">
+    <h1 class="h1" style="font-size:26px">Eingang</h1><span class="small"><b>5</b> Bewerbungen · <b>2</b> Anfragen · nach Themen</span>
+    ${CLUSTERS.map((x) => `<div class="card" style="padding:12px;display:flex;flex-direction:column;gap:6px"><span class="row" style="justify-content:space-between"><b style="color:var(--ink)">${x.t}</b><span class="num" style="color:var(--ink)">${x.n}</span></span><span class="small">${x.sum}</span>${x.id === "c1" ? `<div class="agent" style="padding:8px 10px"><span class="agent-h">Vorschlag</span><span style="font-size:12px">${x.sug[0]}</span>${sugBtns("c10")}</div>` : ""}</div>`).join("")}
+  </div>`;
+}
+
+/* ───── 2 · Netzwerk-Datenbank ───── */
+function Datenbank_desk() {
+  const rows = DB.filter((e) => (state.role === "Alle" || e.role === state.role) && (!state.tag || e.offer.includes(state.tag)));
+  return `${bhead()}${side("Netzwerk-Datenbank")}
+  <div class="content" style="left:240px;right:340px;gap:14px;padding:24px 28px">
+    <div class="row" style="justify-content:space-between;align-items:flex-end"><div><p class="eyebrow" style="color:var(--muted)">Netzwerk</p><h1 class="h1" style="font-size:34px">Netzwerk-Datenbank</h1></div>
+      <span class="row" style="gap:8px"><span class="row small" style="gap:6px;border:1px solid var(--line);border-radius:40px;padding:6px 12px;width:220px">${ic.search} Name, Angebot, Trend …</span><span class="btn solid" style="padding:6px 14px">+ Eintrag</span></span></div>
+    <div class="row" style="gap:4px;flex-wrap:wrap"><button type="button" data-role="Alle" class="btn${state.role === "Alle" ? " solid" : ""}" style="padding:3px 10px">Alle · 69</button>${ROLES.map(([r, n]) => `<button type="button" data-role="${r}" class="btn${state.role === r ? " solid" : ""}" style="padding:3px 10px">${r} · ${n}</button>`).join("")}</div>
+    <div class="row" style="gap:6px;flex-wrap:wrap"><span class="small">Angebot / Tags:</span>${TAGS.map(([t, n]) => `<button type="button" data-tag="${t}" class="tag" style="cursor:pointer;${state.tag === t ? "background:var(--ink);color:var(--bg);border-color:var(--ink)" : ""}">${t} ${n}</button>`).join("")}${state.tag ? `<button type="button" data-tag="" class="lnk" style="font-size:12px">Filter löschen</button>` : ""}</div>
+    <table class="tbl"><thead><tr><th style="width:220px">Name</th><th style="width:130px">Rolle</th><th>Angebot</th><th style="width:96px">Trends</th><th style="width:120px">Status</th><th style="width:150px">Beziehung</th></tr></thead><tbody>
+      ${rows.map((e) => `<tr data-open="${e.id}" style="cursor:pointer"><td><b style="color:var(--ink)">${e.n}</b><div class="small" style="white-space:nowrap">${e.src} · ${e.upd}</div></td>
+        <td><span style="color:var(--ink)">${e.role}</span><div class="small">${e.sub}</div></td>
+        <td><span class="row" style="gap:4px;flex-wrap:wrap">${e.offer.map((t) => `<span class="tag">${t}</span>`).join("")}</span></td>
+        <td><span class="row" style="gap:3px;flex-wrap:wrap">${e.tr.map(trTag).join("") || '<span class="small">–</span>'}</span></td>
+        <td>${stBadge(e.st)}</td><td>${relBadge(e.rel)}</td></tr>`).join("")}</tbody></table>
+  </div>
+  <aside style="position:absolute;right:0;top:60px;bottom:0;width:340px;border-left:1px solid var(--line);padding:22px 20px;display:flex;flex-direction:column;gap:12px;overflow:hidden">
+    <div class="row" style="justify-content:space-between"><span class="h3">Netzwerk-Manager</span><span class="small"><b>5</b> Vorschläge</span></div>
+    <span class="small">Arbeitet der Redaktion zu. Nichts wird ohne eure Freigabe geändert.</span>
+    ${[["Aufnehmen", "SeatServe GmbH als <b>Solution Provider · Startup</b>, Tags Mobile Order, In-Seat, Trend #24. Ähnlich: Pre-Order Pro.", "s1"],
+       ["Tags zusammenlegen", "„Zapfsysteme“ und „Self-Pour“ beschreiben dasselbe Angebot (5 Einträge).", "s2"],
+       ["Eintrag veraltet", "Beispiel Energie GmbH: Website nennt 2 neue Referenzen, Eintrag 2 Monate nicht gepflegt.", "s3"],
+       ["Verbindung", "Beispiel Ventures sucht Dealflow Venue-Tech: QueueLess und CrowdSense vorstellen?", "s4"]].map(([h, t, id]) => `<div class="agent" style="padding:10px 12px"><span class="agent-h">${h}</span><span style="font-size:13px">${t}</span>${sugBtns(id)}</div>`).join("")}
+  </aside>`;
+}
+function Datenbank_phone() {
+  const rows = DB.filter((e) => state.role === "Alle" || e.role === state.role).slice(0, 6);
+  return `${phead()}${phoneMenu("Netzwerk-Datenbank")}
+  <div class="content" style="left:0;top:56px;padding:14px 16px;gap:10px">
+    <h1 class="h1" style="font-size:26px">Netzwerk</h1>
+    <span class="row small" style="gap:6px;border:1px solid var(--line);border-radius:40px;padding:6px 12px">${ic.search} Name, Angebot, Trend …</span>
+    <div class="row" style="gap:4px;overflow:hidden"><button type="button" data-role="Alle" class="btn${state.role === "Alle" ? " solid" : ""}">Alle</button><button type="button" data-role="Solution Provider" class="btn${state.role === "Solution Provider" ? " solid" : ""}">Solution Provider</button><button type="button" data-role="Verein" class="btn${state.role === "Verein" ? " solid" : ""}">Verein</button><span class="btn">…</span></div>
+    ${rows.map((e) => `<button type="button" data-open="${e.id}" style="text-align:left;border-bottom:1px solid var(--line);padding:8px 0;display:flex;flex-direction:column;gap:4px"><span class="row" style="justify-content:space-between"><b style="color:var(--ink)">${e.n}</b>${stBadge(e.st)}</span><span class="small">${e.role} · ${e.sub}</span><span class="row" style="gap:4px;flex-wrap:wrap">${e.offer.map((t) => `<span class="tag">${t}</span>`).join("")}${e.tr.map(trTag).join("")}</span></button>`).join("")}
+  </div>`;
+}
+
+/* ───── 3 · Eintrag (Solution Provider) ───── */
+function Eintrag_desk() {
+  const tabs = [["angebot", "Angebot & Referenzen"], ["verb", "Verbindungen · 6"], ["kontakt", "Kontakt & Vertrauliches"], ["verlauf", "Verlauf"]];
+  const body = {
+    angebot: `<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px">
+        <div style="display:flex;flex-direction:column;gap:10px"><span class="h3">Angebot</span>
+          ${[["TapFlow Wall", "Selbstzapf-Wand mit Bezahlung per Karte oder App, 8 Zapfhähne je Modul", ["Self-Pour", "Zapfsysteme"], [25]], ["TapFlow Insights", "Auswertung Absatz und Wartezeit je Stand", ["Daten", "Gastronomie"], [11]]].map(([t, d, tags, trs]) => `<div class="card" style="padding:12px 14px;display:flex;flex-direction:column;gap:6px"><b style="color:var(--ink)">${t}</b><span style="font-size:13px">${d}</span><span class="row" style="gap:4px;flex-wrap:wrap">${tags.map((x) => `<span class="tag">${x}</span>`).join("")}${trs.filter((n) => TR[n]).map(trTag).join("")}${trs.includes(11) ? `<span class="tag tr"><i style="background:var(--cB);color:var(--cB-fg)">B</i>#11</span>` : ""}</span></div>`).join("")}</div>
+        <div style="display:flex;flex-direction:column;gap:10px"><span class="h3">Referenzen</span>
+          <table class="tbl"><tbody>${[["Beispiel-Arena Süd", "Pilot 2025", "−40 % Wartezeit"], ["Kunde A", "Projekt Halbzeit-Gastro", "Shortlist"], ["Festival Beispiel", "Einsatz 2024", "18.000 Gäste"], ["Messe Beispiel", "seit 2025", "Dauerbetrieb"]].map(([w, a, r]) => `<tr><td><b style="color:var(--ink)">${w}</b></td><td class="small">${a}</td><td>${r}</td></tr>`).join("")}</tbody></table>
+          ${agentBox("Hinweis", `<span style="font-size:13px">Auf der Website gefunden: Referenz „Beispiel-Halle Ost“ (seit 10/2026). Hinzufügen?</span>${sugBtns("e1")}`)}</div></div>`,
+    verb: `<div style="display:flex;flex-direction:column;gap:8px">${[["Challenge", "Wartezeit am Bierstand (Kunde A)", "Fit 86 % · auf Shortlist"], ["Projekt", "Halbzeit-Gastro schneller (Kunde A)", "Shortlist · Kunde: interessant"], ["Bewerbung", "FC Beispielstadt 1912 e. V.", "gleiches Problem · vom Agenten vorgeschlagen"], ["Investor", "Beispiel Ventures", "Fokus passt · vom Agenten vorgeschlagen"], ["ähnlich", "QueueLess", "anderer Ansatz (Kasse statt Zapfen)"], ["Partner", "Beispiel Kassensysteme AG", "Schnittstelle vorhanden"]].map(([k, t, s]) => `<div class="row" style="gap:12px;border-bottom:1px solid var(--line);padding:8px 0"><span class="bdg muted" style="width:90px;justify-content:center">${k}</span><b style="color:var(--ink);flex:1">${t}</b><span class="small">${s}</span></div>`).join("")}</div>`,
+    kontakt: `<div class="warn" style="align-items:center">${ic.lock}<span>Nur für die Redaktion. Kunden sehen das erst, wenn ihr es im Projekt freigebt.</span></div>
+      <dl style="margin:0;display:grid;grid-template-columns:160px minmax(0,1fr);gap:8px 16px;font-size:14px"><dt class="small">Ansprechperson</dt><dd style="margin:0;color:var(--ink)">Gründung · hello@tapflow.example</dd><dt class="small">Preise</dt><dd style="margin:0">ab 2.400 € je Modul und Saison</dd><dt class="small">Pitchdeck</dt><dd style="margin:0">TapFlow-2026.pdf</dd><dt class="small">Notiz Redaktion</dt><dd style="margin:0">Sehr verlässlich im Pilot, kurze Reaktionszeiten.</dd></dl>`,
+    verlauf: `<div style="display:flex;flex-direction:column;gap:6px;font-size:13px">${[["12.10.", "Bewerbung über die Website"], ["13.10.", "Netzwerk-Manager: Klassifizierung vorgeschlagen, von Redaktion übernommen"], ["20.10.", "Aufgenommen"], ["02.11.", "Siegel „New Spice approved“ nach Pilot"], ["03.11.", "Eintrag gepflegt"]].map(([d, t]) => `<div class="row" style="gap:12px"><span class="small" style="width:50px">${d}</span>${t}</div>`).join("")}</div>`,
+  }[state.ptab];
+  return `${bhead()}${side("Netzwerk-Datenbank")}
+  <div class="content" style="left:240px;gap:16px;padding:22px 32px">
+    <span class="small">Netzwerk-Datenbank › Solution Provider</span>
+    <div class="row" style="justify-content:space-between;align-items:flex-start"><div style="display:flex;flex-direction:column;gap:6px">
+        <div class="row" style="gap:8px"><span class="bdg">Solution Provider · Startup</span>${stBadge("Aufgenommen")}<span class="seal">New Spice approved</span><span class="ex">Beispiel</span></div>
+        <h1 class="h1" style="font-size:38px">TapFlow</h1><span style="max-width:70ch">Selbstzapfen ohne Warteschlange: Gäste zapfen selbst, bezahlt wird per Karte oder App. Kunden im Einsatz in 4 Venues.</span></div>
+      <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end"><span class="row" style="gap:6px"><span class="btn">Bearbeiten</span><span class="btn solid">Mit Challenge abgleichen</span></span>
+        <span class="row small" style="gap:8px">Sichtbarkeit <span class="seg" style="font-size:12px"><button type="button" aria-pressed="false">nur intern</button><button type="button" aria-pressed="true">im Radar sichtbar</button></span></span></div></div>
+    <div class="row" style="gap:6px;flex-wrap:wrap"><span class="small">Klassifizierung:</span><span class="tag">Rolle: Solution Provider</span><span class="tag">Typ: Startup</span><span class="tag">Self-Pour</span><span class="tag">Zapfsysteme</span><span class="tag">Gastronomie</span>${trTag(25)}<span class="tag">Reifegrad: Kunden im Einsatz</span><span class="tag">DACH</span><span class="lnk" style="font-size:12px">+ Tag</span></div>
+    <div class="tabsb" style="font-size:13px;border-bottom:1px solid var(--line);padding-bottom:10px">${tabs.map(([k, l]) => `<button type="button" data-ptab="${k}" style="padding:6px 14px;border-radius:40px;font-weight:700;${state.ptab === k ? "background:var(--ink);color:var(--bg)" : "color:var(--ink)"}">${l}</button>`).join("")}</div>
+    ${body}
+  </div>`;
+}
+function Eintrag_phone() {
+  return `${phead()}${phoneMenu("Netzwerk-Datenbank")}
+  <div class="content" style="left:0;top:56px;padding:14px 16px;gap:10px">
+    <span class="small">‹ Netzwerk</span>
+    <div class="row" style="gap:6px;flex-wrap:wrap"><span class="bdg">Solution Provider · Startup</span><span class="seal">approved</span></div>
+    <h1 class="h1" style="font-size:30px">TapFlow</h1><span style="font-size:14px">Selbstzapfen ohne Warteschlange. Kunden im Einsatz in 4 Venues.</span>
+    <div class="row" style="gap:4px;flex-wrap:wrap"><span class="tag">Self-Pour</span><span class="tag">Zapfsysteme</span>${trTag(25)}</div>
+    <div class="tabsb" style="font-size:12px;overflow:hidden"><span class="on">Angebot</span><span>Verbindungen</span><span>Kontakt</span></div>
+    <div class="card" style="padding:12px;display:flex;flex-direction:column;gap:4px"><b style="color:var(--ink)">TapFlow Wall</b><span style="font-size:13px">Selbstzapf-Wand mit Bezahlung per Karte oder App</span></div>
+    <span class="h3">Referenzen · 4</span><span class="small">Beispiel-Arena Süd · Kunde A · Festival Beispiel · Messe Beispiel</span>
+    ${agentBox("Hinweis", `<span style="font-size:12px">Neue Referenz auf der Website gefunden.</span>${sugBtns("e1")}`)}
+  </div>`;
+}
+
+/* ───── 4 · Challenge mit Matching ───── */
+const MATCH = [
+  { id: "m1", n: "QueueLess", k: "Startup", f: 91, why: "Kasse ohne Schlange; löst den Engpass Bezahlen. 2 Referenzen in Arenen.", src: "Datenbank" },
+  { id: "m2", n: "TapFlow", k: "Startup · approved", f: 86, why: "Selbstzapfen entlastet die Theke; Kassensystem-Anbindung vorhanden.", src: "Datenbank" },
+  { id: "m3", n: "Beispiel Kassensysteme AG", k: "Partner", f: 74, why: "Bestehender Kassenanbieter vieler Stadien; Upgrade statt Neusystem.", src: "Datenbank" },
+  { id: "m4", n: "Pre-Order Pro", k: "Startup", f: 69, why: "Vorbestellung vor der Halbzeit; wirkt nur mit App-Nutzung.", src: "Datenbank" },
+  { id: "m5", n: "SeatServe GmbH", k: "Startup · in Prüfung", f: 63, why: "Bestellung am Platz; noch keine Referenz bei 50.000 Gästen.", src: "Eingang" },
+];
+function Challenge_desk() {
+  const tabs = [["problem", "Problem & Deep Dive"], ["matching", "Matching · 5"], ["verb", "Ähnliches & Verbindungen"]];
+  const matching = `<div style="display:flex;flex-direction:column;gap:2px">
+      <div class="row small" style="justify-content:space-between;padding-bottom:6px"><span>Netzwerk-Manager gleicht mit <b>38 Solution Providern</b> der Datenbank ab · zuletzt vor 2 Std.</span><span class="row" style="gap:6px"><span class="btn">Erneut abgleichen</span><span class="btn">Zusätzlich im Web suchen</span></span></div>
+      <table class="tbl"><thead><tr><th>Solution Provider</th><th style="width:150px">Passung</th><th>Warum</th><th style="width:90px">Herkunft</th><th style="width:190px"></th></tr></thead><tbody>
+      ${MATCH.map((m) => `<tr${state.short[m.id] === "ok" ? ' class="hi"' : ""}><td><b style="color:var(--ink)">${m.n}</b><div class="small">${m.k}</div></td><td>${fitRow(m.f)}</td><td style="font-size:13px">${m.why}</td><td><span class="bdg muted">${m.src}</span></td>
+        <td style="text-align:right;white-space:nowrap">${state.short[m.id] ? `<span class="small"><b>${state.short[m.id] === "ok" ? "✓ auf Shortlist" : "verworfen"}</b> · <button type="button" data-short="${m.id}:" class="lnk" style="font-size:12px">rückgängig</button></span>` : `<button type="button" data-short="${m.id}:ok" class="btn solid">Auf Shortlist</button> <button type="button" data-short="${m.id}:no" class="btn">${ic.x}</button>`}</td></tr>`).join("")}</tbody></table></div>`;
+  const verb = `<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px">
+      <div style="display:flex;flex-direction:column;gap:8px"><span class="h3">Ähnliche Herausforderungen</span>
+        ${[["Bewerbung FC Beispielstadt", "Umbau Gastronomie, Wartezeit", 88], ["Bewerbung Beispiel-Arena Nord", "Gastronomie und Einlass", 71], ["Anfrage Kunde P", "VIP-Lounge: Bestellung am Tisch", 58]].map(([t, d, f]) => `<div class="card" style="padding:10px 12px;display:flex;flex-direction:column;gap:4px"><span class="row" style="justify-content:space-between"><b style="color:var(--ink)">${t}</b><span class="fit">${f} %</span></span><span class="small">${d}</span></div>`).join("")}</div>
+      <div style="display:flex;flex-direction:column;gap:8px"><span class="h3">Mögliche Verbindungen</span>
+        ${agentBox("Vorschlag", `<span style="font-size:13px">FC Beispielstadt hat dasselbe Problem. Einen gemeinsamen Pilot mit Kunde A vorschlagen (nur mit Zustimmung von Kunde A).</span>${sugBtns("v1")}`)}
+        ${agentBox("Vorschlag", `<span style="font-size:13px">Beispiel Ventures investiert in Venue-Tech. QueueLess vorstellen?</span>${sugBtns("v2")}`)}</div></div>`;
+  const problem = `<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;font-size:14px"><div><span class="h3">Problem</span><p style="margin-top:6px">In der Halbzeitpause stehen Gäste im Schnitt 12 Minuten am Bierstand an. Der Engpass ist das Bezahlen, nicht das Zapfen.</p></div><div><span class="h3">Muss-Kriterien</span><ul style="margin:6px 0 0;padding-left:18px"><li>DSGVO-konform</li><li>Anbindung an das bestehende Kassensystem</li><li>Betrieb bei 50.000 Gästen</li></ul></div></div><span class="small">Problem Deep Dive (Notion), Problem-Briefing und Suchhypothesen bleiben wie heute.</span>`;
+  const steps = ["Nur intern", "Mit Kunde abstimmen", "Im Netzwerk sichtbar"];
+  return `${bhead()}${side("Challenges")}
+  <div class="content" style="left:240px;gap:14px;padding:22px 32px">
+    <span class="small">Netzwerk › Challenges</span>
+    <div class="row" style="justify-content:space-between;align-items:flex-start;gap:24px"><div style="display:flex;flex-direction:column;gap:6px">
+        <div class="row" style="gap:8px"><span class="bdg">Challenge</span><span class="bdg muted">Kunde A</span><span class="conf">${ic.lock} Vertraulich</span><span class="ex">Beispiel</span></div>
+        <h1 class="h1" style="font-size:34px">Wartezeit am Bierstand in der Halbzeit</h1></div>
+      <div style="display:flex;flex-direction:column;gap:6px;width:400px;flex:none"><span class="small">Sichtbarkeit</span>
+        <div class="steps">${steps.map((s, i) => `<span class="${i === state.conf ? "on" : i < state.conf ? "done" : ""}">${i < state.conf ? "✓ " : ""}${s}</span>`).join("")}</div>
+        <span class="small">${state.conf === 0 ? `Eingereichte Challenges sind zunächst nur intern. <button type="button" data-conf="1" class="lnk" style="font-size:12px">Freigabe bei Kunde A anfragen →</button>` : state.conf === 1 ? `Anfrage an Kunde A gesendet, wartet seit heute. <button type="button" data-conf="2" class="lnk" style="font-size:12px">(Entwurf: Kunde stimmt zu)</button>` : `Kunde A hat zugestimmt. Sichtbar für Solution Provider im Netzwerk, ohne Kundenname. <button type="button" data-conf="0" class="lnk" style="font-size:12px">zurücksetzen</button>`}</span></div></div>
+    <div class="tabsb" style="font-size:13px;border-bottom:1px solid var(--line);padding-bottom:10px">${tabs.map(([k, l]) => `<button type="button" data-ctab="${k}" style="padding:6px 14px;border-radius:40px;font-weight:700;${state.ctab === k ? "background:var(--ink);color:var(--bg)" : "color:var(--ink)"}">${l}</button>`).join("")}</div>
+    ${{ matching, verb, problem }[state.ctab]}
+  </div>`;
+}
+function Challenge_phone() {
+  return `${phead()}${phoneMenu("Challenges")}
+  <div class="content" style="left:0;top:56px;padding:14px 16px;gap:10px">
+    <div class="row" style="gap:6px;flex-wrap:wrap"><span class="bdg muted">Kunde A</span><span class="conf">${ic.lock} Vertraulich</span></div>
+    <h1 class="h1" style="font-size:24px">Wartezeit am Bierstand in der Halbzeit</h1>
+    <span class="small">Nur intern · <span class="lnk" style="font-size:12px">Freigabe bei Kunde A anfragen →</span></span>
+    <span class="h3">Matching · 5</span>
+    ${MATCH.slice(0, 4).map((m) => `<div style="border-bottom:1px solid var(--line);padding-bottom:8px;display:flex;flex-direction:column;gap:4px"><span class="row" style="justify-content:space-between"><b style="color:var(--ink)">${m.n}</b><span class="fit">${m.f} %</span></span><span class="small">${m.why}</span>${state.short[m.id] ? `<span class="small"><b>✓ auf Shortlist</b></span>` : `<span class="row" style="gap:6px"><button type="button" data-short="${m.id}:ok" class="btn solid">Auf Shortlist</button><button type="button" data-short="${m.id}:no" class="btn">Verwerfen</button></span>`}</div>`).join("")}
+  </div>`;
+}
+
+/* ───── Texte je Ansicht ───── */
+const V = {
+  eingang: { eyebrow: "Netzwerk · zentraler Eingang", title: "Eingang", desk: Eingang_desk, phone: Eingang_phone,
+    lead: "Bewerbungen von der Website, Kundenanfragen und eingereichte Challenges landen an einer Stelle. Der Netzwerk-Manager fasst sie zusammen und clustert sie nach Themen, Rollen und Angeboten. Zu jedem Thema schlägt er Klassifizierung, Aufnahme und Verbindungen vor. Die Redaktion übernimmt, passt an oder verwirft.",
+    facts: ["<b>1</b> Eingang für Bewerbungen, Anfragen, Challenges", "Themen-Cluster durch den Agenten", "Vorschläge: Übernehmen · Anpassen · Verwerfen", "Im Cockpit: Knopf „Eingang · 7“ + Pop-up"],
+    a: ["Ersetzt die getrennte Seite „Bewerbungen“ aus Runde 6 und den Anfragen-Knopf; das Pop-up im Cockpit führt hierher.", "Umschalter „Liste statt Themen“ für alle, die lieber chronologisch arbeiten.", "Jeder Eintrag öffnet die Bewerbung bzw. Anfrage mit Akzeptieren / On hold / Ablehnen (wie Runde 6)."],
+    b: ["Der Agent ändert nichts selbst. Jeder Vorschlag braucht ein „Übernehmen“.", "Vorschläge nennen ihren Grund (z. B. „gleiches Problem wie Challenge …“), damit die Redaktion sie prüfen kann.", "Verbindungen zwischen Mitgliedern (z. B. zwei Vereine mit gleichem Problem) werden nie ohne Zustimmung der Beteiligten hergestellt."] },
+  datenbank: { eyebrow: "Netzwerk · eine Datenbank", title: "Netzwerk-Datenbank", desk: Datenbank_desk, phone: Datenbank_phone,
+    lead: "Aus der Startup-Datenbank wird die Netzwerk-Datenbank für alle Mitglieder: Solution Provider (Startups und Partner), Vereine, Betreiber, Multiplikatoren und Investoren. Aufgebaut ist sie nach Rolle und Angebot/Tags, verknüpft mit den Trends. Die Redaktion pflegt die Liste. Der Netzwerk-Manager schlägt rechts Aufnahmen, Tag-Bereinigung, Pflege und Verbindungen vor.",
+    facts: ["Rollen: <b>5</b>, Solution Provider mit Typ Startup/Partner", "Tags = Angebot, verknüpft mit Trends", "Status: Aufgenommen · In Prüfung · On hold", "Zeile anklicken → Eintrag"],
+    a: ["Filter nach Rolle und nach Angebot/Tags (anklickbar). Suche über Name, Angebot und Trendnummer.", "Spalte „Beziehung“: Kunde, Partner oder Siegel „New Spice approved“ (Limette nur für das Siegel).", "„Quelle“ zeigt, woher der Eintrag kommt: Bewerbung, Agent oder Redaktion. Das speist auch den Startup-Funnel im Cockpit."],
+    b: ["Kunden (Organisationen mit Zugang) erscheinen hier als Mitglied mit Rolle; die Kundenverwaltung (Vertrag, Sitzplätze) bleibt unter „Kunden“.", "Tags sind eine gepflegte Liste. Der Agent schlägt Zusammenlegungen vor, damit sie nicht ausfransen.", "Startups aus Challenges kommen weiter über „Kandidaten“ hinein, jetzt mit Rolle und Tags."] },
+  eintrag: { eyebrow: "Netzwerk · Eintrag", title: "Eintrag eines Solution Providers", desk: Eintrag_desk, phone: Eintrag_phone,
+    lead: "Jeder Eintrag hat eine Klassifizierung (Rolle, Typ, Angebot-Tags, Trends, Reifegrad, Region), ein Angebot mit Produkten und Referenzen, Verbindungen zu Challenges, Projekten und anderen Mitgliedern, einen vertraulichen Teil und einen Verlauf. Die Sichtbarkeit steuert, ob der Eintrag im Radar erscheint.",
+    facts: ["Reiter: Angebot · Verbindungen · Kontakt · Verlauf", "Vertrauliches getrennt", "Sichtbarkeit: intern / im Radar", "Agent findet neue Referenzen"],
+    a: ["Angebot als Liste von Produkten oder Leistungen mit eigenen Tags und Trends. So passt ein Partner mit mehreren Lösungen in mehrere Challenges.", "Referenzen mit Ort, Zeitraum und Ergebnis. Das Bewerbungsformular für Solution Provider fragt Angebot und Referenzen schon ab.", "Verbindungen zeigen, wo der Eintrag gebraucht wird: Challenges (mit Passung), Projekte, Bewerbungen mit gleichem Problem, Investoren, ähnliche Anbieter."],
+    b: ["„Kontakt & Vertrauliches“ (Preise, Pitchdeck, Notizen) sehen nur Redaktion; Kunden erst nach Freigabe im Projekt.", "Für Vereine, Betreiber und Investoren hat der Eintrag dieselbe Form, mit „Interessen“ statt „Angebot“."] },
+  challenge: { eyebrow: "Netzwerk · Challenge", title: "Challenge mit Matching", desk: Challenge_desk, phone: Challenge_phone,
+    lead: "Die Challenge bekommt drei Reiter: Problem & Deep Dive wie heute, Matching gegen die Netzwerk-Datenbank und ähnliche Herausforderungen mit möglichen Verbindungen. Oben rechts steht die Sichtbarkeit in drei Stufen: nur intern, mit Kunde abstimmen, im Netzwerk sichtbar.",
+    facts: ["Matching zuerst gegen die <b>eigene Datenbank</b>", "Web-Suche zusätzlich", "Vertraulich bis Kunde zustimmt", "In der Bühne: Shortlist, Reiter, Sichtbarkeit klicken"],
+    a: ["Der Netzwerk-Manager gleicht mit allen Solution Providern ab, nach Angebot-Tags, Trends, Muss-Kriterien und Referenzen. Passung in Prozent mit kurzer Begründung.", "Bisherige Web-Suche (Scouting-Agent) bleibt als „Zusätzlich im Web suchen“; neue Funde landen im Eingang und nach Aufnahme in der Datenbank.", "„Auf Shortlist“ übernimmt den Provider in das Projekt des Kunden."],
+    b: ["Eingereichte Challenges sind zuerst nur intern. Veröffentlichen erst nach Zustimmung des Kunden, dann ohne Kundenname, wenn der Kunde das will.", "Ähnliche Challenges und Bewerbungen werden erkannt, aber nur intern angezeigt. Verbindungen zwischen Kunden nur mit Zustimmung beider."] },
+};
+
+/* ───── Seiten ───── */
+function variantPage(v) {
+  const d = V[v];
+  return `<section class="intro"><div><p class="eyebrow">${d.eyebrow}</p><h1>${d.title}</h1><p class="lead">${d.lead}</p></div></section>
+    <div class="stage ${state.dev}" data-stage><div class="canvas">${state.dev === "desk" ? d.desk() : d.phone()}</div></div>
+    <div class="facts">${d.facts.map((f) => `<span class="fact">${f}</span>`).join("")}<span class="fact">Inhalte sind Beispiele</span></div>
+    <section class="notes"><div class="note"><p class="eyebrow">So funktioniert es</p><ul>${d.a.map((x) => `<li>${x}</li>`).join("")}</ul></div>
+      <div class="note"><p class="eyebrow">Regeln und Grenzen</p><ul>${d.b.map((x) => `<li>${x}</li>`).join("")}</ul></div></section>`;
+}
+function todayPage() {
+  const m = document.documentElement.dataset.mode;
+  return `<section class="intro"><div><p class="eyebrow">Heutiger Stand · Branch dev, Testmodus</p><h1>Startup-Datenbank und Challenges</h1>
+      <p class="lead">Aufgenommen am 6.11.2026 als „Redaktion · Admin“ unter /admin/startups, /admin/venture und /admin/venture/ch-1.</p></div></section>
+    <div class="pair"><img class="shot" src="img/heute-challenge-${m}.png" alt="Challenge heute"><div class="note"><img class="shot" src="img/heute-startups-${m}.png" alt="Startup-Datenbank heute"><p class="meta">Startup-Datenbank</p><img class="shot" src="img/heute-challenges-${m}.png" alt="Challenges heute"><p class="meta">Challenges</p></div></div>
+    <section class="notes">
+      <div class="note"><p class="eyebrow">Startup-Datenbank</p><ul><li>Nur Startups, und nur solche, die über eine Challenge gefunden und qualifiziert wurden.</li><li>Keine Rollen, keine Tags, keine Partner, Vereine oder Investoren.</li><li>Status: Qualifiziert, Im Radar, Archiviert.</li></ul></div>
+      <div class="note"><p class="eyebrow">Challenges</p><ul><li>Problem, Rahmen, Agent „Startups suchen“ (nur Web-Suche), Problem Deep Dive aus Notion.</li><li>Kandidaten mit Vorevaluierung (7 Kriterien); kein Abgleich mit bereits bekannten Anbietern.</li><li>Keine Angabe zur Vertraulichkeit; keine ähnlichen Challenges.</li></ul></div>
+      <div class="note"><p class="eyebrow">Bleibt</p><ul><li>Problem Deep Dive und Problem-Briefing.</li><li>Vorevaluierung mit 7 Kriterien als Grundlage der Passung.</li><li>Trennung öffentlicher und vertraulicher Angaben.</li></ul></div>
+    </section>`;
+}
+function modellPage() {
+  return `<section class="intro"><div><p class="eyebrow">Aufbau</p><h1>Wie Datenbank, Agent und Challenges zusammenhängen</h1><p class="lead">Grobe Skizze zur Abstimmung, noch kein Datenbankschema.</p></div></section>
+    <div class="cmp"><table><thead><tr><th>Baustein</th><th>Inhalt</th><th>Wer pflegt</th><th>Sichtbar für</th></tr></thead><tbody>
+      <tr><td>Mitglied (Eintrag)</td><td>Rolle (Solution Provider, Verein, Betreiber, Multiplikator, Investor), Typ (Startup/Partner), Region, Reifegrad, Status, Quelle</td><td>Redaktion; Agent schlägt vor</td><td>Redaktion; öffentliche Angaben im Radar, wenn freigegeben</td></tr>
+      <tr><td>Angebot</td><td>Produkte/Leistungen eines Solution Providers mit Tags und Trends</td><td>Redaktion, später der Provider selbst</td><td>wie Mitglied</td></tr>
+      <tr><td>Interessen</td><td>Themen von Vereinen, Betreibern, Investoren (Tags)</td><td>Redaktion</td><td>nur Redaktion</td></tr>
+      <tr><td>Tags</td><td>gepflegte Liste, verknüpft mit Trends und Clustern</td><td>Redaktion; Agent schlägt Zusammenlegungen vor</td><td>alle</td></tr>
+      <tr><td>Referenzen</td><td>Ort, Zeitraum, Ergebnis</td><td>Redaktion; Agent findet neue</td><td>Redaktion; öffentlich nach Freigabe</td></tr>
+      <tr><td>Challenge</td><td>Problem, Deep Dive, Briefing, Sichtbarkeit (intern → abgestimmt → im Netzwerk)</td><td>Redaktion mit Kunde</td><td>intern, bis der Kunde zustimmt</td></tr>
+      <tr><td>Match</td><td>Challenge × Angebot mit Passung und Begründung, Status (Vorschlag, Shortlist, verworfen)</td><td>Agent schlägt vor, Redaktion entscheidet</td><td>Redaktion; Kunde sieht die Shortlist</td></tr>
+      <tr><td>Verbindung</td><td>Mitglied × Mitglied (gleiches Problem, Investor ↔ Startup, Partner ↔ Startup)</td><td>Agent schlägt vor, Redaktion entscheidet</td><td>nur Redaktion</td></tr>
+    </tbody></table></div>
+    <section class="notes">
+      <div class="note"><p class="eyebrow">Agent „Netzwerk-Manager“</p><ul><li>Fasst Eingänge zusammen und clustert sie nach Thema, Rolle und Angebot.</li><li>Schlägt Klassifizierung und Aufnahme vor, gleicht Challenges mit Angeboten ab, erkennt ähnliche Herausforderungen und mögliche Verbindungen.</li><li>Schreibt wie alle Agenten nur Vorschläge (mit Begründung) in eine Prüfliste, nie direkt in die Datenbank. Läufe und Kosten im Agenten-Protokoll.</li></ul></div>
+      <div class="note"><p class="eyebrow">Offene Fragen</p><ul><li>Darf ein Solution Provider sein Profil nach Aufnahme selbst pflegen (mit Freigabe durch euch)?</li><li>Welche Tag-Liste ist der Start: aus den 44 Trends ableiten oder eigene Angebotskategorien?</li><li>Sollen Kunden andere Mitglieder (z. B. Vereine) überhaupt sehen, oder nur Solution Provider?</li><li>Bei „im Netzwerk sichtbar“: Wer genau sieht die Challenge, alle Solution Provider oder nur passende?</li></ul></div>
+      <div class="note"><p class="eyebrow">Navigation (Vorschlag)</p><ul><li>Neue Gruppe <b>Netzwerk</b>: Eingang, Netzwerk-Datenbank, Challenges. Ersetzt „Venture Clienting“ und „Startup-Datenbank“.</li><li>Unter <b>Agenten</b> kommt „Netzwerk-Manager“ dazu (Einstellungen, Läufe, offene Vorschläge).</li><li>Im Cockpit heißt der Startup-Funnel künftig Netzwerk-Funnel und zählt alle Rollen, Solution Provider zuerst.</li></ul></div>
+    </section>`;
+}
+
+/* ───── Steuerung ───── */
+function effectiveMode() { const t = document.documentElement.dataset.theme; if (t === "light" || t === "dark") return t; return matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"; }
+function fit() { document.querySelectorAll("[data-stage]").forEach((s) => { const w = s.classList.contains("phone") ? 390 : 1440; s.querySelector(".canvas").style.setProperty("--s", s.clientWidth / w); }); }
+function render() {
+  document.documentElement.dataset.mode = effectiveMode();
+  const v = state.view;
+  document.querySelectorAll(".tab").forEach((a) => a.dataset.v === v ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current"));
+  document.querySelectorAll("[data-dev]").forEach((b) => b.setAttribute("aria-pressed", b.dataset.dev === state.dev));
+  document.querySelectorAll("[data-th]").forEach((b) => b.setAttribute("aria-pressed", b.dataset.th === document.documentElement.dataset.mode));
+  document.getElementById("main").innerHTML = v === "heute" ? todayPage() : v === "modell" ? modellPage() : variantPage(v);
+  fit();
+}
+function route() { const h = location.hash.slice(1); state.view = ["heute", "eingang", "datenbank", "eintrag", "challenge", "modell"].includes(h) ? h : "heute"; state.menu = false; render(); }
+document.addEventListener("click", (e) => {
+  const q = (s) => e.target.closest(s);
+  let el;
+  if ((el = q("[data-dev]"))) { state.dev = el.dataset.dev; state.menu = false; return render(); }
+  if ((el = q("[data-th]"))) { document.documentElement.dataset.theme = el.dataset.th; return render(); }
+  if (q("[data-menu]")) { state.menu = !state.menu; return render(); }
+  if ((el = q("[data-role]"))) { state.role = el.dataset.role; return render(); }
+  if ((el = q("[data-tag]"))) { const t = el.dataset.tag; state.tag = !t || state.tag === t ? null : t; return render(); }
+  if ((el = q("[data-open]"))) { location.hash = "eintrag"; return; }
+  if ((el = q("[data-ptab]"))) { state.ptab = el.dataset.ptab; return render(); }
+  if ((el = q("[data-ctab]"))) { state.ctab = el.dataset.ctab; return render(); }
+  if ((el = q("[data-cl]"))) { state.cl = el.dataset.cl; return render(); }
+  if ((el = q("[data-conf]"))) { state.conf = +el.dataset.conf; return render(); }
+  if ((el = q("[data-sug]"))) { const [id, v] = el.dataset.sug.split(":"); if (v) state.sugg[id] = v; else delete state.sugg[id]; return render(); }
+  if ((el = q("[data-short]"))) { const [id, v] = el.dataset.short.split(":"); if (v) state.short[id] = v; else delete state.short[id]; return render(); }
+});
+addEventListener("hashchange", route);
+addEventListener("resize", fit);
+matchMedia("(prefers-color-scheme: light)").addEventListener("change", render);
+new MutationObserver(() => { if (effectiveMode() !== document.documentElement.dataset.mode) render(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+route();
+</script>
