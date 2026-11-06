@@ -182,6 +182,7 @@ main { max-width: 1440px; margin: 0 auto; padding-left: max(16px, env(safe-area-
       <a class="tab" href="#runde3" data-v="runde3">Runde 3 · Feed &amp; Funnel</a>
       <a class="tab" href="#runde4" data-v="runde4">Runde 4 · Ampel</a>
       <a class="tab" href="#runde5" data-v="runde5">Runde 5 · Anfragen &amp; Projekte</a>
+      <a class="tab" href="#runde6" data-v="runde6">Runde 6 · Bewerbungen</a>
     </nav>
     <div class="tools">
       <div class="seg" role="group" aria-label="Gerät">
@@ -682,6 +683,167 @@ function R5_phone() {
   </div>${toast5(true)}`;
 }
 
+/* ───── Runde 6: Bewerbungen (öffentliches Formular + Backend mit Akzeptieren / On hold / Ablehnen) ───── */
+const CATS = [
+  ["Verein", "Clubs und Vereine aus Profi- und Breitensport"],
+  ["Multiplikator", "Verbände, Agenturen, Berater und Medien mit Netzwerk"],
+  ["Betreiber", "Arenen, Stadien, Venues, Hotels und Veranstalter"],
+  ["Investor", "VCs, Business Angels und Corporate Venture"],
+  ["Startup", "Lösungen für Sport, Hospitality und Live Entertainment"],
+];
+const CAT_FIELDS = {
+  Verein: [["Sportart und Liga", "Fußball · 3. Liga"], ["Stadion / Halle, Kapazität", "Beispielstadion · 15.000"]],
+  Multiplikator: [["Art des Netzwerks", "Verband für Sportstätten"], ["Reichweite", "120 Mitglieder"]],
+  Betreiber: [["Art der Venue", "Multifunktionsarena"], ["Kapazität / Zimmer", "12.000 Plätze"]],
+  Investor: [["Fokus", "Sports-Tech, Fan Experience"], ["Ticketgröße", "250 Tsd. – 1 Mio. €"]],
+  Startup: [["Lösung in einem Satz", "Bestellung am Platz per QR-Code, Lieferung in 8 Minuten"], ["Reifegrad", "Pilot"], ["Pitchdeck", "SeatServe-Pitch.pdf · 2,4 MB"]],
+};
+// Wird beim Akzeptieren angelegt
+const MAP6 = {
+  Verein: ["Kunden-Organisation", "Typ Verein. Die Ansprechperson wird als Owner eingeladen und kann ihr Team einladen."],
+  Betreiber: ["Kunden-Organisation", "Typ Betreiber (Arena, Venue, Hotel). Die Ansprechperson wird als Owner eingeladen."],
+  Multiplikator: ["Partner-Zugang", "Liest den Radar und kann Kontakte empfehlen. Keine Projekte, keine Startup-Details."],
+  Investor: ["Investor-Zugang", "Radar und öffentliche Angaben der Startup-Datenbank. Vertrauliches bleibt verborgen."],
+  Startup: ["Startup-Profil und Zugang", "Profil in der Startup-Datenbank, im Funnel unter „Eingang“ mit Quelle „Bewerbung“. Das Startup pflegt sein Profil selbst."],
+};
+const APPS = [
+  { id: "a1", cat: "Verein", org: "FC Beispielstadt 1912 e. V.", role: "Geschäftsführung", mail: "info@fc-beispielstadt.de", web: "fc-beispielstadt.de", age: "vor 2 Std.", line: "Fußball · 3. Liga · 15.000 Plätze", st: "new",
+    msg: "Wir planen den Umbau unserer Gastronomie und suchen Ideen und Partner für kürzere Wartezeiten.",
+    check: [["ok", "Website erreichbar, Impressum passt zum Verein"], ["ok", "Noch kein Kunde, keine doppelte Bewerbung"], ["ok", "E-Mail-Domain passt zur Website"], ["ok", "Zielgruppe: Profisport"]] },
+  { id: "a2", cat: "Startup", org: "SeatServe GmbH", role: "Gründung", mail: "hello@seatserve.example", web: "seatserve.example", age: "vor 5 Std.", line: "Bestellung am Platz · Pilot", st: "new",
+    msg: "Wir möchten unser Produkt Clubs und Arenen vorstellen und suchen Pilotpartner.",
+    check: [["ok", "Website erreichbar"], ["warn", "Ähnlicher Eintrag in der Startup-Datenbank: „Pre-Order Pro“ (andere Firma)"], ["ok", "Pitchdeck lesbar, 14 Seiten"], ["ok", "Passt zu Trend #24 Mobile Order & In-Seat"]] },
+  { id: "a3", cat: "Betreiber", org: "Beispiel-Arena Nord", role: "Leitung Gastronomie", mail: "gastro@arena-nord.example", web: "arena-nord.example", age: "gestern", line: "Multifunktionsarena · 12.000", st: "new",
+    msg: "Interesse am Radar und an einem Projekt zu Einlass und Besucherströmen.", check: [["ok", "Website erreichbar"], ["ok", "Noch kein Kunde"], ["ok", "Zielgruppe: Betreiber"]] },
+  { id: "a4", cat: "Investor", org: "Beispiel Ventures", role: "Partner", mail: "deals@beispiel-ventures.example", web: "beispiel-ventures.example", age: "gestern", line: "Sports-Tech · 250 Tsd. – 1 Mio. €", st: "new",
+    msg: "Wir suchen Dealflow im Bereich Fan Experience und Venue-Technologie.", check: [["ok", "Website erreichbar"], ["warn", "Keine Referenzen im Sportbereich gefunden"]] },
+  { id: "a6", cat: "Verein", org: "SV Beispiel Handball", role: "Vorstand", mail: "vorstand@sv-beispiel.example", web: "sv-beispiel.example", age: "Di", line: "Handball · 2. Liga · 4.000", st: "new",
+    msg: "Wir möchten wissen, welche Trends für eine kleinere Halle relevant sind.", check: [["ok", "Website erreichbar"], ["ok", "Noch kein Kunde"]] },
+  { id: "a5", cat: "Multiplikator", org: "Verband Beispiel-Sportstätten", role: "Geschäftsstelle", mail: "info@vbs.example", web: "vbs.example", age: "Mo", line: "120 Mitglieder", st: "hold", hold: "Rücksprache intern · Wiedervorlage 20.11.",
+    msg: "Wir würden den Radar gern unseren Mitgliedern vorstellen.", check: [["ok", "Website erreichbar"]] },
+  { id: "a7", cat: "Startup", org: "GreenCup", role: "Gründung", mail: "team@greencup.example", web: "greencup.example", age: "30.10.", line: "Mehrweg-Becher · Kunden im Einsatz", st: "hold", hold: "Unterlagen fehlen · Wiedervorlage 13.11.",
+    msg: "Mehrwegsystem für Stadien und Festivals.", check: [["warn", "Pitchdeck fehlt"]] },
+  { id: "a8", cat: "Betreiber", org: "Hotel am Stadion", role: "Direktion", mail: "direktion@hotel-am-stadion.example", web: "hotel-am-stadion.example", age: "28.10.", line: "Hotel · 180 Zimmer", st: "ok", msg: "", check: [] },
+  { id: "a9", cat: "Verein", org: "Beispiel Freizeitliga", role: "Privatperson", mail: "kontakt@freemail.example", web: "–", age: "27.10.", line: "Freizeitsport", st: "no", msg: "", check: [] },
+];
+const ST6 = { new: ["Neu", ""], hold: ["On hold", "◷"], ok: ["Akzeptiert", "✓"], no: ["Abgelehnt", "✕"] };
+Object.assign(state, { r6: "backend", cat6: "Alle", st6: "new", sel6: "a1", act6: null, done6: {}, fcat: "Startup", fsent: false });
+const app6 = (id) => APPS.find((a) => a.id === id);
+const stOf = (a) => state.done6[a.id] ?? a.st;
+const catChip = (c) => `<span class="bdg">${c}</span>`;
+const stBadge = (s) => s === "new" ? `<span class="row small" style="gap:5px"><span class="newdot" style="width:7px;height:7px;border-radius:50%;background:var(--ink)"></span><b>Neu</b></span>` : `<span class="bdg muted">${ST6[s][1]} ${ST6[s][0]}</span>`;
+const NAV6 = NAV.map((g) => g.g === "Kunden" ? { g: "Kunden", items: [["Bewerbungen", APPS.filter((a) => stOf(a) === "new").length, true], ["Projekte", 0], ["Kunden", 0], ["Team", 0]] } : { g: g.g, items: g.items.map(([l, c]) => [l, c, false]) });
+function list6(phone = false) {
+  const items = APPS.filter((a) => (state.cat6 === "Alle" || a.cat === state.cat6) && stOf(a) === state.st6);
+  if (!items.length) return `<p class="small" style="padding:16px 0">Keine Bewerbungen in dieser Auswahl.</p>`;
+  return items.map((a) => `<button type="button" data-sel6="${a.id}" style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;text-align:left;padding:10px 12px;border-radius:12px;${state.sel6 === a.id && !phone ? "background:var(--surface);outline:1px solid var(--line);" : ""}">
+      <span class="row" style="gap:8px;min-width:0">${catChip(a.cat)}<b class="trunc" style="color:var(--ink)">${a.org}</b></span><span class="small">${a.age}</span>
+      <span class="small trunc">${a.line}</span><span>${stBadge(stOf(a))}</span></button>`).join("");
+}
+function filters6(compact = false) {
+  const cnt = (c) => APPS.filter((a) => (c === "Alle" || a.cat === c) && stOf(a) === state.st6).length;
+  return `<div class="row" style="gap:4px;flex-wrap:wrap">${["Alle", ...CATS.map((c) => c[0])].map((c) => `<button type="button" data-cat6="${c}" class="btn${state.cat6 === c ? " solid" : ""}" style="padding:3px 10px">${c}${compact ? "" : ` · ${cnt(c)}`}</button>`).join("")}</div>
+    <div class="tabsb" style="font-size:13px">${Object.entries(ST6).map(([k, [l]]) => `<button type="button" data-st6="${k}" style="padding:5px 12px;border-radius:40px;font-weight:700;${state.st6 === k ? "background:var(--ink);color:var(--bg)" : "color:var(--ink)"}">${l} · ${APPS.filter((a) => stOf(a) === k).length}</button>`).join("")}</div>`;
+}
+function actPanel6(a) {
+  const s = stOf(a);
+  if (state.act6 === "ok") {
+    const [what, how] = MAP6[a.cat];
+    const org = a.cat === "Verein" || a.cat === "Betreiber";
+    return `<div style="border:1px solid var(--ink);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px">
+      <b style="color:var(--ink)">Wird angelegt: ${what}</b><span class="small">${how}</span>
+      <div style="display:grid;grid-template-columns:repeat(${a.cat === "Startup" ? 2 : 3},minmax(0,1fr));gap:10px;font-size:12px">
+        ${a.cat === "Startup"
+          ? `<label style="display:flex;flex-direction:column;gap:4px"><span class="small">Im Funnel</span><span class="btn" style="justify-content:space-between">Eingang · Quelle Bewerbung</span></label>
+             <label style="display:flex;flex-direction:column;gap:4px"><span class="small">Danach</span><span class="btn">☑ Vorevaluierung durch Agent starten</span></label>`
+          : `<label style="display:flex;flex-direction:column;gap:4px"><span class="small">Paket</span><span class="seg" style="font-size:12px"><button type="button" aria-pressed="true">Basic</button><button type="button" aria-pressed="false">Premium</button></span></label>
+             <label style="display:flex;flex-direction:column;gap:4px"><span class="small">Sitzplätze</span><span class="btn">${org ? 5 : 2}</span></label>
+             <label style="display:flex;flex-direction:column;gap:4px"><span class="small">Laufzeit bis</span><span class="btn">06.11.2027</span></label>`}
+      </div>
+      <span class="small">Einladung an <b>${a.mail}</b> (${org ? "Owner" : "Zugang"}) · Login per Magic-Link</span>
+      <div class="row" style="gap:6px"><button type="button" data-do6="ok" class="btn solid">${ic.ok} Anlegen und einladen</button><button type="button" data-act6="" class="btn">Abbrechen</button></div></div>`;
+  }
+  if (state.act6 === "hold") return `<div style="border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px">
+      <b style="color:var(--ink)">Auf On hold setzen</b>
+      <div class="row" style="gap:6px;flex-wrap:wrap">${["Unterlagen fehlen", "Rücksprache intern", "Später prüfen"].map((g, i) => `<span class="btn${i === 1 ? " solid" : ""}">${g}</span>`).join("")}</div>
+      <span class="small">Wiedervorlage <b>20.11.</b> · Ampel und Erinnerung im Cockpit · ☐ Bewerber informieren</span>
+      <div class="row" style="gap:6px"><button type="button" data-do6="hold" class="btn solid">Auf On hold</button><button type="button" data-act6="" class="btn">Abbrechen</button></div></div>`;
+  if (state.act6 === "no") return `<div style="border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px">
+      <b style="color:var(--ink)">Ablehnen</b><span class="small">Nachricht an ${a.mail} (Vorlage, änderbar):</span>
+      <span style="font-size:13px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--sunk)">„Vielen Dank für Ihr Interesse am New Spice Trendradar. Ihre Anfrage passt derzeit nicht zu unserem Angebot …“</span>
+      <div class="row" style="gap:6px"><button type="button" data-do6="no" class="btn solid">Ablehnen und senden</button><button type="button" data-act6="" class="btn">Abbrechen</button></div></div>`;
+  if (s === "ok") return `<div class="warn" style="align-items:center"><span><b style="color:var(--ink)">Angelegt:</b> ${MAP6[a.cat][0]} „${a.org}“ · Einladung an ${a.mail} verschickt · <span class="lnk" style="font-size:12px">${a.cat === "Startup" ? "Zum Startup-Profil" : "Zum Kunden"} →</span></span></div>`;
+  if (s === "no") return `<div class="warn"><span>Abgelehnt · Nachricht verschickt</span></div>`;
+  return `<div class="row" style="gap:8px">${s === "hold" ? `<span class="small" style="flex:1">${a.hold ?? "On hold"}</span>` : ""}<button type="button" data-act6="ok" class="btn solid" style="padding:7px 16px">${ic.ok} Akzeptieren</button>${s === "hold" ? "" : `<button type="button" data-act6="hold" class="btn" style="padding:7px 16px">On hold</button>`}<button type="button" data-act6="no" class="btn" style="padding:7px 16px">Ablehnen</button></div>`;
+}
+function detail6(a) {
+  if (!a) return `<p class="small">Bewerbung links auswählen.</p>`;
+  const f = CAT_FIELDS[a.cat];
+  return `<div style="display:flex;flex-direction:column;gap:14px">
+    <div class="row" style="gap:8px">${catChip(a.cat)}${stBadge(stOf(a))}<span class="small">eingegangen ${a.age}</span><span class="ex" style="margin-left:auto">Beispiel</span></div>
+    <div><span class="h2">${a.org}</span><div class="small">${a.role} · ${a.mail} · ${a.web}</div></div>
+    <dl style="margin:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 16px;font-size:13px">${(a.id === "a1" || a.id === "a2" ? f : [["Angaben", a.line]]).map(([k, v]) => `<dt class="small">${k}</dt><dd style="margin:0;color:var(--ink)">${v}</dd>`).join("")}</dl>
+    ${a.msg ? `<div style="border-left:2px solid var(--line);padding-left:12px;font-size:14px">„${a.msg}“</div>` : ""}
+    ${a.check.length ? `<div style="display:flex;flex-direction:column;gap:5px"><span class="row" style="gap:8px"><b style="color:var(--ink);font-size:12px">Vorprüfung</b><span class="small">automatisch durch einen Agenten</span></span>
+      ${a.check.map(([k, t]) => `<span class="row" style="gap:8px;font-size:13px">${amp(k === "ok" ? "g" : "y", 16)}<span>${t}</span></span>`).join("")}</div>` : ""}
+    ${actPanel6(a)}</div>`;
+}
+function B6_desk() {
+  const a = app6(state.sel6);
+  return `${bhead()}
+  <nav class="side">${NAV6.map((g) => `<div class="grp">${g.g ? `<span class="gh">${g.g}</span>` : ""}${g.items.map(item).join("")}</div>`).join("")}</nav>
+  <div class="content" style="left:240px;gap:16px;padding:24px 32px">
+    <div class="row" style="justify-content:space-between;align-items:flex-end"><div><p class="eyebrow" style="color:var(--muted)">Kunden</p><h1 class="h1" style="font-size:34px">Bewerbungen</h1></div>
+      <span class="small">Formular: <b>trendradar.newspice.de/bewerben</b> · <span class="lnk">Link kopieren</span></span></div>
+    ${filters6()}
+    <div style="display:grid;grid-template-columns:400px minmax(0,1fr);gap:24px;min-height:0">
+      <div style="display:flex;flex-direction:column;gap:2px;min-width:0">${list6()}</div>
+      <section class="card" style="padding:22px">${detail6(a)}</section></div>
+  </div>`;
+}
+function B6_phone() {
+  const a = app6(state.sel6);
+  return `${phead()}${phoneMenu()}
+  <div class="content" style="left:0;top:56px;padding:14px 16px;gap:12px">
+    ${state.phTab === "detail" && a
+      ? `<button type="button" data-phtab="list" class="lnk" style="align-self:flex-start;font-size:13px">‹ Bewerbungen</button>${detail6(a).replace(/grid-template-columns:repeat\(3,/, "grid-template-columns:repeat(1,")}`
+      : `<h1 class="h1" style="font-size:26px">Bewerbungen</h1>${filters6(true)}<div style="display:flex;flex-direction:column;gap:2px">${list6(true)}</div>`}
+  </div>`;
+}
+/* öffentliches Formular */
+function form6(phone = false) {
+  if (state.fsent) return `<div style="display:flex;flex-direction:column;gap:12px;align-items:flex-start;padding:24px 0">
+      <span class="eyebrow">Bewerbung eingegangen</span><span class="h1" style="font-size:${phone ? 28 : 40}px">Danke! Wir melden uns innerhalb von 5 Werktagen.</span>
+      <p style="max-width:52ch">Die New-Spice-Redaktion prüft jede Bewerbung persönlich. Wenn es passt, bekommen Sie eine Einladung per E-Mail und melden sich ohne Passwort per Magic-Link an.</p>
+      <button type="button" data-fsent="0" class="btn">Zurück zum Formular (Entwurf)</button></div>`;
+  const fld = (l, v, ph = "") => `<label style="display:flex;flex-direction:column;gap:4px;min-width:0"><span class="small" style="font-weight:700;color:var(--ink)">${l}</span><span style="border:1px solid var(--line);background:var(--sunk);border-radius:10px;padding:9px 12px;font-size:14px;color:${v ? "var(--ink)" : "var(--muted)"}">${v || ph}</span></label>`;
+  return `<div style="display:flex;flex-direction:column;gap:${phone ? 16 : 20}px">
+    <div><span class="eyebrow">Zugang zum Trendradar</span><div class="h1" style="font-size:${phone ? 28 : 40}px;margin-top:6px">Bewerben Sie sich</div>
+      <p style="margin-top:6px;max-width:60ch">Der Trendradar ist nur auf Einladung zugänglich. Erzählen Sie uns, wer Sie sind. Die Redaktion meldet sich innerhalb von 5 Werktagen.</p></div>
+    <fieldset style="border:0;margin:0;padding:0;display:flex;flex-direction:column;gap:8px"><legend class="small" style="font-weight:700;color:var(--ink);margin-bottom:8px">1 · Ich bewerbe mich als</legend>
+      <div style="display:grid;grid-template-columns:repeat(${phone ? 1 : 5},minmax(0,1fr));gap:8px">${CATS.map(([c, d]) => `<button type="button" data-fcat="${c}" aria-pressed="${state.fcat === c}" style="text-align:left;border-radius:14px;padding:${phone ? "10px 12px" : "12px"};display:flex;flex-direction:column;gap:4px;border:1px solid ${state.fcat === c ? "var(--ink)" : "var(--line)"};${state.fcat === c ? "background:var(--surface);box-shadow:inset 0 0 0 1px var(--ink)" : ""}">
+        <b style="color:var(--ink)">${state.fcat === c ? "● " : ""}${c}</b>${phone && state.fcat !== c ? "" : `<span class="small" style="line-height:1.35">${d}</span>`}</button>`).join("")}</div></fieldset>
+    <div style="display:flex;flex-direction:column;gap:10px"><span class="small" style="font-weight:700;color:var(--ink)">2 · Über Sie</span>
+      <div style="display:grid;grid-template-columns:repeat(${phone ? 1 : 2},minmax(0,1fr));gap:10px">
+        ${fld("Organisation", "", state.fcat === "Startup" ? "z. B. SeatServe GmbH" : "Name der Organisation")}${fld("Ihre Rolle", "", "z. B. Geschäftsführung")}
+        ${fld("E-Mail", "", "name@organisation.de")}${fld("Website", "", "www.…")}
+        ${CAT_FIELDS[state.fcat].map(([l, v]) => fld(l, "", v.includes(".pdf") ? "PDF hochladen (max. 20 MB)" : "z. B. " + v)).join("")}</div>
+      ${fld("Warum möchten Sie dabei sein?", "", "Ein, zwei Sätze genügen.")}</div>
+    <label class="row small" style="gap:8px"><span style="width:16px;height:16px;border:1.5px solid var(--muted);border-radius:4px"></span>Ich habe die Datenschutzhinweise gelesen.</label>
+    <div class="row" style="gap:12px"><button type="button" data-fsent="1" class="btn solid" style="padding:9px 20px;font-size:14px">Bewerbung senden</button><span class="small">Kein Konto nötig</span></div></div>`;
+}
+function F6_desk() {
+  return `<div class="b-head" style="border-bottom:0;background:transparent"><span class="logo">${LOGO}</span><span class="b-user"><span>Schon eingeladen? <b>Anmelden</b></span></span></div>
+  <div class="content" style="left:0;top:60px;padding:24px 0;align-items:center"><div style="width:1040px">${form6()}</div></div>`;
+}
+function F6_phone() {
+  return `<div class="b-head" style="height:56px;padding:0 16px;border-bottom:0;background:transparent"><span class="logo">${LOGO.replace("<svg", '<svg style="height:20px"')}</span><span class="b-user"><b>Anmelden</b></span></div>
+  <div class="content" style="left:0;top:56px;padding:12px 16px">${form6(true)}</div>`;
+}
+const R6_desk = () => state.r6 === "form" ? F6_desk() : B6_desk();
+const R6_phone = () => state.r6 === "form" ? F6_phone() : B6_phone();
+const r6switch = () => `<div class="state"><span>Ansicht</span><div class="seg" role="group" aria-label="Ansicht Bewerbungen"><button type="button" data-r6="backend" aria-pressed="${state.r6 === "backend"}">Backend</button><button type="button" data-r6="form" aria-pressed="${state.r6 === "form"}">Formular (öffentlich)</button></div></div>`;
+
 function R4_desk() { return R3_desk(true); }
 function R3_phone() {
   const tab = state.phTab;
@@ -703,6 +865,13 @@ function R3_phone() {
 
 /* ───── Texte ───── */
 const V = {
+  runde6: { name: "Runde 6", eyebrow: "Runde 6 · Bewerbungen", title: "Bewerben, prüfen, anlegen",
+    lead: "Wer noch keinen Zugang hat, bewirbt sich über ein öffentliches Formular als Verein, Multiplikator, Betreiber, Investor oder Startup. Im Backend gibt es dafür eine Seite „Bewerbungen“ unter „Kunden“. Ein Agent prüft vorab. Die Redaktion entscheidet: Akzeptieren, On hold oder Ablehnen. Beim Akzeptieren wird je nach Kategorie das Passende angelegt und eingeladen.",
+    desk: R6_desk, phone: R6_phone, extra: () => r6switch(), navLabel: "Ablauf", pageLabel: "Was beim Akzeptieren angelegt wird",
+    facts: ["<b>5</b> Kategorien", "Vorprüfung durch Agent", "Akzeptieren · On hold · Ablehnen", "Akzeptieren → anlegen + Einladung", "Oben rechts: Backend / Formular umschalten"],
+    nav: ["<b>Formular</b> (öffentlich, verlinkt von der Login-Seite): Kategorie wählen, dann Organisation, Rolle, E-Mail, Website, zwei bis drei Felder je Kategorie (Startup: Lösung, Reifegrad, Pitchdeck) und eine kurze Nachricht.", "<b>Vorprüfung:</b> Ein Agent prüft Website, Dubletten (bestehende Kunden, Startup-Datenbank), passende E-Mail-Domain und Zielgruppe. Er entscheidet nicht, er markiert nur grün oder gelb.", "<b>On hold:</b> Grund und Wiedervorlage-Datum. Die Wiedervorlage erscheint im Cockpit mit Ampel.", "<b>Ablehnen:</b> mit änderbarer Textvorlage an den Bewerber."],
+    page: ["<b>Verein, Betreiber</b> → Kunden-Organisation (Paket, Sitzplätze, Laufzeit vorbelegt), Ansprechperson als Owner eingeladen.", "<b>Multiplikator</b> → Partner-Zugang: Radar lesen, Kontakte empfehlen; keine Projekte.", "<b>Investor</b> → Investor-Zugang: Radar und öffentliche Startup-Angaben; Vertrauliches bleibt verborgen.", "<b>Startup</b> → Profil in der Startup-Datenbank, im Funnel unter „Eingang“ mit neuer Quelle „Bewerbung“, optional sofort Vorevaluierung durch den Agenten."],
+    pro: ["Passt zur Regel „keine offene Registrierung“: Bewerben legt kein Konto an. Erst die Freigabe erzeugt eine Einladung.", "Startups aus Bewerbungen landen direkt im Funnel."], con: ["Multiplikator- und Investor-Zugang gibt es heute als Rolle noch nicht. Das braucht neue Rollen und Zugriffsregeln (mit RLS-Tests).", "Ein öffentliches Formular braucht Schutz gegen Spam (Rate-Limit, Prüfung der E-Mail-Adresse)."] },
   runde5: { name: "Runde 5", eyebrow: "Runde 5 · Anfragen und Projekte getrennt", title: "Anfragen als Pop-up, Projekte zum Aufklappen",
     lead: "Anfragen stehen nicht mehr in der Projektliste. Sie erscheinen als kleines Pop-up unten im Cockpit. „Annehmen“ macht daraus ein Projekt, das mit „Neu“ oben in der Liste auftaucht. Projekte zeigen eingeklappt nur Ampel, Name, Kunde und einen kurzen Status. Ein Klick klappt Phase, Frist, „Wartet auf“, Postfach und To-dos aus. Rote und gelbe Ampeln blinken.",
     desk: R5_desk, phone: R5_phone, navLabel: "Anfragen", pageLabel: "Projekte",
@@ -754,7 +923,7 @@ const V = {
 /* ───── Seiten ───── */
 function variantPage(v) {
   const d = V[v];
-  return `<section class="intro"><div><p class="eyebrow">${d.eyebrow ?? "Variante " + v.toUpperCase()}</p><h1>${d.title ?? d.name}</h1><p class="lead">${d.lead}</p></div></section>
+  return `<section class="intro"><div><p class="eyebrow">${d.eyebrow ?? "Variante " + v.toUpperCase()}</p><h1>${d.title ?? d.name}</h1><p class="lead">${d.lead}</p></div>${d.extra ? d.extra() : ""}</section>
     <div class="stage ${state.dev}" data-stage><div class="canvas">${state.dev === "desk" ? d.desk() : d.phone()}</div></div>
     <div class="facts">${d.facts.map((f) => `<span class="fact">${f}</span>`).join("")}${d.dropHint && state.dev === "desk" ? '<span class="fact">„Inhalte“ in der Bühne anklicken</span>' : ""}${state.dev === "phone" && v !== "c" ? '<span class="fact">„Menü“ in der Bühne anklicken</span>' : ""}<span class="fact">Bühne zeigt den ersten Bildschirm (1440 × 900)</span></div>
     <section class="notes">
@@ -832,7 +1001,7 @@ function render() {
 }
 function route() {
   const h = location.hash.slice(1);
-  state.view = ["heute", "a", "b", "c", "vergleich", "vorschlag", "runde3", "runde4", "runde5"].includes(h) ? h : "heute";
+  state.view = ["heute", "a", "b", "c", "vergleich", "vorschlag", "runde3", "runde4", "runde5", "runde6"].includes(h) ? h : "heute";
   state.drop = false; state.menu = false;
   render();
 }
@@ -863,6 +1032,22 @@ document.addEventListener("click", (e) => {
   if (e.target.closest("[data-tnext]")) { state.tIdx++; state.tMore = false; render(); return; }
   if (e.target.closest("[data-tclose]")) { state.toast = false; render(); return; }
   if (e.target.closest("[data-topen]")) { state.toast = true; render(); return; }
+  const r6b = e.target.closest("[data-r6]");
+  if (r6b) { state.r6 = r6b.dataset.r6; render(); return; }
+  const c6 = e.target.closest("[data-cat6]");
+  if (c6) { state.cat6 = c6.dataset.cat6; render(); return; }
+  const s6 = e.target.closest("[data-st6]");
+  if (s6) { state.st6 = s6.dataset.st6; state.act6 = null; render(); return; }
+  const sl = e.target.closest("[data-sel6]");
+  if (sl) { state.sel6 = sl.dataset.sel6; state.act6 = null; if (state.dev === "phone") state.phTab = "detail"; render(); return; }
+  const a6 = e.target.closest("[data-act6]");
+  if (a6) { state.act6 = a6.dataset.act6 || null; render(); return; }
+  const d6 = e.target.closest("[data-do6]");
+  if (d6) { state.done6[state.sel6] = d6.dataset.do6; state.act6 = null; render(); return; }
+  const fc = e.target.closest("[data-fcat]");
+  if (fc) { state.fcat = fc.dataset.fcat; render(); return; }
+  const fs = e.target.closest("[data-fsent]");
+  if (fs) { state.fsent = fs.dataset.fsent === "1"; render(); return; }
   const pt = e.target.closest("[data-phtab]");
   if (pt) { state.phTab = pt.dataset.phtab; render(); return; }
 });
