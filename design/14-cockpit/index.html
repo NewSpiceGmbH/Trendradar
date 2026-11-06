@@ -152,6 +152,13 @@ main { max-width: 1440px; margin: 0 auto; padding-left: max(16px, env(safe-area-
 .tabsb { display: flex; gap: 4px; }
 .tabsb span { padding: 6px 14px; border-radius: 40px; font-weight: 700; color: var(--ink); white-space: nowrap; }
 .tabsb span.on { background: var(--ink); color: var(--bg); }
+.chip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); border-radius: 40px; padding: 1px 10px 1px 3px; font-size: 12px; font-weight: 700; color: var(--ink); white-space: nowrap; background: none; }
+.chip i { font-style: normal; display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; font-size: 10px; font-weight: 800; font-family: var(--font-display); }
+.badge-new { position: relative; display: inline-flex; align-items: center; gap: 6px; border-radius: 40px; background: var(--ink); color: var(--bg); padding: 2px 10px; font-size: 11px; font-weight: 700; text-transform: uppercase; white-space: nowrap; }
+.badge-new::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--bg); }
+.ping::after { content: ""; position: absolute; inset: 0; border-radius: inherit; border: 2px solid var(--ink); animation: ping 1.8s ease-out infinite; }
+@keyframes ping { from { transform: scale(1); opacity: .9; } to { transform: scale(1.6); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .ping::after { animation: none; } }
 .drop { position: absolute; z-index: 5; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--glass-shadow); padding: 8px; width: 260px; display: flex; flex-direction: column; gap: 2px; }
 </style>
 
@@ -165,6 +172,7 @@ main { max-width: 1440px; margin: 0 auto; padding-left: max(16px, env(safe-area-
       <a class="tab" href="#c" data-v="c">C · Newsroom</a>
       <a class="tab" href="#vergleich" data-v="vergleich">Vergleich</a>
       <a class="tab" href="#vorschlag" data-v="vorschlag">Vorschlag · Runde 2</a>
+      <a class="tab" href="#runde3" data-v="runde3">Runde 3 · Feed &amp; Funnel</a>
     </nav>
     <div class="tools">
       <div class="seg" role="group" aria-label="Gerät">
@@ -429,8 +437,142 @@ function R_phone() {
   </div>`;
 }
 
+/* ───── Runde 3: Live-Feed rechts, Startup-Funnel im Limetten-Block, Projekte & Anfragen ───── */
+const LANE_TAG = { S: "Sport & Hosp.", T: "Startups", X: "Cross-Industry" };
+// Feed chronologisch, neueste oben. tr = automatisch vorgeschlagener Trend mit Treffsicherheit; alt = weitere Vorschläge
+const FEED = [
+  { id: "f1", lane: "T", time: "09:41", day: "Heute", t: "Münchner Startup sammelt 6 Mio. € für Kassen ohne Warteschlange", src: "Beispiel-Startupmedium", rel: 3,
+    tr: [[19, "D", "Checkout-freie Gastronomie", 91], [26, "D", "Cashless & Mobile POS", 64], [24, "D", "Mobile Order & In-Seat", 41]] },
+  { id: "f2", lane: "S", time: "09:12", day: "Heute", t: "Bundesliga-Club testet Bestellung am Platz per App", src: "Beispielmedium", rel: 3,
+    tr: [[24, "D", "Mobile Order & In-Seat", 94], [4, "A", "Club-Superapps", 58], [26, "D", "Cashless & Mobile POS", 35]] },
+  { id: "f3", lane: "X", time: "08:30", day: "Heute", t: "Flughafen testet Boarding per Gesichtserkennung ohne Bordkarte", src: "Beispiel-Reisemedium", rel: 3,
+    tr: [[18, "D", "Biometrischer Zugang", 88], [27, "D", "Digitale Tickets & Anti-Fraud", 52]] },
+  { id: "f4", lane: "X", time: "07:55", day: "Heute", t: "Freizeitpark führt dynamische Preise für die Fast-Lane ein", src: "Beispiel-Freizeitmedium", rel: 2,
+    tr: [[12, "C", "Fair Dynamic Pricing", 47], [13, "C", "Premium-Hospitality-Tiers", 31]] },
+  { id: "f5", lane: "X", time: "18:02", day: "Gestern", t: "Bahnhof steuert Personenströme mit Echtzeit-Anzeigen", src: "Beispiel-Bahnmedium", rel: 2,
+    tr: [[37, "G", "KI-Crowd-Management", 76]] },
+  { id: "f6", lane: "S", time: "13:10", day: "Gestern", t: "Arena setzt auf Batteriespeicher für Flutlicht", src: "Beispielmedium", rel: 2,
+    tr: [[34, "F", "Energiespeicher & EMS", 97]] },
+  { id: "f7", lane: "T", time: "07:15", day: "Gestern", t: "KI-Startup erkennt Warteschlangen an Bierständen in Echtzeit", src: "Beispiel-Startupmedium", rel: 2,
+    tr: [[37, "G", "KI-Crowd-Management", 81], [11, "B", "KI-Gastroplanung", 70]] },
+  { id: "f8", lane: "S", time: "16:05", day: "Mi, 4.11.", t: "Neue Studie zu Fan-Anreise mit ÖPNV", src: "Beispielverband", rel: 2,
+    tr: [[32, "F", "Green Fan Mobility", 90]] },
+];
+Object.assign(state, { pushed: { f8: "Mi 16:20", f6: "08:15" }, pick: {}, dd: null, lane: "all", phTab: "overview" });
+const trChip = (tr, open, id) => `<button type="button" data-dd="${id}" class="chip" style="cursor:pointer;${open ? "border-color:var(--ink)" : ""}"><i style="background:var(--c${tr[1]});color:var(--c${tr[1]}-fg)">${tr[1]}</i>#${tr[0]} ${tr[2]} ${ic.chev.replace('class="ico"', 'class="ico" style="width:12px;height:12px"')}</button>`;
+function feedCard(f, compact = false) {
+  const pushed = state.pushed[f.id];
+  const sel = f.tr[state.pick[f.id] ?? 0];
+  const unsure = sel[3] < 60 && state.pick[f.id] === undefined;
+  const open = state.dd === f.id;
+  const dd = open ? `<div style="border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:6px;display:flex;flex-direction:column;gap:2px;box-shadow:var(--glass-shadow)">
+      <span class="row small" style="gap:6px;border:1px solid var(--line);border-radius:40px;padding:3px 10px">${ic.search} Trend suchen (Name oder #)</span>
+      ${f.tr.map((t, i) => `<button type="button" data-pick="${f.id}:${i}" class="row" style="justify-content:space-between;padding:5px 8px;border-radius:8px;text-align:left;${t === sel ? "background:var(--sunk)" : ""}"><span class="row" style="gap:6px;font-size:12px;color:var(--ink);font-weight:700"><i style="font-style:normal;display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;font-size:10px;font-family:var(--font-display);background:var(--c${t[1]});color:var(--c${t[1]}-fg)">${t[1]}</i>#${t[0]} ${t[2]}</span><span class="small">${t[3]} %</span></button>`).join("")}
+      <span class="small" style="padding:4px 8px">Kein Treffer? <span class="lnk" style="font-size:12px">Als neuen Trend vorschlagen</span></span></div>` : "";
+  return `<li style="list-style:none;display:flex;flex-direction:column;gap:6px;padding:12px 0;border-bottom:1px solid var(--line)">
+    <span class="row small" style="gap:8px"><b>${f.time}</b><span class="bdg muted">${LANE_TAG[f.lane]}</span>${rel(f.rel)}<span class="trunc">${f.src}</span></span>
+    <span style="font-weight:700;color:var(--ink);line-height:1.3">${f.t} <span style="color:var(--muted)">↗</span></span>
+    <span class="row" style="gap:6px;flex-wrap:wrap">${trChip(sel, open, f.id)}<span class="small">${state.pick[f.id] !== undefined ? "von euch gewählt" : unsure ? "<b>unsicher</b> · " + sel[3] + " %" : "automatisch · " + sel[3] + " %"}</span></span>
+    ${dd}
+    <span class="row" style="gap:6px;justify-content:space-between">${pushed
+      ? `<span class="small">${ic.ok.replace('class="ico"', 'class="ico" style="width:12px;height:12px;vertical-align:-2px"')} Im Ticker seit ${pushed}</span><button type="button" data-push="${f.id}" class="btn">Zurückziehen</button>`
+      : `<span class="small">${unsure ? "Trend prüfen, bevor es live geht" : "noch nicht im Ticker"}</span><span class="row" style="gap:6px"><button type="button" data-push="${f.id}" class="btn solid">In den Ticker</button><span class="btn" title="Verwerfen" aria-label="Verwerfen">${ic.x}</span></span>`}</span></li>`;
+}
+function feedList(max = 99) {
+  const items = FEED.filter((f) => state.lane === "all" || f.lane === state.lane);
+  let last = "";
+  return items.slice(0, max).map((f) => {
+    const head = f.day !== last ? `<li style="list-style:none" class="eyebrow"><span style="color:var(--muted);font-size:10px;display:block;padding-top:12px">${f.day}</span></li>` : "";
+    last = f.day; return head + feedCard(f);
+  }).join("");
+}
+function feedHead() {
+  const open = FEED.filter((f) => !state.pushed[f.id]).length;
+  return `<div style="display:flex;flex-direction:column;gap:10px;padding-bottom:10px;border-bottom:1px solid var(--line)">
+    <div class="row" style="justify-content:space-between">
+      <span class="row" style="gap:8px"><span class="badge-new ping" style="letter-spacing:.125em">Live</span><span class="h3">Meldungen</span></span>
+      <span class="small">Letzte vor <b>4 Min.</b> · 09:41</span></div>
+    <div class="row" style="gap:4px;flex-wrap:wrap">${[["all", "Alle"], ["S", "Sport & Hosp."], ["T", "Startups"], ["X", "Cross-Ind."]].map(([k, l]) => `<button type="button" data-lane="${k}" class="btn${state.lane === k ? " solid" : ""}" style="padding:3px 10px">${l}</button>`).join("")}</div>
+    <span class="small"><b>${open}</b> noch nicht im Ticker · 1 mit unsicherem Trend · Scouts: 0 von 9 im Einsatz</span></div>`;
+}
+const SRC = { a: "Agent", r: "Redaktion", k: "Kunde" };
+const FUNNEL = [["Eingang", 15, 5, 3], ["Vorevaluiert", 9, 3, 2], ["In der Datenbank", 5, 3, 1], ["Shortlist", 3, 1, 1], ["Pilot", 1, 1, 0], ["New Spice approved", 1, 0, 0]];
+const segStyle = { a: "background:var(--on-accent)", r: "background:rgba(37,57,18,.42)", k: "background:repeating-linear-gradient(135deg,var(--on-accent) 0 2px,transparent 2px 6px);box-shadow:inset 0 0 0 1.5px var(--on-accent)" };
+function funnel(h = 96, compact = false) {
+  const max = 23;
+  return `<div style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:${compact ? 6 : 10}px;align-items:end">
+    ${FUNNEL.map(([l, a, r, k]) => { const tot = a + r + k; return `<div style="display:flex;flex-direction:column;gap:4px;min-width:0" title="${l}: Agent ${a}, Redaktion ${r}, Kunde ${k}">
+      <span class="num" style="font-size:${compact ? 20 : 28}px;line-height:1">${tot}</span>
+      <div style="height:${h}px;display:flex;flex-direction:column;justify-content:flex-end;gap:2px">
+        ${k ? `<span style="height:${(k / max) * h}px;border-radius:3px;${segStyle.k}"></span>` : ""}
+        ${r ? `<span style="height:${(r / max) * h}px;border-radius:3px;${segStyle.r}"></span>` : ""}
+        ${a ? `<span style="height:${(a / max) * h}px;border-radius:3px;${segStyle.a}"></span>` : ""}</div>
+      <span lang="de" style="font-size:${compact ? 10 : 11}px;font-weight:700;line-height:1.2;min-height:${compact ? 3.6 : 2.4}em;hyphens:auto;-webkit-hyphens:auto;overflow-wrap:break-word">${l}</span></div>`; }).join("")}</div>`;
+}
+const legend = `<span class="row" style="gap:12px;font-size:11px;flex-wrap:wrap">${[["a", "Agent 15"], ["r", "Redaktion 5"], ["k", "Kunde 3"]].map(([k, l]) => `<span class="row" style="gap:5px"><span style="width:12px;height:12px;border-radius:3px;${segStyle[k]}"></span><b>${l}</b></span>`).join("")}</span>`;
+const INBOX = [["QueueLess", "a", "Agent · Challenge „Bierstand“", "vor 2 Std."], ["TapFlow", "k", "eingesendet von Kunde A", "gestern"], ["CrowdSense", "r", "von euch eingetragen", "Mo"]];
+const PROJ = [
+  { t: "Halbzeit-Gastro schneller", org: "Kunde A", ph: 2, next: "Rückmeldung zur Shortlist", due: "12.11.", fb: "2 × interessant, 1 offen" },
+  { t: "Einlass ohne Stau", org: "Kunde P", ph: 1, next: "Gespräch Sicherheitsdienst", due: "10.11.", fb: "–" },
+  { t: "Nachhaltige Fan-Anreise", org: "Kunde A", ph: 3, next: "Zwischenauswertung Pilot", due: "überfällig seit 3.11.", fb: "Pilot läuft", warn: true },
+  { t: "Mehrweg-Pfand im Stadion", org: "Kunde P", ph: 5, next: "Abgeschlossen · New Spice approved", due: "", fb: "erfolgreich" },
+];
+const PH = ["Angefragt", "Deep Dive", "Shortlist", "Pilot", "Auswertung", "Abgeschlossen"];
+const phaseBar = (p) => `<span style="display:flex;flex-direction:column;gap:4px"><span style="display:flex;gap:3px" aria-label="Phase ${p + 1} von 6: ${PH[p]}">${PH.map((_, i) => `<span style="width:16px;height:6px;border-radius:3px;background:${i <= p ? "var(--ink)" : "var(--line)"}"></span>`).join("")}</span><span class="small" style="color:var(--ink);font-weight:700">${PH[p]}</span></span>`;
+function R3_desk() {
+  return `${bhead()}
+  <nav class="side">${NAV.map((g) => `<div class="grp">${g.g ? `<span class="gh">${g.g}</span>` : ""}${g.items.map(item).join("")}</div>`).join("")}</nav>
+  <div class="content" style="left:240px;right:400px;gap:18px;padding:24px 28px">
+    <div class="row" style="justify-content:space-between;align-items:flex-end"><div><p class="eyebrow" style="color:var(--muted)">Freitag, 6. November</p><h1 class="h1" style="font-size:34px">Cockpit</h1></div>
+      <span class="row" style="gap:8px"><span class="btn" style="padding:6px 12px"><span class="num" style="font-size:15px">4</span> Vorschläge zur Freigabe →</span><span class="btn" style="padding:6px 12px">⚠ <span class="num" style="font-size:15px">0</span> Agentenläufe</span></span></div>
+    <section class="lime" style="padding:18px 20px;display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:22px">
+      <div style="display:flex;flex-direction:column;gap:10px;min-width:0">
+        <div class="row" style="justify-content:space-between"><span class="eyebrow">Startup-Funnel · 90 Tage</span><b style="font-size:12px">Startup-Datenbank →</b></div>
+        ${funnel(84)}${legend}</div>
+      <div style="display:flex;flex-direction:column;gap:6px;min-width:0;border-left:1px solid rgba(37,57,18,.25);padding-left:18px">
+        <div class="row" style="justify-content:space-between"><span class="eyebrow">Neu im Eingang</span><b style="font-size:12px">+ Startup eintragen</b></div>
+        ${INBOX.map(([n, k, s, a]) => `<div style="display:grid;grid-template-columns:12px minmax(0,1fr) auto;gap:8px;align-items:center;padding:6px 0;border-top:1px solid rgba(37,57,18,.2)">
+          <span style="width:12px;height:12px;border-radius:3px;${segStyle[k]}" title="${SRC[k]}"></span><span class="trunc"><b>${n}</b><br><span style="font-size:12px">${s}</span></span><span style="font-size:11px">${a}</span></div>`).join("")}
+        <b style="font-size:12px;margin-top:auto">3 warten auf Vorevaluierung →</b></div>
+    </section>
+    <section style="display:flex;flex-direction:column;gap:10px">
+      <div class="row" style="justify-content:space-between"><span class="h2">Projekte & Anfragen</span><span class="lnk">Alle Projekte →</span></div>
+      <div class="warn" style="align-items:center;justify-content:space-between"><span style="flex:1"><b style="color:var(--ink)">Neue Anfrage von Kunde P:</b> „VIP-Lounge: Bestellung am Tisch“ · vor 1 Tag · noch nicht beantwortet</span><span class="btn solid">Anfrage öffnen</span></div>
+      <table class="tbl"><thead><tr><th>Projekt</th><th style="width:150px">Phase</th><th>Nächster Schritt</th><th style="width:150px">Kunde sagt</th></tr></thead><tbody>
+      ${PROJ.map((p) => `<tr><td><div style="font-weight:700;color:var(--ink)">${p.t}</div><div class="small">${p.org}</div></td><td>${phaseBar(p.ph)}</td>
+        <td><div style="color:var(--ink)">${p.next}</div><div class="small" ${p.warn ? 'style="color:var(--ink);font-weight:700"' : ""}>${p.warn ? "⚠ " : ""}${p.due}</div></td><td class="small">${p.fb}</td></tr>`).join("")}
+      </tbody></table></section>
+  </div>
+  <aside style="position:absolute;right:0;top:60px;bottom:0;width:400px;border-left:1px solid var(--line);padding:18px 22px 0;display:flex;flex-direction:column;overflow:hidden">
+    ${feedHead()}<ol style="margin:0;padding:0;overflow:hidden;flex:1">${feedList()}</ol></aside>`;
+}
+function R3_phone() {
+  const tab = state.phTab;
+  const body = tab === "feed"
+    ? `<div style="display:flex;flex-direction:column;gap:0">${feedHead()}<ol style="margin:0;padding:0">${feedList(4)}</ol></div>`
+    : `<section class="lime" style="padding:14px;display:flex;flex-direction:column;gap:8px">
+        <div class="row" style="justify-content:space-between"><span class="eyebrow" style="font-size:10px">Startup-Funnel · 90 Tage</span><b style="font-size:12px">→</b></div>
+        ${funnel(56, true)}${legend}
+        <div style="border-top:1px solid rgba(37,57,18,.2);padding-top:6px;font-size:13px"><b>3 neu im Eingang</b> · TapFlow von Kunde A</div></section>
+      <div class="warn"><span><b style="color:var(--ink)">Neue Anfrage von Kunde P</b> · vor 1 Tag</span></div>
+      <span class="h3">Projekte</span>
+      ${PROJ.slice(0, 3).map((p) => `<div style="display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line);padding-bottom:8px"><span style="min-width:0"><b style="color:var(--ink)">${p.t}</b><br><span class="small">${p.org} · ${p.next}${p.warn ? " · ⚠ überfällig" : ""}</span></span>${phaseBar(p.ph).replace(/width:16px/g, "width:9px")}</div>`).join("")}`;
+  return `${phead()}${phoneMenu()}
+  <div class="content" style="left:0;top:56px;padding:14px 16px;gap:12px">
+    <div class="row" style="justify-content:space-between"><h1 class="h1" style="font-size:26px">Cockpit</h1>
+      <span class="seg" style="font-size:12px"><button type="button" data-phtab="overview" aria-pressed="${tab === "overview"}">Übersicht</button><button type="button" data-phtab="feed" aria-pressed="${tab === "feed"}">Live · 7</button></span></div>
+    ${body}</div>`;
+}
+
 /* ───── Texte ───── */
 const V = {
+  runde3: { name: "Runde 3", eyebrow: "Runde 3 · eure Wünsche", title: "Live-Feed, Startup-Funnel, Projekte",
+    lead: "Rechts läuft ein Live-Feed aller Meldungen, chronologisch sortiert, mit Live-Zeichen und der Zeit der letzten Meldung. Jede Meldung hat schon einen automatisch vorgeschlagenen Trend, den ihr ändern könnt. Danach geht sie per Knopf in den Ticker. Der Limetten-Block zeigt den Startup-Funnel nach Herkunft: Agent, Redaktion oder Kunde. Darunter steht der Stand der Projekte und Anfragen.",
+    desk: R3_desk, phone: R3_phone, navLabel: "Live-Feed rechts", pageLabel: "Funnel und Projekte",
+    facts: ["Feed <b>chronologisch</b>, 400 px rechts", "Trend <b>automatisch</b>, änderbar", "Funnel nach <b>3 Quellen</b>", "Projekte mit <b>Phasenleiste</b>", "In der Bühne: Trend-Chip, „In den Ticker“, Bereichsfilter anklicken"],
+    nav: ["<b>Live-Feed:</b> Das Zeichen „Live“ pulsiert, solange Scouts laufen. Daneben steht, wann die letzte Meldung kam („vor 4 Min. · 09:41“).", "Die drei Bereiche des Lagebilds werden zu Filtern im Feed; jede Meldung trägt ihren Bereich als Etikett.", "<b>Trend:</b> Ein Agent schlägt beim Eingang einen Trend mit Treffsicherheit vor. Klick auf den Chip öffnet die Auswahl mit Alternativen und Suche. Unter 60 % steht „unsicher – Trend prüfen“.", "„In den Ticker“ veröffentlicht mit dem gewählten Trend; danach „Im Ticker seit …“ mit „Zurückziehen“. ✕ verwirft."],
+    page: ["<b>Startup-Funnel</b> statt Freigabe-Block: Eingang → Vorevaluiert → In der Datenbank → Shortlist → Pilot → New Spice approved. Die Balken sind nach Quelle geteilt, Kunde zusätzlich schraffiert, damit es nicht nur an der Tönung hängt.", "Daneben „Neu im Eingang“ mit Quelle und „+ Startup eintragen“ für Startups, die ihr selbst einspielt.", "<b>Projekte & Anfragen:</b> Unbeantwortete Anfragen stehen als Hinweis oben. Die Projekte darunter zeigen Phase (6 Stufen), nächsten Schritt mit Fälligkeit (überfällig markiert) und Rückmeldung des Kunden.", "Die Review-Queue (4 Vorschläge) und die Agentenläufe stehen nur noch als kleine Knöpfe oben rechts."],
+    pro: ["Alles Tägliche auf einem Bildschirm: was reinkommt, was im Funnel steckt, wo Projekte hängen.", "Meldungen sind mit zwei Klicks im Ticker, inklusive Trend-Korrektur."], con: ["Die Review-Queue verliert den Blickfang. Bei vielen Vorschlägen könnte sie untergehen.", "Die Treffsicherheit ist neu: Der Analyst-Agent muss sie liefern. Heute ordnet er ohne Prozentwert zu."] },
   vorschlag: { name: "Vorschlag", eyebrow: "Runde 2 · Vorschlag", title: "Gruppierte Leiste, Freigaben oben, Lagebild in Spalten",
     lead: "Die Seitenleiste aus A bleibt links und bekommt Gruppen. Oben im Cockpit steht der Limetten-Block mit den nächsten Freigaben, daneben nur die zwei Zahlen, die Handeln auslösen. Darunter das Lagebild als drei Spalten. Fährt man über eine Meldung, erscheinen ihre Aktionen: in den Ticker, Trend zuordnen, verwerfen.",
     desk: R_desk, phone: R_phone,
@@ -465,8 +607,8 @@ function variantPage(v) {
     <div class="stage ${state.dev}" data-stage><div class="canvas">${state.dev === "desk" ? d.desk() : d.phone()}</div></div>
     <div class="facts">${d.facts.map((f) => `<span class="fact">${f}</span>`).join("")}${d.dropHint && state.dev === "desk" ? '<span class="fact">„Inhalte“ in der Bühne anklicken</span>' : ""}${state.dev === "phone" && v !== "c" ? '<span class="fact">„Menü“ in der Bühne anklicken</span>' : ""}<span class="fact">Bühne zeigt den ersten Bildschirm (1440 × 900)</span></div>
     <section class="notes">
-      <div class="note"><p class="eyebrow">Navigation</p><ul>${d.nav.map((x) => `<li>${x}</li>`).join("")}</ul></div>
-      <div class="note"><p class="eyebrow">Cockpit</p><ul>${d.page.map((x) => `<li>${x}</li>`).join("")}</ul></div>
+      <div class="note"><p class="eyebrow">${d.navLabel ?? "Navigation"}</p><ul>${d.nav.map((x) => `<li>${x}</li>`).join("")}</ul></div>
+      <div class="note"><p class="eyebrow">${d.pageLabel ?? "Cockpit"}</p><ul>${d.page.map((x) => `<li>${x}</li>`).join("")}</ul></div>
       <div class="note"><p class="eyebrow">Dafür</p><ul>${d.pro.map((x) => `<li>${x}</li>`).join("")}</ul><p class="eyebrow" style="margin-top:8px">Dagegen</p><ul>${d.con.map((x) => `<li>${x}</li>`).join("")}</ul></div>
     </section>`;
 }
@@ -539,7 +681,7 @@ function render() {
 }
 function route() {
   const h = location.hash.slice(1);
-  state.view = ["heute", "a", "b", "c", "vergleich", "vorschlag"].includes(h) ? h : "heute";
+  state.view = ["heute", "a", "b", "c", "vergleich", "vorschlag", "runde3"].includes(h) ? h : "heute";
   state.drop = false; state.menu = false;
   render();
 }
@@ -550,6 +692,16 @@ document.addEventListener("click", (e) => {
   if (th) { document.documentElement.dataset.theme = th.dataset.th; render(); return; }
   if (e.target.closest("[data-drop]")) { state.drop = !state.drop; render(); return; }
   if (e.target.closest("[data-menu]")) { state.menu = !state.menu; render(); return; }
+  const dd = e.target.closest("[data-dd]");
+  if (dd) { state.dd = state.dd === dd.dataset.dd ? null : dd.dataset.dd; render(); return; }
+  const pk = e.target.closest("[data-pick]");
+  if (pk) { const [id, i] = pk.dataset.pick.split(":"); state.pick[id] = +i; state.dd = null; render(); return; }
+  const pu = e.target.closest("[data-push]");
+  if (pu) { const id = pu.dataset.push; if (state.pushed[id]) delete state.pushed[id]; else state.pushed[id] = "09:45"; render(); return; }
+  const ln = e.target.closest("[data-lane]");
+  if (ln) { state.lane = ln.dataset.lane; render(); return; }
+  const pt = e.target.closest("[data-phtab]");
+  if (pt) { state.phTab = pt.dataset.phtab; render(); return; }
 });
 document.addEventListener("mouseover", (e) => {
   const c = e.target.closest("[data-hov]");
