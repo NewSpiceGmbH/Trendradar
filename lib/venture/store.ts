@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { fixtureVenture } from "./fixture";
 import { readBrief, type Brief } from "./brief";
 import { domainOf } from "./scoring";
-import type { Candidate, CandidateStatus, Challenge, DeepDiveSession, Startup, StartupPrivate } from "./types";
+import { MEMBER_DEFAULTS, type Candidate, type CandidateStatus, type Challenge, type DeepDiveSession, type Startup, type StartupPrivate } from "./types";
 
 /** Daten fehlen, weil Migration 0009 noch nicht angewendet ist */
 export class VentureMissingError extends Error {
@@ -109,6 +109,21 @@ export const mapStartup = (r: Row): Startup => ({
   trendNumbers: (r.trend_numbers as number[]) ?? [], tags: (r.tags as string[]) ?? [], status: r.status as Startup["status"],
   approved: r.approved as boolean, published: r.published as boolean, logoUrl: r.logo_url as string | null,
   sources: (r.sources as Startup["sources"]) ?? [], createdAt: r.created_at as string, updatedAt: r.updated_at as string,
+  // ab Migration 0014; davor Standardwerte
+  partnerTypes: (r.partner_types as Startup["partnerTypes"]) ?? MEMBER_DEFAULTS.partnerTypes,
+  isStartup: (r.is_startup as boolean | undefined) ?? true,
+  region: (r.region as Startup["region"]) ?? null,
+  source: (r.source as Startup["source"]) ?? "editor",
+  details: (r.details as Record<string, string>) ?? {},
+  isPartner: (r.is_partner as boolean | undefined) ?? false,
+});
+
+/** Spalten der Mitglieder-Tabelle aus der App-Sicht (ohne id, Zeitstempel, Siegel) */
+export const startupRow = (s: StartupInput) => ({
+  name: s.name, website: s.website, domain: domainOf(s.website), country: s.country, city: s.city, founded: s.founded, stage: s.stage, funding: s.funding,
+  team_size: s.teamSize, tagline: s.tagline, solution: s.solution, use_cases: s.useCases, reference_customers: s.referenceCustomers,
+  trend_numbers: s.trendNumbers, tags: s.tags, status: s.status, published: s.published, logo_url: s.logoUrl, sources: s.sources,
+  partner_types: s.partnerTypes, is_startup: s.isStartup, region: s.region, source: s.source, details: s.details, is_partner: s.isPartner,
 });
 
 const mapPrivate = (r: Row | null): StartupPrivate => ({
@@ -119,7 +134,8 @@ const mapPrivate = (r: Row | null): StartupPrivate => ({
 const MESSAGES: Record<string, string> = {
   "Begründung": "Bitte eine Begründung angeben.",
   "bereits entschieden": "Über diesen Kandidaten ist bereits entschieden.",
-  "startups_publish_qualified": "Archivierte Profile lassen sich nicht veröffentlichen.",
+  "startups_publish_qualified": "Nur aufgenommene Einträge lassen sich veröffentlichen.",
+  "startups_partner_types": "Bitte mindestens einen Partner-Typ wählen.",
   "startups_domain_key": "Ein Startup mit dieser Website gibt es schon in der Datenbank.",
 };
 const friendly = (msg: string) => MESSAGES[Object.keys(MESSAGES).find((k) => msg.includes(k)) ?? ""] ?? msg;
@@ -166,11 +182,7 @@ export function supabaseVenture(db: SupabaseClient): VentureRepo {
       return { startup: mapStartup(row), priv: mapPrivate(ok(p, "startup_private")) };
     },
     async saveStartup(id, s, priv) {
-      const { error } = await db.from("startups").update({
-        name: s.name, website: s.website, domain: domainOf(s.website), country: s.country, city: s.city, founded: s.founded, stage: s.stage, funding: s.funding,
-        team_size: s.teamSize, tagline: s.tagline, solution: s.solution, use_cases: s.useCases, reference_customers: s.referenceCustomers,
-        trend_numbers: s.trendNumbers, tags: s.tags, status: s.status, published: s.published, logo_url: s.logoUrl, sources: s.sources,
-      }).eq("id", id);
+      const { error } = await db.from("startups").update(startupRow(s)).eq("id", id);
       if (error) throw new Error(friendly(error.message));
       const p = await db.from("startup_private").upsert({
         startup_id: id, contact_name: priv.contactName, contact_role: priv.contactRole, contact_email: priv.contactEmail,

@@ -11,6 +11,7 @@ import {
   CANDIDATE_STATUS_LABEL, CHALLENGE_STATUS_LABEL, CRITERIA, MATURITY_LABEL, RECOMMENDATION_LABEL,
   type Candidate, type ChallengeStatus, type Maturity, type Startup, type StartupPrivate,
 } from "@/lib/venture/types";
+import { DETAIL_FIELDS, MEMBER_STATUS_LABEL, PARTNER_TYPE_LABEL, PARTNER_TYPES, suggestStartup, type PartnerType } from "@/lib/network/types";
 import { Label, Toggles, lines } from "./form";
 import { Badge, Card, btn, input } from "./ui";
 
@@ -18,6 +19,7 @@ type Msg = { ok: boolean; text: string } | null;
 const Note = ({ m }: { m: Msg }) => (m ? <p role="status" className={`text-sm ${m.ok ? "text-ink" : "text-[var(--cA)]"}`}>{m.text}</p> : null);
 
 const REGION = { DACH: "DACH", EU: "Europa", US: "USA", GLOBAL: "Global" } as const;
+const PARTNER_OPTIONS = Object.fromEntries(PARTNER_TYPES.map((t) => [t, PARTNER_TYPE_LABEL[t]])) as Record<PartnerType, string>;
 const MIN_MATURITY = { idea: MATURITY_LABEL.idea, prototype: MATURITY_LABEL.prototype, pilot: MATURITY_LABEL.pilot, market: MATURITY_LABEL.market } as const;
 
 // ───────────────────────── Challenge ─────────────────────────
@@ -274,6 +276,10 @@ export function StartupEditor({ startup, priv, trends }: { startup: Startup; pri
   const set = <K extends keyof StartupInput>(k: K, v: StartupInput[K]) => setD((x) => ({ ...x, [k]: v }));
   const setPriv = <K extends keyof StartupPrivate>(k: K, v: string) => setP((x) => ({ ...x, [k]: v || null }));
   const trendNumbers = trendText.split(/[,\s#]+/).map(Number).filter((n) => trends.some((t) => t.number === n));
+  const suggested = suggestStartup(d.founded);
+  const startupHint = suggested == null || suggested === d.isStartup ? null
+    : suggested ? "Laut Gründungsjahr jünger als 5 Jahre – Merkmal „Startup“ setzen?" : "Laut Gründungsjahr 5 Jahre oder älter – Merkmal „Startup“ entfernen?";
+  const detailFields = d.partnerTypes.flatMap((t) => DETAIL_FIELDS[t]);
 
   const save = (patch: Partial<StartupInput> = {}) =>
     start(async () => {
@@ -302,8 +308,38 @@ export function StartupEditor({ startup, priv, trends }: { startup: Startup; pri
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
       <div className="flex min-w-0 flex-col gap-6">
         <Card>
+          <h2 className="!text-xl">Klassifizierung</h2>
+          <div className="mt-4 flex flex-col gap-4">
+            <Toggles label="Partner-Typ (mehrere möglich)" options={PARTNER_OPTIONS} value={d.partnerTypes} onChange={(v) => set("partnerTypes", v)} />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" checked={d.isStartup} onChange={(e) => set("isStartup", e.target.checked)} />
+                Merkmal „Startup“ (jünger als 5 Jahre)
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" checked={d.isPartner} onChange={(e) => set("isPartner", e.target.checked)} />
+                Partner von New Spice
+              </label>
+            </div>
+            {startupHint && <p role="note" className="text-xs text-muted">{startupHint}</p>}
+            <Toggles label="Region" options={REGION} value={d.region ? [d.region] : []} onChange={(v) => set("region", (v.at(-1) ?? null) as Startup["region"])} />
+            {detailFields.length > 0 && (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {detailFields.map((f) => (
+                  <div key={f.key} className="flex flex-col gap-1.5">
+                    <Label htmlFor={`dt-${f.key}`}>{f.label}</Label>
+                    <input id={`dt-${f.key}`} value={d.details[f.key] ?? ""} className={input}
+                      onChange={(e) => set("details", Object.fromEntries(Object.entries({ ...d.details, [f.key]: e.target.value }).filter(([, x]) => x)))} />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </Card>
+
+        <Card>
           <h2 className="!text-xl">Profil</h2>
-          <p className="mt-1 text-sm text-muted">Diese Angaben sehen Kunden, sobald das Profil im Radar veröffentlicht ist. Nur Angaben zum Unternehmen, keine Personen.</p>
+          <p className="mt-1 text-sm text-muted">Öffentliche Angaben: Kunden sehen sie, sobald der Eintrag öffentlich ist oder ihrem Projekt zugewiesen wird. Nur Angaben zur Organisation, keine Personen.</p>
           <div className="mt-4 flex flex-col gap-4">
             <div className="grid gap-4 sm:grid-cols-2">{field("name", "Name")}{field("website", "Website", "https://…")}</div>
             {field("tagline", "In einem Satz", "Kasse ohne Schlange für Stadien und Arenen")}
@@ -318,7 +354,7 @@ export function StartupEditor({ startup, priv, trends }: { startup: Startup; pri
             <div className="grid gap-4 sm:grid-cols-2">{field("funding", "Finanzierung", "Seed, 6 Mio. € (2025)")}{field("logoUrl", "Logo (https, mit Nutzungsrecht)")}</div>
             <Toggles label="Reifegrad" options={MATURITY_LABEL} value={d.stage ? [d.stage] : []} onChange={(v) => set("stage", (v.at(-1) ?? null) as Maturity | null)} />
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="flex flex-col gap-1.5"><Label htmlFor="st-trends">Trends (Nummern)</Label><input id="st-trends" value={trendText} onChange={(e) => setTrendText(e.target.value)} className={input} /></div>
+              <div className="flex flex-col gap-1.5"><Label htmlFor="st-trends">Trends direkt (bisherige Zuordnung; sonst über Angebotskategorien)</Label><input id="st-trends" value={trendText} onChange={(e) => setTrendText(e.target.value)} className={input} /></div>
               <div className="flex flex-col gap-1.5"><Label htmlFor="st-tags">Schlagwörter (mit Komma)</Label><input id="st-tags" value={tags} onChange={(e) => setTags(e.target.value)} className={input} /></div>
             </div>
           </div>
@@ -345,13 +381,13 @@ export function StartupEditor({ startup, priv, trends }: { startup: Startup; pri
 
       <aside className="flex flex-col gap-6">
         <Card className={d.published ? "!border-ink" : ""}>
-          <h2 className="!text-xl">Im Radar</h2>
+          <h2 className="!text-xl">Sichtbarkeit</h2>
           <p className="mt-1 text-sm text-muted">
-            {d.published ? "Veröffentlicht: Kunden sehen das Kurzprofil bei den zugeordneten Trends." : "Nicht veröffentlicht. Kunden sehen das Profil nicht."}
+            {d.published ? "Öffentlich: Kunden sehen die öffentlichen Angaben, auch beim Trend im Radar." : "Nur intern. Kunden sehen den Eintrag nur, wenn er ihrem Projekt zugewiesen und freigegeben ist."}
           </p>
           <div className="mt-4 flex flex-col gap-2">
             <button type="button" disabled={busy || d.status !== "qualified"} onClick={() => save({ published: !d.published })} className={d.published ? btn.ghost : btn.primary}>
-              {d.published ? "Aus dem Radar nehmen" : "Im Radar veröffentlichen"}
+              {d.published ? "Nur intern sichtbar machen" : "Öffentlich machen"}
             </button>
             {startup.approved && <Badge>New Spice approved</Badge>}
           </div>
@@ -359,8 +395,8 @@ export function StartupEditor({ startup, priv, trends }: { startup: Startup; pri
         <Card>
           <h2 className="!text-xl">Status</h2>
           <div className="mt-3">
-            <Toggles label="Status" options={{ qualified: "Qualifiziert", archived: "Archiviert" }} value={[d.status]}
-              onChange={(v) => setD((x) => ({ ...x, status: (v.at(-1) ?? x.status) as Startup["status"], published: v.at(-1) === "archived" ? false : x.published }))} />
+            <Toggles label="Status" options={MEMBER_STATUS_LABEL} value={[d.status]}
+              onChange={(v) => setD((x) => ({ ...x, status: (v.at(-1) ?? x.status) as Startup["status"], published: v.at(-1) !== "qualified" ? false : x.published }))} />
           </div>
         </Card>
         <div className="flex flex-col gap-2">

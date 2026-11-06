@@ -165,7 +165,8 @@ test.describe("Redaktion", () => {
     await expect(queueless.getByText("Problem-Fit")).toBeVisible();
     await expect(queueless.getByText("4,10")).toBeVisible(); // 5·0,25 + 4·0,2 + 4·0,15 + 4·0,15 + 4·0,1 + 3·0,1 + 3·0,05
     await queueless.getByRole("button", { name: "In die Datenbank" }).click();
-    await expect(page.getByRole("status").filter({ hasText: "aufgenommen" })).toBeVisible();
+    // die Karte wandert danach aus „offen“ heraus – geprüft wird das Ergebnis, nicht die kurze Meldung
+    await expect(page.getByRole("link", { name: /^In der Datenbank 1$/ })).toBeVisible();
 
     // Ablehnen nur mit Begründung
     const crowd = page.getByRole("listitem").filter({ has: page.getByRole("heading", { name: /CrowdSense/ }) });
@@ -177,12 +178,14 @@ test.describe("Redaktion", () => {
     await page.goto("/admin/venture/ch-1?zeige=abgelehnt");
     await expect(page.getByRole("heading", { name: /CrowdSense/ })).toBeVisible();
 
-    // Profil ergänzen und im Radar veröffentlichen
+    // Eintrag in der Netzwerk-Datenbank ergänzen und öffentlich machen (alte Adresse leitet weiter)
     await page.goto("/admin/startups");
+    await expect(page).toHaveURL(/\/admin\/netzwerk\?typ=solution_provider/);
     await page.getByRole("link", { name: /QueueLess/ }).click();
+    await page.getByRole("navigation", { name: "Reiter" }).getByRole("link", { name: "Bearbeiten" }).click();
     await page.getByLabel("In einem Satz").fill("Kasse ohne Schlange für Stadien und Arenen.");
     await page.getByLabel("Kosten / Preismodell").fill("2.000 € im Monat");
-    await page.getByRole("button", { name: "Im Radar veröffentlichen" }).click();
+    await page.getByRole("button", { name: "Öffentlich machen" }).click();
     await expect(page.getByRole("status").filter({ hasText: "veröffentlicht" })).toBeVisible();
 
     // neue Challenge anlegen; im Testmodus gibt es keine echten Läufe
@@ -204,6 +207,84 @@ test.describe("Redaktion", () => {
     await expect(page.getByText("2.000 € im Monat")).toHaveCount(0);
     await page.goto("/admin/startups");
     await expect(page.getByRole("heading", { name: "Nur für die Redaktion" })).toBeVisible();
+  });
+
+  test("Netzwerk-Datenbank: Filter, Eintrag mit Angebot, Kategorien, Netzwerk-Manager", async ({ page }) => {
+    await loginAs(page, /Redaktion/);
+    await page.goto("/admin/netzwerk");
+    await expect(page.getByRole("heading", { name: "Netzwerk-Datenbank", level: 1 })).toBeVisible();
+    const types = page.getByRole("navigation", { name: "Partner-Typ" });
+    await types.getByRole("link", { name: /^Verein · \d+/ }).click();
+    await expect(page.getByRole("link", { name: /FC Beispielstadt/ })).toBeVisible();
+    await expect(page.getByRole("link", { name: /TapFlow/ })).toHaveCount(0);
+    // Suche nach Trendnummer läuft über die Angebotskategorien
+    await page.goto("/admin/netzwerk?q=%2325");
+    await expect(page.getByRole("link", { name: /TapFlow/ })).toBeVisible();
+    await expect(page.getByRole("link", { name: /Kassensysteme AG/ })).toHaveCount(0);
+
+    // Netzwerk-Manager: Kategorie anpassen und übernehmen → Eintrag bekommt sie
+    const manager = page.getByRole("complementary").filter({ has: page.getByRole("heading", { name: "Netzwerk-Manager" }) });
+    const sensorik = manager.getByRole("listitem").filter({ hasText: "Sensorik" });
+    await sensorik.getByRole("button", { name: "Anpassen" }).click();
+    await sensorik.getByLabel("Name").fill("Sensorik & Messung");
+    await sensorik.getByRole("button", { name: "Angepasst übernehmen" }).click();
+    await expect(sensorik).toHaveCount(0); // entschieden: verschwindet aus der Liste
+    const crowd = manager.getByRole("listitem").filter({ hasText: "Crowd-Management" });
+    await crowd.getByRole("button", { name: "Verwerfen" }).click();
+    await expect(crowd).toHaveCount(0);
+    await expect(manager.getByText("Keine offenen Vorschläge.")).toBeVisible();
+
+    // Eintrag: Angebot mit Kategorie → Trends; Referenz; Sichtbarkeit
+    await page.goto("/admin/netzwerk");
+    await page.getByRole("link", { name: /TapFlow/ }).click();
+    await expect(page.getByRole("heading", { name: /TapFlow/, level: 1 })).toBeVisible();
+    await expect(page.getByText("New Spice approved").first()).toBeVisible();
+    await expect(page.getByText("Sensorik & Messung").first()).toBeVisible(); // aus dem übernommenen Vorschlag
+    await page.getByRole("button", { name: "+ Angebot" }).click();
+    await page.getByLabel("Produkt / Leistung").last().fill("TapFlow Pay");
+    await page.getByRole("group", { name: "Angebotskategorien" }).last().getByRole("button", { name: "Kassensysteme" }).click();
+    await page.getByRole("button", { name: "Angebot hinzufügen" }).click();
+    await expect(page.getByRole("status").filter({ hasText: "Angebot gespeichert" })).toBeVisible();
+    await expect(page.getByText("TapFlow Pay")).toBeVisible();
+    await expect(page.getByText(/#26/).first()).toBeVisible();
+    await page.getByRole("button", { name: "+ Referenz" }).click();
+    await page.getByLabel("Wo / bei wem").last().fill("Messe Beispiel");
+    await page.getByRole("button", { name: "Referenz hinzufügen" }).click();
+    await expect(page.getByText("Messe Beispiel")).toBeVisible();
+    const vis = page.getByRole("group", { name: "Sichtbarkeit" });
+    await vis.getByRole("button", { name: "öffentlich" }).click();
+    await expect(page.getByRole("status").filter({ hasText: "Öffentlich" })).toBeVisible();
+    await expect(vis.getByRole("button", { name: "öffentlich" })).toHaveAttribute("aria-pressed", "true");
+    // Verbindungen: Projekt aus der Shortlist; Kontakt nur intern
+    await page.getByRole("navigation", { name: "Reiter" }).getByRole("link", { name: "Verbindungen" }).click();
+    await expect(page.getByRole("link", { name: /Halbzeit-Gastro schneller/ })).toBeVisible();
+    await page.getByRole("navigation", { name: "Reiter" }).getByRole("link", { name: "Kontakt & Vertrauliches" }).click();
+    await expect(page.getByText("ab 2.400 € je Modul und Saison")).toBeVisible();
+
+    // Kategorien verwalten
+    await page.goto("/admin/netzwerk/kategorien");
+    await expect(page.getByText("Sensorik & Messung")).toBeVisible();
+    await page.getByLabel("Name").first().fill("Einlasssysteme");
+    await page.getByLabel("Trends (Nummern)").first().fill("18");
+    await page.getByRole("button", { name: "Kategorie anlegen" }).click();
+    await expect(page.getByText("Einlasssysteme")).toBeVisible();
+    await page.getByLabel("Name").first().fill("zapfsysteme");
+    await page.getByRole("button", { name: "Kategorie anlegen" }).click();
+    await expect(page.getByRole("status").filter({ hasText: "gibt es schon" })).toBeVisible();
+    await page.getByRole("button", { name: "Kategorienliste vorschlagen" }).click();
+    await expect(page.getByRole("status").filter({ hasText: "Testmodus" })).toBeVisible();
+
+    // neuer Eintrag: Merkmal Startup aus dem Gründungsjahr
+    await page.goto("/admin/netzwerk/neu");
+    await page.getByLabel("Name").fill("Hallen-Catering Nord");
+    await page.getByRole("group", { name: /Partner-Typ/ }).getByRole("button", { name: "Solution Provider" }).click();
+    await page.getByRole("group", { name: /Partner-Typ/ }).getByRole("button", { name: "Caterer" }).click();
+    await page.getByLabel("Gründungsjahr").fill(String(new Date().getFullYear() - 1));
+    await expect(page.getByLabel(/Startup \(jünger als 5 Jahre\)/)).toBeChecked();
+    await page.getByRole("button", { name: "Eintrag anlegen" }).click();
+    await expect(page.getByRole("heading", { name: "Hallen-Catering Nord", level: 1 })).toBeVisible();
+    await expect(page.getByText("Caterer · Startup")).toBeVisible();
+    await expect(page.getByLabel("Art der Gastronomie")).toBeVisible();
   });
 
   test("Problem Deep Dive: Briefing prüfen, bearbeiten, als Scouting-Grundlage übernehmen", async ({ page }) => {

@@ -3,7 +3,7 @@ import "server-only";
 import { domainOf, totalOf } from "./scoring";
 import type { ChallengeInput, StartupInput, VentureRepo, VentureRun } from "./store";
 import { EMPTY_BRIEF, type Brief } from "./brief";
-import { CRITERIA, EMPTY_PRIVATE, type Candidate, type Challenge, type CriterionKey, type DeepDiveSession, type Startup, type StartupPrivate } from "./types";
+import { CRITERIA, EMPTY_PRIVATE, MEMBER_DEFAULTS, type Candidate, type Challenge, type CriterionKey, type DeepDiveSession, type Startup, type StartupPrivate } from "./types";
 
 /**
  * Venture Clienting im lokalen Testmodus (RADAR_FIXTURES=1): eine Beispiel-Challenge mit vorbewerteten Kandidaten.
@@ -105,6 +105,9 @@ function init(): Store {
 
 const store = () => (g.__trendradarVenture ??= init());
 
+/** Testmodus: gemeinsamer Speicher der Mitglieder (Netzwerk-Datenbank nutzt dieselben Profile) */
+export const fixtureStartupStore = () => store();
+
 export function fixtureVenture(): VentureRepo {
   return {
     async challenges() { return structuredClone(store().challenges); },
@@ -145,6 +148,7 @@ export function fixtureVenture(): VentureRepo {
             id: sid, name: c.name, website: c.website, domain: c.domain, country: c.country, city: null, founded: c.founded, stage: c.stage,
             funding: c.funding, teamSize: null, tagline: null, solution: c.summary, useCases: null, referenceCustomers: null, trendNumbers: [...trends],
             tags: [], status: "qualified", approved: false, published: false, logoUrl: null, sources: c.sources, createdAt: now, updatedAt: now,
+            ...structuredClone(MEMBER_DEFAULTS), source: "agent", isStartup: c.founded == null || c.founded > new Date().getFullYear() - 5,
           });
         }
       }
@@ -159,7 +163,8 @@ export function fixtureVenture(): VentureRepo {
     async saveStartup(id, input: StartupInput, priv) {
       const s = store().startups.find((x) => x.id === id);
       if (!s) throw new Error("Startup nicht gefunden.");
-      if (input.published && input.status !== "qualified") throw new Error("Archivierte Profile lassen sich nicht veröffentlichen.");
+      if (input.published && input.status !== "qualified") throw new Error("Nur aufgenommene Einträge lassen sich veröffentlichen.");
+      if (!input.partnerTypes.length) throw new Error("Bitte mindestens einen Partner-Typ wählen.");
       Object.assign(s, structuredClone(input), { domain: domainOf(input.website), updatedAt: new Date().toISOString() });
       store().priv.set(id, structuredClone(priv));
     },

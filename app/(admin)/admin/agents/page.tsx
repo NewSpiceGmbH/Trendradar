@@ -11,7 +11,13 @@ const AGENTS = [
   { key: "analyst", name: "Analyst", text: "Ordnet Meldungen einem Trend zu oder schlägt einen neuen Trend vor (nur mit mindestens zwei unabhängigen Signalen)." },
   { key: "scorer", name: "Scorer", text: "Bewertet nach den sechs Kriterien, global und für Europa, mit Begründung je Kriterium." },
   { key: "editor", name: "Editor / QA", text: "Prüft Quellen, Dubletten und Ton, bevor ein Vorschlag in die Review-Queue geht." },
+  { key: "network", name: "Netzwerk-Manager", text: "Schlägt Angebotskategorien und Klassifizierungen für die Netzwerk-Datenbank vor; später auch Clustern des Eingangs, Matching und Verbindungen." },
 ] as const;
+
+const LINKS: Partial<Record<(typeof AGENTS)[number]["key"], { href: string; label: string }>> = {
+  scout: { href: "/admin/scouting", label: "Zum Scouting-Stab" },
+  network: { href: "/admin/netzwerk/manager", label: "Zum Netzwerk-Manager" },
+};
 
 export default function AgentsPage() {
   return (
@@ -26,20 +32,21 @@ async function Agents() {
   return (
     <>
       <PageHead eyebrow="Redaktion" title="Agenten">
-        Vier Agenten mit klar getrennten Aufgaben. Sie schreiben nie direkt in die Trends, sondern nur Vorschläge und Meldungen.
+        Agenten mit klar getrennten Aufgaben. Sie schreiben nie direkt in die Trends, sondern nur Vorschläge und Meldungen.
       </PageHead>
       <div className="grid gap-4 md:grid-cols-2">
         {AGENTS.map((a) => {
-          const last = runs.find((r) => r.agent === a.key);
+          const last = runs.find((r) => (r.agent as string) === a.key);
+          const link = LINKS[a.key];
           return (
             <Card key={a.key} className="flex flex-col gap-2">
               <div className="flex items-center justify-between gap-3">
                 <h2 className="!text-xl">{a.name}</h2>
-                <Badge tone="muted">{last ? `zuletzt ${formatDate(last.startedAt)}` : a.key === "scout" ? "bereit" : "folgt"}</Badge>
+                <Badge tone="muted">{last ? `zuletzt ${formatDate(last.startedAt)}` : link ? "bereit" : "folgt"}</Badge>
               </div>
               <p className="text-sm">{a.text}</p>
-              {a.key === "scout" ? (
-                <Link href="/admin/scouting" className="glass mt-1 self-start rounded-[var(--radius-pill)] px-4 py-2 text-sm font-bold text-ink no-underline">Zum Scouting-Stab</Link>
+              {link ? (
+                <Link href={link.href} className="glass mt-1 self-start rounded-[var(--radius-pill)] px-4 py-2 text-sm font-bold text-ink no-underline">{link.label}</Link>
               ) : (
                 <span className="mt-1 text-xs text-muted">Folgt mit Paket B (Kette Analyst → Scorer → QA).</span>
               )}

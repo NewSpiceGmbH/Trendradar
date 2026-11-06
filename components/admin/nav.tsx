@@ -19,8 +19,10 @@ export function AdminNav({ groups }: { groups: NavGroup[] }) {
   const path = usePathname();
   const [open, setOpen] = useState(false);
   const all = groups.flatMap((g) => g.items);
-  const isActive = (href: string) => (href === "/admin" ? path === "/admin" : path.startsWith(href));
-  const current = all.find((i) => isActive(i.href));
+  const matches = (href: string) => (href === "/admin" ? path === "/admin" : path === href || path.startsWith(`${href}/`));
+  // bei verschachtelten Adressen (z. B. /admin/netzwerk/manager) gewinnt der längste Treffer
+  const current = all.filter((i) => matches(i.href)).sort((a, b) => b.href.length - a.href.length)[0];
+  const isActive = (href: string) => current?.href === href;
   const total = all.reduce((n, i) => n + (i.count ?? 0), 0);
 
   const list = (

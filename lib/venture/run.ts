@@ -76,7 +76,7 @@ export async function runChallenge(challengeId: string, opts: { userId?: string 
         must_have_gaps: c.must_have_gaps, open_questions: c.open_questions, sources: c.sources,
         uncertain: c.uncertain || c.scores.some((s) => !s.source_url),
         // bereits in der Datenbank: Profil verknüpfen, die Redaktion entscheidet trotzdem
-        decision_note: domain && existingStartups.has(domain) ? "Bereits in der Startup-Datenbank." : null,
+        decision_note: domain && existingStartups.has(domain) ? "Bereits in der Netzwerk-Datenbank." : null,
       });
     }
     if (rows.length) {

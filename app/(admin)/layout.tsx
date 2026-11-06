@@ -9,6 +9,7 @@ import { UserMenu } from "@/components/app/user-menu";
 import { getAdminRepo } from "@/lib/admin/repo";
 import { MigrationMissingError } from "@/lib/admin/types";
 import { getViewer } from "@/lib/auth/viewer";
+import { getNetworkRepo } from "@/lib/network/store";
 import { getProjectsRepo } from "@/lib/projects/store";
 import { getVentureRepo } from "@/lib/venture/store";
 
@@ -52,7 +53,7 @@ async function Shell({ children }: { children: ReactNode }) {
     );
   }
 
-  let pending = 0, fresh = 0, openCandidates = 0, newRequests = 0, migration: string | null = null;
+  let pending = 0, fresh = 0, openCandidates = 0, newRequests = 0, networkSuggestions = 0, migration: string | null = null;
   try {
     const repo = await getAdminRepo();
     const [proposals, signals] = await Promise.all([repo.proposals(), repo.signals()]);
@@ -61,6 +62,8 @@ async function Shell({ children }: { children: ReactNode }) {
     // Venture Clienting (Migration 0009) – fehlt sie noch, bleibt die Zahl leer
     // Projekte (Migration 0010) – neue Anfragen; fehlt sie noch, bleibt die Zahl leer
     newRequests = await getProjectsRepo(viewer).then((r) => r.projects()).then((ps) => ps.filter((x) => x.status === "requested").length).catch(() => 0);
+    // Netzwerk-Manager (Migration 0014) – offene Vorschläge; fehlt sie noch, bleibt die Zahl leer
+    networkSuggestions = await getNetworkRepo().then((r) => r.suggestions("pending")).then((s) => s.length).catch(() => 0);
     openCandidates = await getVentureRepo().then((r) => r.candidates()).then((cs) => cs.filter((c) => c.status === "pending").length).catch(() => 0);
   } catch (e) {
     if (e instanceof MigrationMissingError) migration = e.message;
@@ -78,10 +81,11 @@ async function Shell({ children }: { children: ReactNode }) {
     ] },
     { label: "Netzwerk", items: [
       { href: "/admin/venture", label: "Challenges", count: openCandidates },
-      { href: "/admin/startups", label: "Netzwerk-Datenbank" },
+      { href: "/admin/netzwerk", label: "Netzwerk-Datenbank" },
     ] },
     { label: "Agenten", items: [
       { href: "/admin/scouting", label: "Scouting" },
+      { href: "/admin/netzwerk/manager", label: "Netzwerk-Manager", count: networkSuggestions },
       { href: "/admin/agents", label: "Agenten-Protokoll" },
     ] },
     { label: "Kunden", items: [

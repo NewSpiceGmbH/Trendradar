@@ -67,7 +67,7 @@ export async function decideCandidate(candidateId: string, decision: Exclude<Can
     await guard();
     const startupId = await (await getVentureRepo()).decide(candidateId, decision, orNull(note));
     revalidatePath("/admin", "layout");
-    const message = decision === "qualified" ? "In die Startup-Datenbank aufgenommen." : decision === "watch" ? "Auf Beobachten gesetzt." : "Abgelehnt.";
+    const message = decision === "qualified" ? "In die Netzwerk-Datenbank aufgenommen." : decision === "watch" ? "Auf Beobachten gesetzt." : "Abgelehnt.";
     return { ok: true, message, startupId };
   } catch (e) {
     return fail(e);
@@ -79,6 +79,7 @@ export async function saveStartup(id: string, s: StartupInput, priv: StartupPriv
     await guard();
     if (!s.name.trim()) return { ok: false, error: "Bitte einen Namen angeben." };
     if (s.website && !domainOf(s.website)) return { ok: false, error: "Die Website ist keine gültige Adresse." };
+    if (!s.partnerTypes.length) return { ok: false, error: "Bitte mindestens einen Partner-Typ wählen." };
     if (s.published && !s.tagline?.trim() && !s.solution?.trim()) return { ok: false, error: "Für die Veröffentlichung braucht das Profil mindestens einen Satz zur Lösung." };
     if (priv.contactEmail && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(priv.contactEmail)) return { ok: false, error: "Die Kontakt-E-Mail ist ungültig." };
     if (priv.pitchDeckUrl && !/^https:\/\//.test(priv.pitchDeckUrl)) return { ok: false, error: "Pitchdeck bitte als https-Link." };
@@ -92,7 +93,7 @@ export async function saveStartup(id: string, s: StartupInput, priv: StartupPriv
     });
     revalidatePath("/admin", "layout");
     revalidatePath("/radar");
-    return { ok: true, message: s.published ? "Gespeichert und im Radar veröffentlicht." : "Gespeichert." };
+    return { ok: true, message: s.published ? "Gespeichert und veröffentlicht: Kunden sehen die öffentlichen Angaben." : "Gespeichert." };
   } catch (e) {
     return fail(e);
   }

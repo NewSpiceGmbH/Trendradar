@@ -200,7 +200,15 @@ Alle offenen Fragen sind damit beantwortet.
   Live-Feed rechts mit „In den Ticker“, „Zurückziehen“, ✕. Migration `0013_cockpit.sql`.
   Noch ohne Prozentwerte (Trend-Vorschläge kommen vom Scout, Treffsicherheit folgt mit dem Analyst-Agenten).
   Navigation heißt bereits „Netzwerk · Challenges / Netzwerk-Datenbank“; „Eingang“ und „Netzwerk-Manager“ folgen mit Schritt 3–6.
-- [ ] Schritt 3 – Netzwerk-Datenbank
+- [x] **Schritt 3** – Netzwerk-Datenbank: Migration `0014_network.sql` (Tabelle `startups` bleibt die Tabelle der Mitglieder,
+  erweitert um Partner-Typen, Merkmal Startup, Region, Quelle, Angaben je Typ, Partner; neue Status In Prüfung/On hold;
+  Angebotskategorien mit Trends, Angebote, Interessen, Referenzen, Beziehung „Kunde“ nur intern, Vorschläge des Netzwerk-Managers;
+  Sichtbarkeit für Kunden in RLS mit `tests/db/network.test.sql`). Liste `/admin/netzwerk` mit Filtern (Partner-Typ, Kategorie,
+  „bietet etwas an“, Startups, Status), Suche auch nach Trendnummer und Spalte „Netzwerk-Manager“; Eintrag `/admin/netzwerk/[id]`
+  mit Reitern Angebot & Referenzen (bzw. Interessen), Verbindungen, Kontakt & Vertrauliches, Verlauf, Bearbeiten und Schalter
+  „nur intern / öffentlich“; `/admin/netzwerk/neu`, `/admin/netzwerk/kategorien`, `/admin/netzwerk/manager` (Läufe, Vorschläge).
+  Netzwerk-Manager, erste Aufgabe: Kategorienliste vorschlagen (ohne Websuche, nur Vorschläge). `/admin/startups` leitet um.
+  Noch offen: Matches und Verbindungen als Tabellen (Schritt 5/6), Änderungsanfragen (Schritt 4).
 - [ ] Schritt 4 – Bewerbungen und Eingang (neue Rollen Partner/Investor)
 - [ ] Schritt 5 – Challenge: Sichtbarkeit und Matching
 - [ ] Schritt 6 – Agent Netzwerk-Manager

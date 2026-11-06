@@ -146,14 +146,34 @@ export interface Startup {
   referenceCustomers: string | null;
   trendNumbers: number[];
   tags: string[];
-  status: "qualified" | "archived";
+  /** qualified = „Aufgenommen“; review/on_hold ab Migration 0014 (Netzwerk-Datenbank) */
+  status: "qualified" | "review" | "on_hold" | "archived";
   approved: boolean;
   published: boolean;
   logoUrl: string | null;
   sources: SourceRef[];
+  // Netzwerk-Datenbank (Migration 0014): die Tabelle startups ist die Tabelle der Mitglieder
+  partnerTypes: PartnerType[];
+  /** Merkmal „Startup“ (jünger als 5 Jahre), von der Redaktion bestätigt */
+  isStartup: boolean;
+  region: Region | null;
+  source: MemberSource;
+  /** Angaben je Partner-Typ, z. B. { league: "3. Liga", capacity: "12.000" } */
+  details: Record<string, string>;
+  isPartner: boolean;
   createdAt: string;
   updatedAt: string;
 }
+
+export type PartnerType = "club" | "caterer" | "operator" | "multiplier" | "investor" | "solution_provider";
+export type Region = "DACH" | "EU" | "US" | "GLOBAL";
+export type MemberSource = "agent" | "editor" | "application";
+
+/** Standardwerte für Mitglieder, solange Migration 0014 fehlt oder ein Profil neu angelegt wird */
+export const MEMBER_DEFAULTS = {
+  partnerTypes: ["solution_provider"] as PartnerType[], isStartup: false, region: null, source: "editor" as MemberSource,
+  details: {} as Record<string, string>, isPartner: false,
+};
 
 /** Vertraulich, nur Redaktion (in Paket 3 für die Shortlist eines Kunden freigebbar) */
 export interface StartupPrivate {

@@ -125,7 +125,7 @@ function Funnel({ candidates, startups, overview, now }: { candidates: Candidate
       <div className="flex min-w-0 flex-col gap-3">
         <div className="flex items-baseline justify-between gap-3">
           <h2 id="funnel" className="eyebrow !text-on-accent">Netzwerk-Funnel · 90 Tage</h2>
-          <Link href="/admin/startups" className="text-xs font-bold !text-on-accent">Netzwerk-Datenbank →</Link>
+          <Link href="/admin/netzwerk" className="text-xs font-bold !text-on-accent">Netzwerk-Datenbank →</Link>
         </div>
         <ol className="grid grid-cols-3 gap-x-4 gap-y-4 sm:grid-cols-6">
           {stages.map((s) => (

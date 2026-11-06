@@ -283,3 +283,11 @@ export function fixtureProjects(viewer: Viewer): ProjectsRepo {
     },
   };
 }
+
+/** Testmodus: Projekte, denen ein Mitglied zugewiesen ist (für die Netzwerk-Datenbank, nur Redaktion) */
+export function fixtureAssignments(startupId: string) {
+  const s = store();
+  return s.projects.flatMap((p) => (s.shortlist.get(p.id) ?? []).filter((e) => e.startupId === startupId).map((e) => ({
+    projectId: p.id, title: p.title, orgName: p.orgName, status: p.status, role: "shortlist" as const, shared: e.shared, customerStatus: e.customerStatus,
+  })));
+}

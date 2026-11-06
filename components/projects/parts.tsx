@@ -351,7 +351,7 @@ export function ShortlistEditor({ projectId, items, options }: { projectId: stri
           <li key={e.startup.id} className="flex flex-col gap-3 py-4">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <StartupHead e={e} />
-              <Link href={`/admin/startups/${e.startup.id}`} className="text-xs">Profil →</Link>
+              <Link href={`/admin/netzwerk/${e.startup.id}`} className="text-xs">Profil →</Link>
             </div>
             <textarea aria-label={`Begründung für ${e.startup.name}`} rows={2} defaultValue={e.rationale ?? ""} className={input}
               onBlur={(x) => x.target.value !== (e.rationale ?? "") && run(() => updateShortlist(projectId, e.startup.id, { rationale: x.target.value || null }))}

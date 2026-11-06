@@ -115,7 +115,7 @@ async function ChallengeView({ params, searchParams }: { params: PageProps<"/adm
         <Card className="!py-0">
           {list.length ? (
             <ul className="divide-y divide-line">
-              {list.map((x) => <CandidateCard key={x.id} c={x} startupHref={x.startupId ? `/admin/startups/${x.startupId}` : null} />)}
+              {list.map((x) => <CandidateCard key={x.id} c={x} startupHref={x.startupId ? `/admin/netzwerk/${x.startupId}` : null} />)}
             </ul>
           ) : (
             <div className="py-6">
