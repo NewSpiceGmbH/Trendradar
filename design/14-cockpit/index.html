@@ -1,0 +1,495 @@
+<meta charset="utf-8">
+<title>Redaktion Cockpit · Entwurf 14</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@800&family=DM+Sans:opsz,wght@9..40,400;9..40,700&display=swap">
+<style>
+
+/* Layout: Entwurfsmappe – oben Reiter (Heute · A · B · C), je Reiter eine skalierte 1440er-Bühne bzw. 390er-Handy,
+   darunter die Notizen. Tokens 1:1 aus app/globals.css (Dunkel Standard, Hell per data-theme="light"). */
+:root {
+  --bg: #1d1d1d; --surface: #2b2a27; --sunk: #242321; --line: #3d3b37;
+  --ink: #fcf4e6; --text: #d9cfbd; --muted: #a8a195;
+  --accent: #c2e689; --on-accent: #253912; --accent-ink: #c2e689; --logo: #f3efe6;
+  --glass-tint: rgba(43, 42, 39, 0.38); --glass-tint-strong: rgba(36, 35, 33, 0.62);
+  --glass-edge: rgba(252, 244, 230, 0.14); --glass-hi: rgba(252, 244, 230, 0.24);
+  --glass-sheen: rgba(252, 244, 230, 0.08); --glass-shadow: 0 18px 50px rgba(0, 0, 0, 0.4);
+  --cA: #c2402a; --cB: #4d9cd0; --cC: #9d6500; --cD: #2ca8a0; --cE: #7b57b9; --cF: #66a758; --cG: #ca6db8;
+  --cA-fg: #fcf4e6; --cB-fg: #1d1d1d; --cC-fg: #fcf4e6; --cD-fg: #1d1d1d; --cE-fg: #fcf4e6; --cF-fg: #1d1d1d; --cG-fg: #1d1d1d;
+  --font-display: "Archivo", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --font-sans: "DM Sans", "Segoe UI", system-ui, sans-serif;
+  --radius-card: 16px; --radius-pill: 40px;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) {
+  --bg: #fcf4e6; --surface: #faf8f4; --sunk: #f2e5cf; --line: #e3d7c2;
+  --ink: #1d1d1d; --text: #3d3b37; --muted: #655f55; --accent-ink: #4a6b1a; --logo: #1d1d1d;
+  --glass-tint: rgba(252, 248, 240, 0.42); --glass-tint-strong: rgba(252, 248, 240, 0.72);
+  --glass-edge: rgba(255, 255, 255, 0.75); --glass-hi: rgba(255, 255, 255, 0.95);
+  --glass-sheen: rgba(255, 255, 255, 0.4); --glass-shadow: 0 18px 50px rgba(29, 29, 29, 0.14);
+  --cA: #b6341f; --cB: #3e8cc9; --cC: #8f5d04; --cD: #009b92; --cE: #6a45a6; --cF: #549a44; --cG: #c562b2;
+  color-scheme: light;
+} }
+:root[data-theme="light"] {
+  --bg: #fcf4e6; --surface: #faf8f4; --sunk: #f2e5cf; --line: #e3d7c2;
+  --ink: #1d1d1d; --text: #3d3b37; --muted: #655f55; --accent-ink: #4a6b1a; --logo: #1d1d1d;
+  --glass-tint: rgba(252, 248, 240, 0.42); --glass-tint-strong: rgba(252, 248, 240, 0.72);
+  --glass-edge: rgba(255, 255, 255, 0.75); --glass-hi: rgba(255, 255, 255, 0.95);
+  --glass-sheen: rgba(255, 255, 255, 0.4); --glass-shadow: 0 18px 50px rgba(29, 29, 29, 0.14);
+  --cA: #b6341f; --cB: #3e8cc9; --cC: #8f5d04; --cD: #009b92; --cE: #6a45a6; --cF: #549a44; --cG: #c562b2;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--text); font-family: var(--font-sans); font-size: 16px; line-height: 1.55; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 800; color: var(--ink); letter-spacing: -0.014em; line-height: 1.1; text-wrap: balance; margin: 0; }
+p { margin: 0; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; padding: 0; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.eyebrow { font-weight: 700; font-size: 12px; letter-spacing: .125em; text-transform: uppercase; color: var(--accent-ink); }
+.num { font-family: var(--font-display); font-weight: 800; font-variant-numeric: tabular-nums; }
+.glass { background: linear-gradient(180deg, var(--glass-sheen), transparent 55%), var(--glass-tint);
+  -webkit-backdrop-filter: blur(22px) saturate(170%); backdrop-filter: blur(22px) saturate(170%);
+  border: 1px solid var(--glass-edge); box-shadow: inset 0 1px 0 var(--glass-hi), var(--glass-shadow); }
+.glass-strong { background: linear-gradient(180deg, var(--glass-sheen), transparent 45%), var(--glass-tint-strong);
+  -webkit-backdrop-filter: blur(28px) saturate(180%); backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid var(--glass-edge); box-shadow: inset 0 1px 0 var(--glass-hi), var(--glass-shadow); }
+
+/* ───── Mappe ───── */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; border-bottom: 1px solid var(--line);
+  background: var(--bg); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--bg); }
+.top-in { max-width: 1440px; margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; padding-block: 12px; }
+.brand { display: flex; align-items: center; gap: 12px; color: var(--logo); }
+.brand svg { height: 22px; width: auto; }
+.brand span { font-size: 13px; color: var(--muted); }
+.tabs { display: flex; flex-wrap: wrap; gap: 4px; flex: 1; }
+.tab { border-radius: var(--radius-pill); padding: 6px 14px; font-size: 14px; font-weight: 700; color: var(--ink); }
+.tab:hover { background: var(--sunk); }
+.tab[aria-current="page"] { background: var(--ink); color: var(--bg); }
+.tools { display: flex; gap: 8px; flex-wrap: wrap; }
+.seg { display: inline-flex; border-radius: var(--radius-pill); padding: 2px; border: 1px solid var(--line); }
+.seg button { border-radius: var(--radius-pill); padding: 4px 12px; font-size: 13px; font-weight: 700; color: var(--ink); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+
+main { max-width: 1440px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 32px 64px; display: flex; flex-direction: column; gap: 32px; }
+.intro { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px 32px; align-items: end; }
+.intro h1 { font-size: clamp(28px, 3.4vw, 44px); }
+.intro p.lead { max-width: 68ch; margin-top: 8px; }
+.state { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; font-size: 13px; color: var(--muted); }
+@media (max-width: 760px) { .intro { grid-template-columns: 1fr; } }
+
+/* Bühne: 1440×900 (Desktop) bzw. 390×844 (Handy), skaliert auf die verfügbare Breite */
+.stage { position: relative; width: 100%; max-width: 100%; border-radius: var(--radius-card); overflow: hidden; border: 1px solid var(--line); background: var(--bg); }
+.stage.desk { aspect-ratio: 1440 / 900; }
+.stage.phone { aspect-ratio: 390 / 844; width: min(100%, 390px); margin: 0 auto; border-radius: 32px; }
+.canvas { position: absolute; left: 0; top: 0; transform-origin: 0 0; transform: scale(var(--s, 1)); overflow: hidden; background: var(--bg); }
+.desk .canvas { width: 1440px; height: 900px; }
+.phone .canvas { width: 390px; height: 844px; }
+.pair { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 24px; align-items: start; }
+@media (max-width: 1000px) { .pair { grid-template-columns: 1fr; } }
+.shot { width: 100%; display: block; border-radius: var(--radius-card); border: 1px solid var(--line); }
+
+.notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; }
+.note { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.note h3 { font-size: 20px; }
+.note ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; }
+.note .eyebrow { color: var(--muted); }
+.facts { display: flex; flex-wrap: wrap; gap: 8px; }
+.fact { border: 1px solid var(--line); border-radius: var(--radius-pill); padding: 4px 12px; font-size: 13px; color: var(--text); }
+.fact b { color: var(--ink); }
+.cmp { overflow-x: auto; }
+.cmp table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 14px; }
+.cmp th, .cmp td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.cmp th { color: var(--muted); font-weight: 700; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; }
+.cmp td:first-child { color: var(--ink); font-weight: 700; }
+.reco { border: 1px solid var(--line); border-radius: var(--radius-card); padding: 24px; display: flex; flex-direction: column; gap: 8px; background: var(--surface); }
+.reco p { max-width: 75ch; }
+
+
+/* ───── Bühne: nachgebautes Backend ───── */
+.canvas { color: var(--text); font-size: 14px; line-height: 1.45; }
+.b-head { position: absolute; inset: 0 0 auto; height: 60px; display: flex; align-items: center; gap: 24px; padding: 0 32px; border-bottom: 1px solid var(--line); background: var(--bg); z-index: 3; }
+.b-head .logo { color: var(--logo); display: flex; align-items: center; gap: 12px; }
+.b-head .logo svg { height: 26px; width: auto; }
+.b-head .logo span { color: var(--muted); font-size: 14px; }
+.b-user { margin-left: auto; display: flex; align-items: center; gap: 16px; font-size: 13px; color: var(--muted); }
+.b-user b { color: var(--ink); }
+.side { position: absolute; left: 0; top: 60px; bottom: 0; width: 240px; padding: 24px 16px; display: flex; flex-direction: column; gap: 18px; border-right: 1px solid var(--line); overflow: hidden; }
+.grp { display: flex; flex-direction: column; gap: 2px; }
+.grp > .gh { font-weight: 700; font-size: 10px; letter-spacing: .125em; text-transform: uppercase; color: var(--muted); padding: 0 12px 4px; }
+.it { display: flex; align-items: center; justify-content: space-between; gap: 8px; border-radius: 12px; padding: 6px 12px; color: var(--text); }
+.it.on { background: var(--ink); color: var(--bg); font-weight: 700; }
+.cnt { font-family: var(--font-display); font-weight: 800; font-size: 11px; border-radius: 999px; padding: 0 7px; background: var(--line); color: var(--ink); font-variant-numeric: tabular-nums; }
+.it.on .cnt { background: var(--bg); color: var(--ink); }
+.content { position: absolute; top: 60px; right: 0; bottom: 0; overflow: hidden; padding: 28px 32px; display: flex; flex-direction: column; gap: 24px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 20px; min-width: 0; }
+.h1 { font-family: var(--font-display); font-weight: 800; color: var(--ink); font-size: 40px; line-height: 1.05; letter-spacing: -.014em; }
+.h2 { font-family: var(--font-display); font-weight: 800; color: var(--ink); font-size: 22px; line-height: 1.1; }
+.h3 { font-family: var(--font-display); font-weight: 800; color: var(--ink); font-size: 17px; line-height: 1.15; }
+.small { font-size: 12px; color: var(--muted); }
+.small b { color: var(--ink); }
+.bdg { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 40px; padding: 0 8px; font-size: 11px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+.bdg.muted { color: var(--muted); }
+.ex { font-size: 10px; font-weight: 700; color: var(--muted); border: 1px dashed var(--line); border-radius: 40px; padding: 0 7px; white-space: nowrap; }
+.rel { letter-spacing: .15em; color: var(--ink); font-size: 11px; }
+.rel s { text-decoration: none; color: var(--line); }
+.lnk { color: var(--accent-ink); font-size: 13px; font-weight: 700; white-space: nowrap; }
+.btn { display: inline-flex; align-items: center; gap: 6px; border-radius: 40px; padding: 4px 12px; font-size: 12px; font-weight: 700; border: 1px solid var(--line); color: var(--ink); white-space: nowrap; }
+.btn.solid { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.warn { display: flex; gap: 8px; align-items: flex-start; font-size: 12px; color: var(--text); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--sunk); }
+.warn::before { content: "!"; flex: none; display: grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: var(--ink); color: var(--bg); font-weight: 800; font-size: 11px; }
+.lime { background: var(--accent); color: var(--on-accent); border-radius: 16px; }
+.lime .eyebrow, .lime .h1, .lime .h2, .lime .h3, .lime b, .lime .small { color: var(--on-accent); }
+.row { display: flex; align-items: center; gap: 12px; }
+.trunc { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+.tbl th { text-align: left; font-size: 10px; letter-spacing: .125em; text-transform: uppercase; color: var(--muted); font-weight: 700; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+.tbl td { padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.tbl tr.hi td { background: var(--sunk); }
+.ico { width: 16px; height: 16px; flex: none; }
+.tabsb { display: flex; gap: 4px; }
+.tabsb span { padding: 6px 14px; border-radius: 40px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+.tabsb span.on { background: var(--ink); color: var(--bg); }
+.drop { position: absolute; z-index: 5; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--glass-shadow); padding: 8px; width: 260px; display: flex; flex-direction: column; gap: 2px; }
+</style>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand"><svg role="img" aria-label="New Spice" viewBox="0 0 535 212" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M534.427 139.758H466.278V148.893H534.427V172.803H466.278V181.938H534.427V210.063H429.357V111.633H534.427V139.758Z" fill="currentColor"/><path d="M299.594 160.713C299.594 126.543 318.164 110.223 361.469 110.223C400.843 110.223 421.378 124.008 422.923 155.088H385.513C384.103 145.803 376.934 141.168 361.469 141.168C339.809 141.168 336.148 150.303 336.148 160.713C336.148 171.123 339.944 180.543 361.469 180.543C376.934 180.543 384.103 175.758 385.513 166.338H422.923C421.378 197.553 400.993 211.473 361.469 211.473C318.149 211.473 299.594 195.018 299.594 160.713Z" fill="currentColor"/><path d="M292.498 111.633V210.063H255.928V111.633H292.498Z" fill="currentColor"/><path d="M211.793 111.633C234.158 111.633 249.473 127.383 249.473 149.313C249.473 171.243 234.143 186.993 211.793 186.993H171.008V210.063H134.438V111.633H211.778H211.793ZM204.758 156.063C208.418 156.063 212.918 156.063 212.918 149.313C212.918 142.563 208.418 142.563 204.758 142.563H171.008V156.063H204.758Z" fill="currentColor"/><path d="M0.25 175.338H37.3982C37.3982 180.123 41.9712 183.348 65.5527 183.348C87.5642 183.348 90.8415 181.938 90.8415 178.278C90.8415 174.063 87.5489 173.493 64.1198 172.788C18.9689 171.378 1.66764 164.073 1.66764 141.153C1.66764 119.493 23.2523 110.223 62.6869 110.223C102.122 110.223 123.706 119.508 123.706 144.678H86.5581C86.5581 139.473 77.9913 138.348 59.8364 138.348C41.6815 138.348 38.831 139.188 38.831 142.983C38.831 146.778 42.398 146.643 64.1198 147.483C103.57 149.028 128.005 151.698 128.005 177.438C128.005 204.573 105.14 211.473 64.1198 211.473C23.0999 211.473 0.25 204.588 0.25 175.338Z" fill="currentColor"/><path d="M409.445 0.632812H448.685L416.345 99.0629H362.06L345.89 42.3928L329.72 99.0629H275.435L243.095 0.632812H282.335L302.72 70.0978L324.095 0.632812H367.685L389.06 70.0978L409.445 0.632812Z" fill="currentColor"/><path d="M238.367 28.7578H170.867V37.8928H238.367V61.8028H170.867V70.9378H238.367V99.0629H134.297V0.632812H238.367V28.7578Z" fill="currentColor"/><path d="M91.4499 0.632812H128.005V99.0629H80.1999L37.7349 40.9828V99.0629H1.17993V0.632812H48.9849L91.4499 58.7128V0.632812Z" fill="currentColor"/><path d="M475.236 20.073H472.011L468.366 15.048H466.521V20.073H463.851V6.33301H469.341C472.461 6.33301 474.381 7.99801 474.381 10.773C474.381 12.798 473.151 14.268 471.201 14.808L475.221 20.073H475.236ZM469.206 8.71801H466.521V12.813H469.206C470.691 12.813 471.576 12.123 471.576 10.773C471.576 9.42301 470.676 8.71801 469.206 8.71801Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M468.561 25.6828C474.966 25.6828 480.156 20.4928 480.156 14.0878C480.156 7.68284 474.966 2.49283 468.561 2.49283C462.156 2.49283 456.966 7.68284 456.966 14.0878C456.966 20.4928 462.156 25.6828 468.561 25.6828ZM468.561 27.6478C476.046 27.6478 482.121 21.5728 482.121 14.0878C482.121 6.60284 476.046 0.527832 468.561 0.527832C461.076 0.527832 455.001 6.60284 455.001 14.0878C455.001 21.5728 461.076 27.6478 468.561 27.6478Z" fill="currentColor"/></svg><span>Entwurf 14 · Redaktion: Cockpit und Navigation · Runde 1, grob</span></div>
+    <nav class="tabs" aria-label="Ansicht der Mappe">
+      <a class="tab" href="#heute" data-v="heute">Heute</a>
+      <a class="tab" href="#a" data-v="a">A · Ruhig</a>
+      <a class="tab" href="#b" data-v="b">B · Arbeitsliste</a>
+      <a class="tab" href="#c" data-v="c">C · Newsroom</a>
+      <a class="tab" href="#vergleich" data-v="vergleich">Vergleich</a>
+    </nav>
+    <div class="tools">
+      <div class="seg" role="group" aria-label="Gerät">
+        <button type="button" id="dev-desk" data-dev="desk" aria-pressed="true">Desktop 1440</button>
+        <button type="button" id="dev-phone" data-dev="phone" aria-pressed="false">Handy 390</button>
+      </div>
+      <div class="seg" role="group" aria-label="Darstellung">
+        <button type="button" id="th-dark" data-th="dark">Dunkel</button>
+        <button type="button" id="th-light" data-th="light">Hell</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main id="main"></main>
+
+<script>
+const LOGO = `<svg role="img" aria-label="New Spice" viewBox="0 0 535 212" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M534.427 139.758H466.278V148.893H534.427V172.803H466.278V181.938H534.427V210.063H429.357V111.633H534.427V139.758Z" fill="currentColor"/><path d="M299.594 160.713C299.594 126.543 318.164 110.223 361.469 110.223C400.843 110.223 421.378 124.008 422.923 155.088H385.513C384.103 145.803 376.934 141.168 361.469 141.168C339.809 141.168 336.148 150.303 336.148 160.713C336.148 171.123 339.944 180.543 361.469 180.543C376.934 180.543 384.103 175.758 385.513 166.338H422.923C421.378 197.553 400.993 211.473 361.469 211.473C318.149 211.473 299.594 195.018 299.594 160.713Z" fill="currentColor"/><path d="M292.498 111.633V210.063H255.928V111.633H292.498Z" fill="currentColor"/><path d="M211.793 111.633C234.158 111.633 249.473 127.383 249.473 149.313C249.473 171.243 234.143 186.993 211.793 186.993H171.008V210.063H134.438V111.633H211.778H211.793ZM204.758 156.063C208.418 156.063 212.918 156.063 212.918 149.313C212.918 142.563 208.418 142.563 204.758 142.563H171.008V156.063H204.758Z" fill="currentColor"/><path d="M0.25 175.338H37.3982C37.3982 180.123 41.9712 183.348 65.5527 183.348C87.5642 183.348 90.8415 181.938 90.8415 178.278C90.8415 174.063 87.5489 173.493 64.1198 172.788C18.9689 171.378 1.66764 164.073 1.66764 141.153C1.66764 119.493 23.2523 110.223 62.6869 110.223C102.122 110.223 123.706 119.508 123.706 144.678H86.5581C86.5581 139.473 77.9913 138.348 59.8364 138.348C41.6815 138.348 38.831 139.188 38.831 142.983C38.831 146.778 42.398 146.643 64.1198 147.483C103.57 149.028 128.005 151.698 128.005 177.438C128.005 204.573 105.14 211.473 64.1198 211.473C23.0999 211.473 0.25 204.588 0.25 175.338Z" fill="currentColor"/><path d="M409.445 0.632812H448.685L416.345 99.0629H362.06L345.89 42.3928L329.72 99.0629H275.435L243.095 0.632812H282.335L302.72 70.0978L324.095 0.632812H367.685L389.06 70.0978L409.445 0.632812Z" fill="currentColor"/><path d="M238.367 28.7578H170.867V37.8928H238.367V61.8028H170.867V70.9378H238.367V99.0629H134.297V0.632812H238.367V28.7578Z" fill="currentColor"/><path d="M91.4499 0.632812H128.005V99.0629H80.1999L37.7349 40.9828V99.0629H1.17993V0.632812H48.9849L91.4499 58.7128V0.632812Z" fill="currentColor"/><path d="M475.236 20.073H472.011L468.366 15.048H466.521V20.073H463.851V6.33301H469.341C472.461 6.33301 474.381 7.99801 474.381 10.773C474.381 12.798 473.151 14.268 471.201 14.808L475.221 20.073H475.236ZM469.206 8.71801H466.521V12.813H469.206C470.691 12.813 471.576 12.123 471.576 10.773C471.576 9.42301 470.676 8.71801 469.206 8.71801Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M468.561 25.6828C474.966 25.6828 480.156 20.4928 480.156 14.0878C480.156 7.68284 474.966 2.49283 468.561 2.49283C462.156 2.49283 456.966 7.68284 456.966 14.0878C456.966 20.4928 462.156 25.6828 468.561 25.6828ZM468.561 27.6478C476.046 27.6478 482.121 21.5728 482.121 14.0878C482.121 6.60284 476.046 0.527832 468.561 0.527832C461.076 0.527832 455.001 6.60284 455.001 14.0878C455.001 21.5728 461.076 27.6478 468.561 27.6478Z" fill="currentColor"/></svg>`;
+/* Beispielinhalte wie im Testmodus (lib/admin/fixture-repo.ts) */
+const P = [
+  { kind: "Bewertung ändern", what: "#10 Bar- & Küchenrobotik", why: "Mehrere Piloten in DACH deuten auf höhere Marktreife in Europa hin.", agent: "Scorer", age: "vor 2 Std." },
+  { kind: "Meldung zuordnen", what: "#24 Mobile Order & In-Seat", why: "Die Meldung zur Bestellung am Platz gehört zu Mobile Order.", agent: "Analyst", age: "vor 3 Std." },
+  { kind: "Trend ergänzen", what: "#26 Cashless & Mobile POS", why: "Risiken um Abhängigkeit von Zahlungsanbietern ergänzen.", agent: "Analyst", age: "vor 5 Std." },
+  { kind: "Neuer Trend", what: "Smart Parking & E-Laden", why: "Zwei unabhängige Signale zu buchbaren Parkplätzen mit Ladesäule.", agent: "Analyst", age: "vor 9 Std." },
+];
+const L = [
+  { key: "Sport & Hospitality", blurb: "Clubs, Ligen, Arenen, Hotels und Events", scouts: "0 von 7 Scouts im Einsatz", fresh: 3, items: [
+    { t: "Bundesliga-Club testet Bestellung am Platz per App", src: "Beispielmedium", age: "vor 3 Std.", rel: 3, st: "neu" },
+    { t: "Arena setzt auf Batteriespeicher für Flutlicht", src: "Beispielmedium", age: "vor 20 Std.", rel: 2, st: "#34" },
+    { t: "Neue Studie zu Fan-Anreise mit ÖPNV", src: "Beispielverband", age: "vorgestern", rel: 2, st: "Im Ticker" } ] },
+  { key: "Startups & Technologie", blurb: "Startups, Finanzierungen, Technologien", scouts: "0 von 1 Scout im Einsatz", fresh: 2, items: [
+    { t: "Münchner Startup sammelt 6 Mio. € für Kassen ohne Warteschlange", src: "Beispiel-Startupmedium", age: "vor 5 Std.", rel: 3, st: "neu" },
+    { t: "KI-Startup erkennt Warteschlangen an Bierständen in Echtzeit", src: "Beispiel-Startupmedium", age: "vor 26 Std.", rel: 2, st: "neu" } ] },
+  { key: "Cross-Industry", blurb: "Flughäfen, Bahnhöfe, Handel, Messen", scouts: "0 von 1 Scout im Einsatz", fresh: 2, items: [
+    { t: "Flughafen testet Boarding per Gesichtserkennung ohne Bordkarte", src: "Beispiel-Reisemedium", age: "vor 8 Std.", rel: 3, st: "neu" },
+    { t: "Bahnhof steuert Personenströme mit Echtzeit-Anzeigen", src: "Beispiel-Bahnmedium", age: "vorgestern", rel: 2, st: "neu" } ] },
+];
+const rel = (n) => `<span class="rel" aria-label="Relevanz ${n} von 3">${"●".repeat(n)}<s>${"●".repeat(3 - n)}</s></span>`;
+const st = (s) => s === "neu" ? `<span class="bdg muted">neu</span>` : s === "Im Ticker" ? `<span class="bdg">Im Ticker</span>` : `<span class="bdg muted">${s}</span>`;
+const ic = {
+  chev: `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6l4 4 4-4"/></svg>`,
+  search: `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>`,
+  menu: `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 4h12M2 8h12M2 12h12"/></svg>`,
+  ok: `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8.5l3 3 7-7"/></svg>`,
+  x: `<svg class="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4l8 8M12 4l-8 8"/></svg>`,
+};
+const state = { view: "heute", dev: "desk", drop: false, menu: false };
+
+/* Navigation gruppiert (Vorschlag aus dem Briefing, leicht umgestellt) */
+const NAV = [
+  { g: null, items: [["Cockpit", 0, true]] },
+  { g: "Inhalte", items: [["Review-Queue", 4], ["Liveticker", 6], ["Trends", 0], ["Trenddatenbank", 0], ["Quellenverzeichnis", 0]] },
+  { g: "Agenten", items: [["Scouting", 0], ["Agenten-Protokoll", 0]] },
+  { g: "Venture Clienting", items: [["Challenges", 4], ["Startup-Datenbank", 0]] },
+  { g: "Kunden", items: [["Projekte", 0], ["Kunden", 0], ["Team", 0]] },
+];
+const item = ([l, c, on]) => `<span class="it${on ? " on" : ""}"><span>${l}</span>${c ? `<span class="cnt">${c}</span>` : ""}</span>`;
+function bhead(extra = "") {
+  return `<div class="b-head"><span class="logo">${LOGO}<span>Redaktion</span></span>${extra}
+    <span class="b-user"><span>Zum Dashboard →</span><span>Hell</span><span><b>Redaktion</b> · Admin</span><span>Abmelden</span></span></div>`;
+}
+function phead(title = "Redaktion") {
+  return `<div class="b-head" style="height:56px;padding:0 16px;gap:10px"><span class="logo">${LOGO.replace("<svg", '<svg style="height:20px"')}<span style="font-size:13px">${title}</span></span>
+    <span class="b-user" style="gap:8px">${toggleMenu()}</span></div>`;
+}
+const toggleMenu = () => `<button type="button" data-menu="1" class="btn">${ic.menu} Menü</button>`;
+function phoneMenu() {
+  if (!state.menu) return "";
+  return `<div style="position:absolute;inset:56px 0 0;background:var(--bg);z-index:4;padding:16px;display:flex;flex-direction:column;gap:16px;overflow:hidden">
+    ${NAV.map((g) => `<div class="grp">${g.g ? `<span class="gh">${g.g}</span>` : ""}${g.items.map(item).join("")}</div>`).join("")}
+    <span class="small">Zum Dashboard → · Hell · Abmelden</span></div>`;
+}
+
+/* ───── A · Ruhig: gruppierte Seitenleiste, ein großer Limetten-Block mit den nächsten Freigaben ───── */
+function A_desk() {
+  return `${bhead()}
+  <nav class="side">${NAV.map((g) => `<div class="grp">${g.g ? `<span class="gh">${g.g}</span>` : ""}${g.items.map(item).join("")}</div>`).join("")}
+    <div class="warn" style="margin-top:auto">Keine Agentenläufe in den letzten 7 Tagen. <span class="lnk" style="font-size:12px">Scouting →</span></div></nav>
+  <div class="content" style="left:240px">
+    <div><p class="eyebrow" style="color:var(--muted)">Freitag, 6. November</p><h1 class="h1">Cockpit</h1></div>
+    <div style="display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:24px">
+      <section class="lime" style="padding:24px;display:flex;flex-direction:column;gap:14px">
+        <div class="row" style="justify-content:space-between"><span class="eyebrow">Wartet auf eure Freigabe</span><b style="font-size:13px">Review-Queue →</b></div>
+        <div class="row" style="align-items:baseline;gap:12px"><span class="num" style="font-size:72px;line-height:.9">4</span><span class="h3">offene Vorschläge der Agenten</span></div>
+        <ol style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column">${P.slice(0, 3).map((p) => `
+          <li style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;padding:8px 0;border-top:1px solid rgba(37,57,18,.2)">
+            <span class="trunc"><b>${p.what}</b> · ${p.kind}</span><span style="font-size:12px">${p.age}</span></li>`).join("")}</ol>
+      </section>
+      <section style="display:flex;flex-direction:column;gap:0">
+        ${[["Meldungen ohne Freigabe", "6", "Liveticker →"], ["Trends veröffentlicht", "44", "0 Entwürfe"], ["Radar heute", "18 · 18 · 8", "Anstoß · Aufwärmen · Scouting"], ["Agentenläufe (7 Tage)", "0", "0 Tsd. Tokens"]].map(([l, v, s]) => `
+          <div style="display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:baseline;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)">
+            <span><span style="color:var(--ink);font-weight:700">${l}</span><br><span class="small">${s}</span></span><span class="num" style="font-size:30px;color:var(--ink)">${v}</span></div>`).join("")}
+      </section>
+    </div>
+    <section style="display:flex;flex-direction:column;gap:12px">
+      <div class="row" style="justify-content:space-between"><span class="h2">Lagebild</span><span class="small">Wichtigste Meldungen der letzten 14 Tage · <span class="lnk">Scouts steuern →</span></span></div>
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px">${L.map((l) => `
+        <div style="display:flex;flex-direction:column;gap:10px;border-top:2px solid var(--ink);padding-top:12px">
+          <div class="row" style="justify-content:space-between"><span class="h3">${l.key}</span><span class="small"><b>${l.fresh}</b> neu</span></div>
+          ${l.items.slice(0, 2).map((s) => `<div style="display:flex;flex-direction:column;gap:4px"><span style="font-weight:700;color:var(--ink)">${s.t} <span style="color:var(--muted)">↗</span></span><span class="row small" style="gap:8px">${rel(s.rel)}${s.src} · ${s.age} ${st(s.st)}</span></div>`).join("")}
+          <span class="small">${l.items.length > 2 ? `+${l.items.length - 2} weitere · ` : ""}<span class="lnk" style="font-size:12px">Alle im Liveticker →</span></span></div>`).join("")}
+      </div></section>
+  </div>`;
+}
+function A_phone() {
+  return `${phead()}${phoneMenu()}
+  <div class="content" style="left:0;top:56px;padding:20px 16px;gap:16px">
+    <div><p class="eyebrow" style="color:var(--muted);font-size:10px">Freitag, 6. November</p><h1 class="h1" style="font-size:30px">Cockpit</h1></div>
+    <section class="lime" style="padding:18px;display:flex;flex-direction:column;gap:10px">
+      <span class="eyebrow" style="font-size:10px">Wartet auf eure Freigabe</span>
+      <div class="row" style="align-items:baseline"><span class="num" style="font-size:52px;line-height:.9">4</span><span class="h3" style="font-size:15px">offene Vorschläge</span></div>
+      ${P.slice(0, 2).map((p) => `<div class="trunc" style="border-top:1px solid rgba(37,57,18,.2);padding-top:6px;font-size:13px"><b>${p.what}</b> · ${p.kind}</div>`).join("")}
+      <b style="font-size:13px">Review-Queue öffnen →</b></section>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${[["Ohne Freigabe", "6"], ["Agentenläufe", "0"]].map(([l, v]) => `<div class="card" style="padding:12px"><span class="small">${l}</span><div class="num" style="font-size:26px;color:var(--ink)">${v}</div></div>`).join("")}</div>
+    <div class="tabsb" style="font-size:12px"><span class="on">Sport & Hosp.</span><span>Startups</span><span>Cross-Ind.</span></div>
+    ${L[0].items.slice(0, 2).map((s) => `<div style="display:flex;flex-direction:column;gap:4px;border-bottom:1px solid var(--line);padding-bottom:10px"><span style="font-weight:700;color:var(--ink)">${s.t}</span><span class="row small" style="gap:8px">${rel(s.rel)}${s.age} ${st(s.st)}</span></div>`).join("")}
+  </div>`;
+}
+
+/* ───── B · Arbeitsliste: schmale Leiste mit Gruppen, Cockpit als „Heute zu tun“ mit Aktionen in der Zeile ───── */
+const todo = [
+  ...P.map((p) => ({ type: "Vorschlag", kind: p.kind, t: p.what, sub: p.why, area: p.agent, age: p.age, acts: "review" })),
+  { type: "Meldung", kind: "Sport & Hosp.", t: "Bundesliga-Club testet Bestellung am Platz per App", sub: "Beispielmedium · " + rel(3), area: "#24 vorgeschlagen", age: "vor 3 Std.", acts: "signal" },
+  { type: "Meldung", kind: "Startups", t: "Münchner Startup sammelt 6 Mio. € für Kassen ohne Warteschlange", sub: "Beispiel-Startupmedium · " + rel(3), area: "ohne Trend", age: "vor 5 Std.", acts: "signal" },
+  { type: "Meldung", kind: "Cross-Industry", t: "Flughafen testet Boarding per Gesichtserkennung ohne Bordkarte", sub: "Beispiel-Reisemedium · " + rel(3), area: "ohne Trend", age: "vor 8 Std.", acts: "signal" },
+  { type: "Meldung", kind: "Sport & Hosp.", t: "Arena setzt auf Batteriespeicher für Flutlicht", sub: "Beispielmedium · " + rel(2), area: "#34 zugeordnet", age: "vor 20 Std.", acts: "signal" },
+];
+function B_desk() {
+  const side = `<nav class="side" style="width:212px;gap:14px;padding:20px 12px">
+    <span class="row" style="gap:8px;border:1px solid var(--line);border-radius:40px;padding:5px 12px;color:var(--muted);font-size:13px">${ic.search} Springen zu …<span style="margin-left:auto;font-size:11px;border:1px solid var(--line);border-radius:6px;padding:0 5px">⌘K</span></span>
+    ${NAV.map((g, i) => `<div class="grp">${g.g ? `<span class="gh row" style="justify-content:space-between">${g.g}<span style="font-size:12px">${i === 4 ? "›" : "⌄"}</span></span>` : ""}${i === 4 ? "" : g.items.map(item).join("")}</div>`).join("")}</nav>`;
+  return `${bhead()}${side}
+  <div class="content" style="left:212px;gap:18px;padding:24px 28px">
+    <div class="row" style="justify-content:space-between;align-items:flex-end">
+      <div><p class="eyebrow" style="color:var(--muted)">Redaktion · Fr, 6. November</p><h1 class="h1" style="font-size:34px">Heute zu tun</h1></div>
+      <div class="row" style="gap:8px">
+        <span class="lime row" style="border-radius:40px;padding:6px 14px;gap:8px"><span class="num" style="font-size:20px">4</span><b style="font-size:13px">Vorschläge</b></span>
+        <span class="btn" style="padding:7px 14px"><span class="num" style="font-size:15px">6</span> Meldungen ohne Freigabe</span>
+        <span class="btn" style="padding:7px 14px"><span class="num" style="font-size:15px">0</span> Läufe in 7 Tagen</span></div></div>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:24px;min-height:0">
+      <section style="display:flex;flex-direction:column;gap:10px;min-width:0">
+        <div class="row" style="justify-content:space-between"><div class="tabsb" style="font-size:13px"><span class="on">Alles · 8</span><span>Vorschläge · 4</span><span>Meldungen · 4</span></div><span class="small">Sortiert nach Dringlichkeit · <b>J/K</b> blättern, <b>F</b> freigeben</span></div>
+        <table class="tbl"><thead><tr><th style="width:120px">Art</th><th>Worum es geht</th><th style="width:130px">Trend / Agent</th><th style="width:80px">Alter</th><th style="width:196px"></th></tr></thead><tbody>
+        ${todo.map((r, i) => `<tr${i === 0 ? ' class="hi"' : ""}><td><span class="bdg${r.type === "Meldung" ? " muted" : ""}">${r.kind}</span></td>
+          <td style="max-width:0"><div class="trunc" style="font-weight:700;color:var(--ink)">${r.t}</div><div class="trunc small">${r.sub}</div></td>
+          <td class="small">${r.area}</td><td class="small">${r.age}</td>
+          <td style="text-align:right;white-space:nowrap">${r.acts === "review" ? `<span class="btn solid">${ic.ok} Freigeben</span> <span class="btn">Prüfen</span>` : `<span class="btn">In Ticker</span> <span class="btn" title="Verwerfen">${ic.x}</span>`}</td></tr>`).join("")}
+        </tbody></table>
+        <span class="small">Ohne Freigabe älter als 14 Tage: <b>0</b> · <span class="lnk" style="font-size:12px">Erledigte heute anzeigen</span></span>
+      </section>
+      <aside style="display:flex;flex-direction:column;gap:14px">
+        <div class="card" style="padding:16px"><span class="h3">Radar heute</span><div class="small">Veröffentlicht, Europa</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);margin-top:10px">${[["Anstoß", 18], ["Aufwärmen", 18], ["Scouting", 8]].map(([l, v]) => `<div><div class="small">${l}</div><div class="num" style="font-size:26px;color:var(--ink)">${v}</div></div>`).join("")}</div></div>
+        <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:8px"><span class="h3">Scouts</span>
+          ${L.map((l) => `<div class="row small" style="justify-content:space-between"><span style="color:var(--text)">${l.key}</span><span>${l.scouts.replace(" im Einsatz", "").replace(" Scouts", "").replace(" Scout", "")}</span></div>`).join("")}
+          <div class="warn">Kein Scout im Einsatz.</div></div>
+        <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:6px"><span class="h3">Zuletzt im Ticker</span><span style="color:var(--ink);font-size:13px">Neue Studie zu Fan-Anreise mit ÖPNV</span><span class="small">#32 · vor 30 Std.</span></div>
+      </aside></div>
+  </div>`;
+}
+function B_phone() {
+  return `${phead()}${phoneMenu()}
+  <div class="content" style="left:0;top:56px;padding:18px 16px;gap:12px">
+    <h1 class="h1" style="font-size:28px">Heute zu tun</h1>
+    <div class="row" style="gap:6px;flex-wrap:wrap"><span class="lime row" style="border-radius:40px;padding:4px 12px;gap:6px"><span class="num" style="font-size:16px">4</span><b style="font-size:12px">Vorschläge</b></span><span class="btn">6 Meldungen</span><span class="btn">0 Läufe</span></div>
+    ${todo.slice(0, 5).map((r) => `<div style="border-bottom:1px solid var(--line);padding-bottom:10px;display:flex;flex-direction:column;gap:5px">
+      <span class="row small" style="justify-content:space-between"><span class="bdg${r.type === "Meldung" ? " muted" : ""}">${r.kind}</span>${r.age}</span>
+      <span class="trunc" style="font-weight:700;color:var(--ink)">${r.t}</span>
+      <span class="row" style="gap:6px">${r.acts === "review" ? `<span class="btn solid">Freigeben</span><span class="btn">Prüfen</span>` : `<span class="btn">In Ticker</span><span class="btn">Verwerfen</span>`}</span></div>`).join("")}
+  </div>`;
+}
+
+/* ───── C · Newsroom: Navigation oben in Gruppen, Cockpit als Spaltenbrett ───── */
+function C_desk() {
+  const groups = `<span class="tabsb" style="margin-left:8px;font-size:14px"><span class="on">Cockpit</span>
+    ${["Inhalte", "Agenten", "Venture Clienting", "Kunden"].map((g) => `<span ${g === "Inhalte" ? 'data-drop="1" role="button" tabindex="0"' : ""} style="display:inline-flex;align-items:center;gap:4px;cursor:pointer">${g}${g === "Inhalte" ? ' <span class="cnt">10</span>' : g === "Venture Clienting" ? ' <span class="cnt">4</span>' : ""} ${ic.chev}</span>`).join("")}</span>`;
+  const drop = state.drop ? `<div class="drop" style="left:330px;top:54px">${NAV[1].items.map(item).join("")}</div>` : "";
+  const col = (head, body, lime = false) => `<section style="display:flex;flex-direction:column;gap:10px;min-width:0;${lime ? "" : ""}">${head}${body}</section>`;
+  const sig = (s) => `<div class="card" style="padding:12px 14px;display:flex;flex-direction:column;gap:6px">
+      <span style="font-weight:700;color:var(--ink);line-height:1.3">${s.t}</span>
+      <span class="row small" style="gap:8px;flex-wrap:wrap">${rel(s.rel)}${s.src} · ${s.age}</span>
+      <span class="row" style="justify-content:space-between">${st(s.st)}<span class="row" style="gap:6px"><span class="btn">Trend ↗</span>${s.st === "Im Ticker" ? "" : '<span class="btn">In Ticker</span>'}</span></span></div>`;
+  return `${bhead(groups)}${drop}
+  <div class="content" style="left:0;padding:20px 32px;gap:16px">
+    <div class="row" style="justify-content:space-between;align-items:flex-end">
+      <div><p class="eyebrow" style="color:var(--muted)">Lagebild · letzte 14 Tage</p><h1 class="h1" style="font-size:34px">Newsroom</h1></div>
+      <div class="row small" style="gap:20px"><span>Radar heute <b>18 · 18 · 8</b></span><span>Trends <b>44</b></span><span>Agentenläufe 7 Tage <b>0</b></span><span class="lnk">Scouts steuern →</span></div></div>
+    <div style="display:grid;grid-template-columns:300px repeat(3,minmax(0,1fr));gap:20px">
+      ${col(`<div class="lime" style="padding:16px;display:flex;flex-direction:column;gap:4px"><span class="eyebrow" style="font-size:10px">Zur Freigabe</span><div class="row" style="align-items:baseline;gap:8px"><span class="num" style="font-size:44px;line-height:.9">4</span><b>Vorschläge</b></div></div>`,
+        P.map((p) => `<div class="card" style="padding:12px 14px;display:flex;flex-direction:column;gap:4px"><span class="row" style="justify-content:space-between"><span class="bdg">${p.kind}</span><span class="small">${p.age}</span></span><b style="color:var(--ink)">${p.what}</b><span class="small" style="line-height:1.35">${p.why}</span></div>`).join(""))}
+      ${L.map((l) => col(`<div style="padding:4px 0 6px;border-bottom:2px solid var(--ink);display:flex;flex-direction:column;gap:2px">
+          <div class="row" style="justify-content:space-between"><span class="h3">${l.key}</span><span class="small"><b>${l.fresh}</b> neu</span></div>
+          <span class="small">${l.scouts}</span></div>`, l.items.map(sig).join(""))).join("")}
+    </div>
+  </div>`;
+}
+function C_phone() {
+  return `<div class="b-head" style="height:56px;padding:0 16px"><span class="logo">${LOGO.replace("<svg", '<svg style="height:20px"')}<span style="font-size:13px">Redaktion</span></span><span class="b-user"><span class="btn">⋯</span></span></div>
+  <div style="position:absolute;top:56px;left:0;right:0;border-bottom:1px solid var(--line);padding:8px 12px;overflow:hidden"><span class="tabsb" style="font-size:13px"><span class="on">Cockpit</span><span>Inhalte</span><span>Agenten</span><span>Venture</span><span>Kunden</span></span></div>
+  <div class="content" style="left:0;top:106px;padding:16px;gap:12px">
+    <div class="lime" style="padding:14px;display:flex;justify-content:space-between;align-items:center"><div class="row" style="align-items:baseline;gap:8px"><span class="num" style="font-size:36px;line-height:.9">4</span><b>zur Freigabe</b></div><b style="font-size:13px">Öffnen →</b></div>
+    <div class="row small" style="justify-content:space-between"><span class="h3">Sport & Hospitality</span><span>1 / 3 · wischen →</span></div>
+    <div style="display:flex;gap:12px;overflow:hidden"><div style="flex:0 0 320px;display:flex;flex-direction:column;gap:10px">${L[0].items.map((s) => `<div class="card" style="padding:12px;display:flex;flex-direction:column;gap:5px"><span style="font-weight:700;color:var(--ink);line-height:1.3">${s.t}</span><span class="row small" style="gap:8px">${rel(s.rel)}${s.age} ${st(s.st)}</span></div>`).join("")}</div>
+      <div style="flex:0 0 320px" class="card"></div></div>
+  </div>`;
+}
+
+/* ───── Texte ───── */
+const V = {
+  a: { name: "Ruhig", lead: "Die Seitenleiste bekommt Gruppen: Inhalte, Agenten, Venture Clienting, Kunden. Das Cockpit wird luftiger: Ein großer Limetten-Block zeigt, was auf Freigabe wartet, mit den drei nächsten Vorschlägen. Daneben stehen die Kennzahlen als ruhige Liste. Das Lagebild zeigt je Bereich nur die zwei wichtigsten Meldungen.",
+    desk: A_desk, phone: A_phone,
+    facts: ["Navigation in <b>4 Gruppen</b>", "<b>1</b> großer Limetten-Block", "Lagebild: <b>2</b> Meldungen je Bereich", "Hinweis, wenn Agenten ruhen"],
+    nav: ["Gruppen nach Arbeitsbereich: Inhalte (Review-Queue, Liveticker, Trends, Trenddatenbank, Quellen), Agenten (Scouting, Agenten-Protokoll), Venture Clienting (Challenges, Startup-Datenbank), Kunden (Projekte, Kunden, Team).", "„Agenten“ heißt in der Navigation „Agenten-Protokoll“, damit es sich von „Scouting“ unterscheidet.", "Unten in der Leiste ein Hinweis, wenn etwas stillsteht (heute: keine Agentenläufe)."],
+    page: ["Der Limetten-Block ist zugleich Einstieg in die Review-Queue.", "Vier Kennzahlen als Liste statt Kacheln; „Radar heute“ wandert hier hinein.", "Lagebild ohne Kartenrahmen, nur mit Linie oben je Bereich; Meta-Infos zu Scouts entfallen (stehen unter Scouting).", "„Zuletzt im Liveticker“ entfällt im Cockpit."],
+    pro: ["Klarer Einstieg: Man sieht sofort, was zu tun ist.", "Am wenigsten Umbau, gleiche Struktur wie heute."], con: ["Freigeben braucht weiter einen Klick in die Review-Queue.", "Das Lagebild zeigt weniger auf einmal."] },
+  b: { name: "Arbeitsliste", lead: "Das Cockpit wird zur Arbeitsliste „Heute zu tun“. Vorschläge und Meldungen ohne Freigabe stehen in einer Tabelle, nach Dringlichkeit sortiert. Freigeben, In den Ticker und Verwerfen gehen direkt in der Zeile. Die Seitenleiste hat Gruppen zum Einklappen und eine Sprungsuche.",
+    desk: B_desk, phone: B_phone,
+    facts: ["<b>1</b> Liste für Vorschläge und Meldungen", "Aktionen in der Zeile", "Tastatur: J/K, F", "Sprungsuche ⌘K"],
+    nav: ["Gleiche Gruppen wie A, aber einklappbar; zugeklappte Gruppen zeigen keine Einträge (im Bild: Kunden).", "Sprungsuche oben: Seite, Trend (#24), Startup oder Kunde per Tastatur.", "Leiste schmaler (212 px), damit die Tabelle Platz hat."],
+    page: ["Kennzahlen als drei Zähler-Pillen im Kopf; der Limetten-Zähler „4 Vorschläge“ ist der eine Blickfang.", "Reiter Alles / Vorschläge / Meldungen filtern die Liste.", "Rechte Spalte: Radar heute, Stand der Scouts mit Warnung, zuletzt im Ticker.", "Das Lagebild nach Bereichen gibt es hier nicht mehr als eigenen Block. Der Bereich steht als Etikett in der Zeile."],
+    pro: ["Am schnellsten für die tägliche Redaktionsarbeit.", "Passt zu „dichter“ (offene Frage 7)."], con: ["Das Lagebild als Überblick über drei Bereiche geht verloren.", "Freigabe ohne Detailblick kann zu schnell sein. Eventuell nur bei einfachen Vorschlägen erlauben."] },
+  c: { name: "Newsroom", lead: "Die Navigation wandert nach oben: fünf Gruppen als Reiter, jede mit einem Menü (Klick auf „Inhalte“ in der Bühne). Damit hat das Cockpit die volle Breite für ein Spaltenbrett wie in einer Redaktion: links die Freigaben mit Limetten-Kopf, daneben je Bereich eine Spalte mit Meldungskarten und schnellen Aktionen.",
+    desk: C_desk, phone: C_phone, dropHint: true,
+    facts: ["Navigation oben, <b>5</b> Reiter", "Cockpit <b>volle Breite</b>", "<b>4</b> Spalten: Freigabe + 3 Bereiche", "Aktionen auf der Karte"],
+    nav: ["Reiter: Cockpit · Inhalte · Agenten · Venture Clienting · Kunden; Zähler am Reiter.", "Menü je Gruppe öffnet sich beim Klick; auf Unterseiten erscheint eine zweite Zeile mit den Seiten der Gruppe.", "Am Handy: Reiter quer wischbar statt Menü-Knopf."],
+    page: ["Spaltenbrett ersetzt Kacheln und Lagebild-Karten.", "Kennzahlen schrumpfen auf eine Textzeile oben rechts.", "Karten zeigen Relevanz, Quelle, Status und zwei Aktionen (Trend öffnen, in den Ticker).", "Später denkbar: Karte per Ziehen einem Trend zuordnen."],
+    pro: ["Das Lagebild ist wirklich ein Lagebild: drei Bereiche nebeneinander, alles auf einen Blick.", "Lange Seitenleiste entfällt."], con: ["Unterseiten brauchen eine zweite Navigationszeile.", "Größter Umbau; das Brett wird bei vielen Meldungen lang."] },
+};
+
+/* ───── Seiten ───── */
+function variantPage(v) {
+  const d = V[v];
+  return `<section class="intro"><div><p class="eyebrow">Variante ${v.toUpperCase()}</p><h1>${d.name}</h1><p class="lead">${d.lead}</p></div></section>
+    <div class="stage ${state.dev}" data-stage><div class="canvas">${state.dev === "desk" ? d.desk() : d.phone()}</div></div>
+    <div class="facts">${d.facts.map((f) => `<span class="fact">${f}</span>`).join("")}${d.dropHint && state.dev === "desk" ? '<span class="fact">„Inhalte“ in der Bühne anklicken</span>' : ""}${state.dev === "phone" && v !== "c" ? '<span class="fact">„Menü“ in der Bühne anklicken</span>' : ""}<span class="fact">Bühne zeigt den ersten Bildschirm (1440 × 900)</span></div>
+    <section class="notes">
+      <div class="note"><p class="eyebrow">Navigation</p><ul>${d.nav.map((x) => `<li>${x}</li>`).join("")}</ul></div>
+      <div class="note"><p class="eyebrow">Cockpit</p><ul>${d.page.map((x) => `<li>${x}</li>`).join("")}</ul></div>
+      <div class="note"><p class="eyebrow">Dafür</p><ul>${d.pro.map((x) => `<li>${x}</li>`).join("")}</ul><p class="eyebrow" style="margin-top:8px">Dagegen</p><ul>${d.con.map((x) => `<li>${x}</li>`).join("")}</ul></div>
+    </section>`;
+}
+function todayPage() {
+  const m = document.documentElement.dataset.mode;
+  const big = state.dev === "desk"
+    ? `<div class="pair"><img class="shot" src="img/heute-desktop-${m}.png" alt="Cockpit heute, ganze Seite"><div class="note"><p class="eyebrow">Zum Vergleich</p><img class="shot" src="img/heute-review-desktop-dark.png" alt="Review-Queue heute"><p class="meta">Review-Queue</p><img class="shot" src="img/heute-ticker-desktop-dark.png" alt="Liveticker im Backend heute"><p class="meta">Liveticker (Backend)</p></div></div>`
+    : `<img class="shot" style="max-width:390px;margin:0 auto" src="img/heute-mobile-${m}.png" alt="Cockpit heute am Handy">`;
+  return `<section class="intro"><div><p class="eyebrow">Heutiger Stand · Branch dev, Testmodus</p><h1>Cockpit und Seitennavigation</h1>
+      <p class="lead">Aufgenommen am 6.11.2026 als „Redaktion · Admin“ unter /admin. Desktop als ganze Seite, Handy als erster Bildschirm.</p></div></section>
+    ${big}
+    <section class="notes">
+      <div class="note"><p class="eyebrow">Navigation</p><ul>
+        <li>13 Einträge untereinander ohne Gruppen; Zähler nur an vier Einträgen.</li>
+        <li>„Scouting“ und „Agenten“ klingen gleich, sind aber zwei Seiten.</li>
+        <li>Im Kopf steht „Redaktion“ dreimal (Logo-Zusatz, Name, Knopf).</li>
+        <li>Am Handy wird die Navigation zur Reiterzeile, die seitlich aus dem Bild läuft.</li></ul></div>
+      <div class="note"><p class="eyebrow">Cockpit</p><ul>
+        <li>Vier gleich große Kacheln; „Agentenläufe 0“ steht gleichrangig neben „Offene Vorschläge 4“, obwohl es ein Warnsignal ist.</li>
+        <li>Lagebild: drei hohe Karten mit Beschreibung, Scout-Liste und bis zu drei Meldungen. Viel Text vor der ersten Meldung.</li>
+        <li>„Als Nächstes prüfen“ beginnt erst unterhalb des ersten Bildschirms.</li>
+        <li><b>Fehler am Handy:</b> Die Seite läuft seitlich über; Kopf und Kacheln sind abgeschnitten.</li></ul></div>
+      <div class="note"><p class="eyebrow">Was gut ist und bleibt</p><ul>
+        <li>Limette nur bei „Offene Vorschläge“.</li>
+        <li>Relevanz als drei Punkte, Beispiel-Kennzeichnung an jeder Meldung.</li>
+        <li>Drei Bereiche des Lagebilds mit eigenen Scouts.</li></ul></div>
+    </section>`;
+}
+function comparePage() {
+  return `<section class="intro"><div><p class="eyebrow">Vergleich</p><h1>A, B und C nebeneinander</h1><p class="lead">Grobe Einschätzung zu offener Frage 7 im Briefing: Navigation gruppieren, Cockpit dichter oder luftiger.</p></div></section>
+    <div class="cmp"><table>
+      <thead><tr><th></th><th>Heute</th><th>A · Ruhig</th><th>B · Arbeitsliste</th><th>C · Newsroom</th></tr></thead>
+      <tbody>
+        <tr><td>Navigation</td><td>13 Einträge, links</td><td>4 Gruppen, links</td><td>4 Gruppen einklappbar, Sprungsuche</td><td>5 Reiter oben mit Menüs</td></tr>
+        <tr><td>Dichte</td><td>mittel, lange Seite</td><td>luftig</td><td>dicht</td><td>mittel bis dicht</td></tr>
+        <tr><td>Erster Bildschirm zeigt</td><td>Kacheln + Anfang Lagebild</td><td>Freigaben + Kennzahlen + Lagebild</td><td>alle offenen Aufgaben</td><td>Freigaben + alle drei Bereiche</td></tr>
+        <tr><td>Freigeben</td><td>in der Review-Queue</td><td>in der Review-Queue</td><td>direkt in der Zeile</td><td>Meldungen direkt, Vorschläge in der Queue</td></tr>
+        <tr><td>Lagebild je Bereich</td><td>ja</td><td>ja, gekürzt</td><td>nur als Etikett</td><td>ja, als Spalten</td></tr>
+        <tr><td>Umbau in der App</td><td>–</td><td>klein</td><td>mittel</td><td>groß (Navigation für alle Seiten)</td></tr>
+      </tbody></table></div>
+    <div class="reco"><p class="eyebrow">Mein Vorschlag für Runde 2</p>
+      <p><b style="color:var(--ink)">Navigation aus A, Cockpit als Mischung aus A und C.</b> Die Seitenleiste behält ihren Platz, aber mit Gruppen. Das kostet die anderen 12 Backend-Seiten keinen Umbau. Im Cockpit bleibt der Limetten-Block mit den nächsten Freigaben oben. Darunter steht das Lagebild als drei Spalten wie in C. Die Schnell-Aktionen aus B kommen dorthin, wo sie gefahrlos sind: Meldung in den Ticker übernehmen oder verwerfen. Vorschläge, die Trends verändern, bleiben in der Review-Queue mit Vorher/Nachher.</p></div>
+    <div class="note"><p class="eyebrow">Fragen an euch</p><ul>
+      <li>Wie viele Leute arbeiten täglich im Backend, und wie viele Meldungen pro Tag sind realistisch? Davon hängt ab, ob sich die Arbeitsliste (B) lohnt.</li>
+      <li>Darf man Meldungen ohne Detailansicht freigeben?</li>
+      <li>Braucht das Cockpit „Radar heute“ und „Zuletzt im Liveticker“, oder genügt das in den jeweiligen Bereichen?</li>
+      <li>Stimmen die Gruppen (Inhalte · Agenten · Venture Clienting · Kunden)? Gehören Projekte zu Kunden oder zu Venture Clienting?</li></ul></div>`;
+}
+
+/* ───── Steuerung (wie Entwurf 03) ───── */
+function effectiveMode() {
+  const t = document.documentElement.dataset.theme;
+  if (t === "light" || t === "dark") return t;
+  return matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+}
+function fit() {
+  document.querySelectorAll("[data-stage]").forEach((s) => {
+    const w = s.classList.contains("phone") ? 390 : 1440;
+    s.querySelector(".canvas").style.setProperty("--s", s.clientWidth / w);
+  });
+}
+function render() {
+  document.documentElement.dataset.mode = effectiveMode();
+  const v = state.view;
+  document.querySelectorAll(".tab").forEach((a) => a.dataset.v === v ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current"));
+  document.querySelectorAll("[data-dev]").forEach((b) => b.setAttribute("aria-pressed", b.dataset.dev === state.dev));
+  document.querySelectorAll("[data-th]").forEach((b) => b.setAttribute("aria-pressed", b.dataset.th === document.documentElement.dataset.mode));
+  document.getElementById("main").innerHTML = v === "heute" ? todayPage() : v === "vergleich" ? comparePage() : variantPage(v);
+  fit();
+}
+function route() {
+  const h = location.hash.slice(1);
+  state.view = ["heute", "a", "b", "c", "vergleich"].includes(h) ? h : "heute";
+  state.drop = false; state.menu = false;
+  render();
+}
+document.addEventListener("click", (e) => {
+  const dev = e.target.closest("[data-dev]");
+  if (dev) { state.dev = dev.dataset.dev; state.menu = false; render(); return; }
+  const th = e.target.closest("[data-th]");
+  if (th) { document.documentElement.dataset.theme = th.dataset.th; render(); return; }
+  if (e.target.closest("[data-drop]")) { state.drop = !state.drop; render(); return; }
+  if (e.target.closest("[data-menu]")) { state.menu = !state.menu; render(); return; }
+});
+addEventListener("hashchange", route);
+addEventListener("resize", fit);
+matchMedia("(prefers-color-scheme: light)").addEventListener("change", render);
+new MutationObserver(() => { if (effectiveMode() !== document.documentElement.dataset.mode) render(); })
+  .observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+route();
+</script>
