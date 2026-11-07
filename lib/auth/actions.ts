@@ -4,7 +4,7 @@ import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
-import { PERSONAS, isDemoLogin, isFixtureMode } from "./personas";
+import { availablePersonas, isDemoLogin, isFixtureMode } from "./personas";
 
 export type LoginState = { status: "idle" | "sent" | "error"; message?: string };
 
@@ -35,7 +35,7 @@ export async function sendMagicLink(_prev: LoginState, formData: FormData): Prom
 
 export async function demoLogin(formData: FormData) {
   if (!isDemoLogin()) throw new Error("Demo-Login ist nicht aktiv");
-  const persona = PERSONAS.find((p) => p.key === formData.get("persona"));
+  const persona = availablePersonas().find((p) => p.key === formData.get("persona"));
   if (!persona) throw new Error("Unbekannter Demo-Zugang");
 
   if (isFixtureMode()) {
@@ -46,7 +46,7 @@ export async function demoLogin(formData: FormData) {
     const { error } = await supabase.auth.signInWithPassword({ email: persona.email, password });
     if (error) redirect(`/login?fehler=${encodeURIComponent("Demo-Zugang nicht verfügbar: " + error.message)}`);
   }
-  redirect("/radar");
+  redirect(persona.key === "provider" ? "/profil" : "/radar");
 }
 
 export async function logout() {

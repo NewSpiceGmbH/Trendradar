@@ -26,6 +26,15 @@ async function Projects() {
   if (!viewer) redirect("/login");
   if (!viewer.hasAccess) return <NoAccess viewer={viewer} />;
   if (viewer.isEditor) redirect("/admin/projekte");
+  if (!viewer.canRequestProjects) {
+    return (
+      <header className="flex flex-col gap-2">
+        <p className="eyebrow">{viewer.activeOrg?.name}</p>
+        <h1 className="!text-[clamp(32px,4vw,48px)]">Projekte</h1>
+        <p className="max-w-2xl text-lg">Projekte mit New Spice sind Kunden vorbehalten (Vereine, Betreiber, Caterer). Ihre Ansprechperson bei New Spice hilft weiter.</p>
+      </header>
+    );
+  }
   const projects = await getProjectsRepo(viewer).then((r) => r.projects()).catch((e) => {
     if (e instanceof ProjectsMissingError) return [];
     throw e;

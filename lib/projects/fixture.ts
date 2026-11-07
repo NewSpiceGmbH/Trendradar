@@ -291,3 +291,9 @@ export function fixtureAssignments(startupId: string) {
     projectId: p.id, title: p.title, orgName: p.orgName, status: p.status, role: "shortlist" as const, shared: e.shared, customerStatus: e.customerStatus,
   })));
 }
+
+/** Testmodus: Organisation anlegen (Annehmen einer Bewerbung) */
+export function fixtureAddOrg(o: Omit<Org, "memberCount" | "openInvites">, invite: boolean) {
+  const s = store();
+  s.orgs.push({ ...o, memberCount: 0, openInvites: invite ? 1 : 0 });
+}

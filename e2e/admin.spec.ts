@@ -13,7 +13,7 @@ test("Kunde: kein Zugang zum Backend", async ({ page }) => {
   await loginAs(page, /Kunde A · Member/);
   // Trenddatenbank und Quellen liegen im Backend: nicht in der Kundennavigation, Seiten gesperrt
   const nav = page.getByRole("navigation", { name: "Bereiche" });
-  await expect(nav.getByRole("link")).toHaveText([/Dashboard \(3D\)|3D/, /2D-Ansicht|2D/, /News-Ticker|News/, /Projekte/]);
+  await expect(nav.getByRole("link")).toHaveText([/Dashboard \(3D\)|3D/, /2D-Ansicht|2D/, /News-Ticker|News/, /Netzwerk/, /Projekte/]);
   await page.goto("/admin");
   await expect(page.getByRole("heading", { name: "Nur für die Redaktion" })).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Redaktion" })).toHaveCount(0);
@@ -285,6 +285,117 @@ test.describe("Redaktion", () => {
     await expect(page.getByRole("heading", { name: "Hallen-Catering Nord", level: 1 })).toBeVisible();
     await expect(page.getByText("Caterer · Startup")).toBeVisible();
     await expect(page.getByLabel("Art der Gastronomie")).toBeVisible();
+  });
+
+  test("Bewerbung: Formular, Eingang, Annehmen, On hold, Ablehnen, Änderungsanfrage", async ({ page }) => {
+    // öffentliches Formular ohne Login, von der Login-Seite verlinkt
+    await page.goto("/login");
+    await page.getByRole("link", { name: "Jetzt bewerben" }).click();
+    await expect(page.getByRole("heading", { name: "Jetzt bewerben", level: 1 })).toBeVisible();
+    await page.getByRole("radio", { name: /Solution Provider/ }).check();
+    await page.getByRole("button", { name: "Weiter" }).click();
+    await page.getByLabel("Organisation *").fill("Becher-Rücknahme GmbH");
+    await page.getByLabel("Ihr Name *").fill("Mara Muster");
+    await page.getByLabel("E-Mail (geschäftlich) *").fill("mara@becher.example");
+    await page.getByLabel("Website").fill("becher.example");
+    await page.getByLabel("Gründungsjahr *").fill(String(new Date().getFullYear() - 1));
+    await page.getByLabel(/Angebot \(Produkt \/ Leistung\)/).fill("Automaten für die Rückgabe von Mehrwegbechern im Stadion");
+    await page.getByRole("checkbox", { name: "Mehrweg" }).check();
+    await expect(page.getByRole("checkbox", { name: /einverstanden/ })).toHaveAttribute("required", ""); // Pflichtfeld (Server prüft ebenfalls)
+    await page.getByRole("checkbox", { name: /einverstanden/ }).check();
+    await page.getByRole("button", { name: "Bewerbung senden" }).click();
+    await expect(page.getByRole("heading", { name: "Danke!" })).toBeVisible();
+
+    await loginAs(page, /Redaktion/);
+    await page.goto("/admin/netzwerk/eingang");
+    await expect(page.getByRole("heading", { name: "Eingang", level: 1 })).toBeVisible();
+    await expect(page.getByText(/1 warten noch auf die Bestätigung/)).toBeVisible();
+    // neue Bewerbung annehmen: Solution Provider mit 1 Monat kostenlos, Einladungslink zum Kopieren (kein Mailversand im Test)
+    await page.getByRole("link", { name: /Becher-Rücknahme GmbH/ }).click();
+    const details = page.getByRole("region", { name: "Details" });
+    await expect(details.getByRole("heading", { name: "Becher-Rücknahme GmbH" })).toBeVisible();
+    await expect(details.getByText("Vorprüfung · entscheidet nicht")).toBeVisible();
+    await details.getByRole("button", { name: "Akzeptieren" }).click();
+    await expect(details.getByLabel(/Laufzeit/)).toHaveValue("1");
+    await expect(details.getByText("1 Monat kostenlos, danach Abo (Abrechnung folgt).")).toBeVisible();
+    await details.getByRole("button", { name: "Anlegen und einladen" }).click();
+    await expect(details.getByRole("status")).toContainText("Eintrag und Zugang angelegt");
+    await expect(details.getByLabel("Einladungslink")).toHaveValue(/\/invite\//);
+    await details.getByRole("link", { name: /Zum Eintrag/ }).click();
+    await expect(page.getByRole("heading", { name: "Becher-Rücknahme GmbH", level: 1 })).toBeVisible();
+    await expect(page.getByText("Solution Provider · Startup")).toBeVisible();
+
+    // On hold mit Wiedervorlage
+    await page.goto("/admin/netzwerk/eingang");
+    await page.getByRole("link", { name: /SeatServe/ }).click();
+    await details.getByRole("button", { name: "On hold" }).click();
+    await details.getByLabel("Grund").selectOption("documents");
+    await details.getByRole("button", { name: "Auf Wiedervorlage setzen" }).click();
+    await expect(details.getByRole("status")).toContainText("On hold bis");
+
+    // Ablehnen mit Textvorlage; ohne Mailversand Text zum Kopieren
+    await page.goto("/admin/netzwerk/eingang");
+    await page.getByRole("link", { name: /SV Musterhausen/ }).click();
+    await expect(details.getByText("E-Mail bei einem Freemail-Anbieter")).toBeVisible();
+    await details.getByRole("button", { name: "Ablehnen" }).click();
+    await expect(details.getByLabel("Text an den Bewerber")).toHaveValue(/vielen Dank für Ihr Interesse/);
+    await details.getByRole("button", { name: "Ablehnen" }).last().click();
+    await expect(details.getByRole("status")).toContainText("Abgelehnt");
+    await expect(details.getByLabel(/Text der Absage/)).toHaveValue(/Guten Tag Vorstand/);
+
+    // Cockpit: fällige Wiedervorlage mit Ampel, neue Bewerbungen im Funnel
+    await page.goto("/admin");
+    const holds = page.getByRole("region", { name: "Wiedervorlagen" });
+    await expect(holds.getByRole("img", { name: /Ampel rot: Wiedervorlage/i })).toBeVisible(); // Agentur Nord: seit gestern fällig
+    await expect(holds.getByText(/SeatServe/)).toBeVisible();
+
+    // Änderungsanfrage eines Solution Providers übernehmen → Eintrag geändert
+    await page.goto("/admin/netzwerk/eingang");
+    await page.getByRole("link", { name: /Kurzbeschreibung/ }).click();
+    await details.getByRole("button", { name: "Übernehmen" }).click();
+    await expect(details.getByRole("status")).toContainText("Übernommen");
+    await page.goto("/admin/netzwerk/fx-st-2");
+    await expect(page.getByText("jetzt auch mit Pfandrückgabe")).toBeVisible();
+  });
+
+  test("Partner, Investor und Solution Provider sehen nur ihren Bereich", async ({ page }) => {
+    // Partner: Radar und Netzwerk, keine Projekte; Kontakt empfehlen landet im Eingang
+    await loginAs(page, /Partner · Verband/);
+    const nav = page.getByRole("navigation", { name: "Bereiche" });
+    await expect(nav.getByRole("link", { name: /Empfehlen|Kontakt empfehlen/ })).toBeVisible();
+    await expect(nav.getByRole("link", { name: /Projekte/ })).toHaveCount(0);
+    await page.goto("/empfehlen");
+    await page.getByLabel("Organisation").fill("Halle West");
+    await page.getByLabel("E-Mail").fill("info@halle-west.example");
+    await page.getByRole("button", { name: "Empfehlung senden" }).click();
+    await expect(page.getByRole("status")).toContainText("einverstanden");
+    await page.getByRole("checkbox", { name: /einverstanden/ }).check();
+    await page.getByRole("button", { name: "Empfehlung senden" }).click();
+    await expect(page.getByRole("status")).toContainText("Danke");
+    await page.goto("/projekte");
+    await expect(page.getByText(/Projekte mit New Spice sind Kunden vorbehalten/)).toBeVisible();
+
+    // Investor: Netzwerk mit öffentlichen Einträgen, nichts Vertrauliches
+    await loginAs(page, /Investor · Ventures/);
+    await page.goto("/netzwerk");
+    await expect(page.getByRole("heading", { name: "Netzwerk", level: 1 })).toBeVisible();
+    await expect(page.getByText("ab 2.400 € je Modul und Saison")).toHaveCount(0);
+    await page.goto("/empfehlen");
+    await expect(page).toHaveURL(/\/radar/);
+
+    // Solution Provider: kein Radar, nur das eigene Profil; Änderung anfragen
+    await page.goto("/login");
+    await page.getByRole("button", { name: /Solution Provider · TapFlow/ }).click();
+    await page.waitForURL("**/profil");
+    await expect(page.getByRole("heading", { name: /TapFlow/, level: 1 })).toBeVisible();
+    await expect(page.getByText("ab 2.400 € je Modul und Saison")).toHaveCount(0); // Preise stehen nicht im Profil
+    await page.getByLabel("Was soll sich ändern?").selectOption("website");
+    await page.getByLabel("Neu").fill("https://tapflow.example/neu");
+    await page.getByRole("button", { name: "Änderung anfragen" }).click();
+    await expect(page.getByRole("status")).toContainText("Redaktion prüft");
+    await page.goto("/radar");
+    await expect(page).toHaveURL(/\/profil/);
+    await expect(page.getByRole("navigation", { name: "Bereiche" }).getByRole("link")).toHaveText([/Mein Profil|Profil/]);
   });
 
   test("Problem Deep Dive: Briefing prüfen, bearbeiten, als Scouting-Grundlage übernehmen", async ({ page }) => {

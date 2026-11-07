@@ -9,6 +9,7 @@ import { UserMenu } from "@/components/app/user-menu";
 import { getAdminRepo } from "@/lib/admin/repo";
 import { MigrationMissingError } from "@/lib/admin/types";
 import { getViewer } from "@/lib/auth/viewer";
+import { getApplicationsRepo } from "@/lib/applications/store";
 import { getNetworkRepo } from "@/lib/network/store";
 import { getProjectsRepo } from "@/lib/projects/store";
 import { getVentureRepo } from "@/lib/venture/store";
@@ -53,7 +54,7 @@ async function Shell({ children }: { children: ReactNode }) {
     );
   }
 
-  let pending = 0, fresh = 0, openCandidates = 0, newRequests = 0, networkSuggestions = 0, migration: string | null = null;
+  let pending = 0, fresh = 0, openCandidates = 0, newRequests = 0, networkSuggestions = 0, inbox = 0, migration: string | null = null;
   try {
     const repo = await getAdminRepo();
     const [proposals, signals] = await Promise.all([repo.proposals(), repo.signals()]);
@@ -63,6 +64,11 @@ async function Shell({ children }: { children: ReactNode }) {
     // Projekte (Migration 0010) – neue Anfragen; fehlt sie noch, bleibt die Zahl leer
     newRequests = await getProjectsRepo(viewer).then((r) => r.projects()).then((ps) => ps.filter((x) => x.status === "requested").length).catch(() => 0);
     // Netzwerk-Manager (Migration 0014) – offene Vorschläge; fehlt sie noch, bleibt die Zahl leer
+    // Eingang (Migration 0015): neue Bewerbungen, fällige Wiedervorlagen, offene Änderungsanfragen
+    const today = new Date().toISOString().slice(0, 10);
+    inbox = await getApplicationsRepo().then((r) => Promise.all([r.applications(), r.changeRequests("open")]))
+      .then(([a, c]) => a.filter((x) => x.status === "new" || (x.status === "on_hold" && x.holdUntil != null && x.holdUntil <= today)).length + c.length)
+      .catch(() => 0);
     networkSuggestions = await getNetworkRepo().then((r) => r.suggestions("pending")).then((s) => s.length).catch(() => 0);
     openCandidates = await getVentureRepo().then((r) => r.candidates()).then((cs) => cs.filter((c) => c.status === "pending").length).catch(() => 0);
   } catch (e) {
@@ -80,6 +86,7 @@ async function Shell({ children }: { children: ReactNode }) {
       { href: "/admin/quellenverzeichnis", label: "Quellenverzeichnis" },
     ] },
     { label: "Netzwerk", items: [
+      { href: "/admin/netzwerk/eingang", label: "Eingang", count: inbox },
       { href: "/admin/venture", label: "Challenges", count: openCandidates },
       { href: "/admin/netzwerk", label: "Netzwerk-Datenbank" },
     ] },

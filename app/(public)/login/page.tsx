@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { demoLogin } from "@/lib/auth/actions";
-import { PERSONAS, demoLoginDiagnosis, isDemoLogin } from "@/lib/auth/personas";
+import { availablePersonas, demoLoginDiagnosis, isDemoLogin } from "@/lib/auth/personas";
 import { Logo } from "@/components/app/logo";
 import { MagicLinkForm } from "./magic-link-form";
 
@@ -18,6 +19,7 @@ export default function LoginPage({ searchParams }: PageProps<"/login">) {
           44 Trends für Sport, Hospitality und Live Entertainment – bewertet, eingeordnet und mit Europa-Perspektive.
         </p>
         <p className="text-sm text-muted">Zugang nur per Einladung. Fragen? Ihre Ansprechperson bei New Spice hilft weiter.</p>
+        <p className="text-sm">Noch kein Zugang? <Link href="/bewerben" className="font-bold">Jetzt bewerben</Link></p>
       </div>
 
       <div className="flex flex-col gap-6">
@@ -59,7 +61,7 @@ async function DemoLogins() {
             <h2 id="demo-h" className="!text-xl">Demo-Zugänge</h2>
             <p className="text-sm text-muted">Nur in der Vorschau. Zeigt, wer was sieht – mit echten Zugriffsregeln.</p>
             <form action={demoLogin} className="grid gap-2">
-              {PERSONAS.map((p) => (
+              {availablePersonas().map((p) => (
                 <button
                   key={p.key}
                   name="persona"

@@ -209,7 +209,17 @@ Alle offenen Fragen sind damit beantwortet.
   „nur intern / öffentlich“; `/admin/netzwerk/neu`, `/admin/netzwerk/kategorien`, `/admin/netzwerk/manager` (Läufe, Vorschläge).
   Netzwerk-Manager, erste Aufgabe: Kategorienliste vorschlagen (ohne Websuche, nur Vorschläge). `/admin/startups` leitet um.
   Noch offen: Matches und Verbindungen als Tabellen (Schritt 5/6), Änderungsanfragen (Schritt 4).
-- [ ] Schritt 4 – Bewerbungen und Eingang (neue Rollen Partner/Investor)
+- [x] **Schritt 4** – Bewerbungen und Eingang: Migration `0015_applications.sql` (Zugangsarten `organizations.kind`: Kunde, Partner,
+  Investor, Solution Provider; Bewerbungen, Änderungsanfragen, Speicher für Pitchdecks, `accept_application()`; Tests in
+  `tests/db/applications.test.sql`). Öffentliches Formular `/bewerben` (zwei Schritte, Fangfeld, Rate-Limit je IP-Hash und E-Mail,
+  Bestätigung der E-Mail-Adresse per Knopf), Eingang `/admin/netzwerk/eingang` (Liste Offen/On hold/Erledigt mit Bewerbungen,
+  Empfehlungen, Änderungen, Kundenanfragen; Vorprüfung ohne KI: Website, E-Mail-Domain, Dubletten; Akzeptieren mit Box
+  „Wird angelegt“, On hold mit Wiedervorlage, Ablehnen mit Textvorlage). Wiedervorlagen mit Ampel und Bewerbungen im Funnel des Cockpits.
+  Partner/Investor/Solution Provider: 1 Monat kostenlos, danach Abo (Stripe folgt). Neue Seiten `/netzwerk` (öffentliche Einträge),
+  `/empfehlen` (Partner), `/profil` (Solution Provider, nur lesend mit „Änderung anfragen“); Navigation je Zugangsart.
+  Mailversand über Brevo (`BREVO_API_KEY`, `MAIL_FROM`, `MAIL_REPLY_TO`); ohne Schlüssel Links und Texte zum Kopieren.
+  Noch offen: Ansicht nach Themen (Schritt 6), Demo-Konten für Partner/Investor/Solution Provider in der Datenbank (nur Testmodus),
+  Rechtsseiten (Datenschutzerklärung, auf die das Formular verweisen sollte).
 - [ ] Schritt 5 – Challenge: Sichtbarkeit und Matching
 - [ ] Schritt 6 – Agent Netzwerk-Manager
 - [ ] Schritt 7 – Dashboard-Vorschlag (nach Bestätigung)

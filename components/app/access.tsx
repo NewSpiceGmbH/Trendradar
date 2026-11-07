@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import type { Viewer } from "@/lib/auth/viewer";
 
 /** Hinweis vor Ablauf des Zugangs (30 Tage vorher) */
@@ -24,6 +25,8 @@ export function ExpiryNotice({ viewer, overlay = false }: { viewer: Viewer; over
 }
 
 export function NoAccess({ viewer }: { viewer: Viewer }) {
+  // Solution Provider sehen keinen Radar, nur ihr eigenes Profil
+  if (viewer.providerMemberId) redirect("/profil");
   const expired = viewer.orgs.find((o) => !o.active && o.accessUntil && o.accessUntil < new Date().toISOString().slice(0, 10));
   const future = viewer.orgs.find((o) => !o.active && o.accessFrom > new Date().toISOString().slice(0, 10));
   return (
